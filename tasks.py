@@ -103,7 +103,7 @@ def NotifyUsers():
         if total_str == '':
             total_str = '*No Trade*'
 
-        recipient_phone_number_list = [("Pratik", "+917000681073")] #, ("Shambhu", '+919329561945'), ("Rahul", '+918109912368'), ("Sudeep", '+919713113031'), , ("Himanshu", '+917415535562')
+        recipient_phone_number_list = [("Pratik", "+917000681073"), ("Sudeep", '+919713113031'), ("Himanshu", '+917415535562')] #, ("Shambhu", '+919329561945'), ("Rahul", '+918109912368'), 
 
         for user_name, recipient_phone_number in recipient_phone_number_list:
             sleep(1)
@@ -328,7 +328,7 @@ def Minute1():
                 entries_list = StockConfig.objects.filter(symbol__index=index_obj, is_active=True)
 
                 if not entries_list:
-                    if (now.time() > time(15, 3, 00) and now.date() == index_obj.expiry_date) or (now.date() == index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > index_obj.fixed_target + 5)) or (now.date() != index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > index_obj.fixed_target/(days_difference+1))) or (now.date() != index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -index_obj.stoploss)):
+                    if (now.time() > time(15, 3, 00) and now.date() == index_obj.expiry_date) or (now.date() == index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > index_obj.fixed_target + 5)) or (now.date() != index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > index_obj.fixed_target/(days_difference+1))) or (now.date() != index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -index_obj.stoploss)) or (now.date() == index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -(index_obj.stoploss+20))):
                         write_info_log(logger, f'Index: {index_obj.index} : Entry Passed')
                         pass
                     else:
@@ -361,7 +361,7 @@ def Minute1():
                             super_trend = SUPER_TREND(high=data_frame_5['High'], low=data_frame_5['Low'], close=data_frame_5['Close'], length=10, multiplier=3)
 
                             if data_frame_5['Close'].iloc[-1] < super_trend[-1]:
-                                call_entry_stock_obj_list = StockConfig.objects.filter(buy=True, mode='CE', symbol__index=index_obj)
+                                call_entry_stock_obj_list = StockConfig.objects.filter(mode='CE', symbol__index=index_obj)
                                 ForceExit(call_entry_stock_obj_list, fyers_conn, angel_conn, configuration_obj)
                                 call_entry_stock_obj_list.delete()
                                 mode = 'PE'
@@ -436,7 +436,6 @@ def Minute1():
                 write_info_log(logger, f'Index: {index_obj.index} : Ended')
             except Exception as e:
                 write_error_log(logger, f'Error in Index: {index_obj.index} : {e}')
-        del model_obj
 
     except Exception as e:
         write_error_log(logger, f'{e}')

@@ -14,17 +14,10 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
 
-admin.site.site_header = 'Trade Bros'            # default: "Django Administration"
-admin.site.index_title = 'Features Area'         # default: "Site administration"
-admin.site.site_title = 'Trade Bros'             # default: "Django site admin"
+from django.urls import path
+from option.views import AwakeAPI
 
 urlpatterns = [
-    path('', admin.site.urls),
-    path('api/trade/', include('option.urls')),
+    path('awake/', AwakeAPI),
 ]
-
-import clock
-clock.start()

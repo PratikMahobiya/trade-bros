@@ -23,7 +23,7 @@ def Price_Action_Trade(data):
         # Place Order.
         order_id, order_status, price = Create_Order(data['configuration'], stock_config_obj, data['price'], data['angel_conn'])
         stock_config_obj.lot = lot
-        stock_config_obj.buy_price = price
+        stock_config_obj.price = price
         stock_config_obj.stoploss = round(price - price * (data['stoploss'])/100, 2)
         stock_config_obj.target = round(price + price * (data['target'])/100, 2)
         stock_config_obj.fixed_target = round(price + price * (data['fixed_target'])/100, 2)
@@ -58,8 +58,8 @@ def ForceExit(stock_obj_list, fyers_conn, angel_conn, configuration_obj):
         price = fyers_conn.quotes({"symbols": f"{stock_obj.symbol.symbol}{stock_obj.mode}"})['d'][0]['v']['lp']
         order_id, order_status = Exit_Order(configuration_obj, stock_obj, price, angel_conn)
 
-        diff = (price - stock_obj.buy_price)
-        profit = round((((diff/stock_obj.buy_price) * 100)), 2)
+        diff = (price - stock_obj.price)
+        profit = round((((diff/stock_obj.price) * 100)), 2)
         type_exit = 'F-EXIT'
         Transaction.objects.create(mode=stock_obj.mode,
                                     index=stock_obj.symbol.index,

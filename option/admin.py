@@ -3,7 +3,7 @@ from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 
 from django.contrib import admin
-from option.models import DailyRecord, Index, Keys, StockConfig, Transaction
+from option.models import DailyRecord, Index, Keys, OptionSymbol, StockConfig, Transaction
 from helper.common import colour
 
 # Register your models here.
@@ -64,6 +64,15 @@ class DailyRecordAdmin(ExportActionMixin, ExtraButtonsMixin, admin.ModelAdmin):
         self.message_user(request, 'P/L UPDATE Done')
         return HttpResponseRedirectToReferrer(request)
 
+
+@admin.register(OptionSymbol)
+class OptionSymbolAdmin(ExportActionMixin, admin.ModelAdmin):
+    list_display = ('index', 'strike_price', 'symbol', 'call_token', 'put_token', 'call_angel_symbol', 'put_angel_symbol', 'lot', 'is_active')
+    search_fields = ['symbol', 'index']
+    list_filter = ['index', ]
+
+    def get_ordering(self, request):
+        return ['-created_at']
 
 @admin.register(StockConfig)
 class StockConfigAdmin(admin.ModelAdmin):

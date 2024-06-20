@@ -5,6 +5,7 @@ from time import sleep
 from django.db.models import Count, Sum
 from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
+from helper.angel_orders import Create_Order
 from helper.trade_action import ForceExit, Price_Action_Trade
 from logs.logger import create_logger, write_error_log, write_info_log
 from logs.models import Log
@@ -258,7 +259,7 @@ def BasicSetupJob():
     try:
         # Fetch Data
         data = {
-            "BANKEX": ["BSE:BANKEX-INDEX", next_expiry_date(datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), 0).strftime('%d-%b-%Y'), 100, 1],
+            # "BANKEX": ["BSE:BANKEX-INDEX", next_expiry_date(datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), 0).strftime('%d-%b-%Y'), 100, 1],
             # "MIDCPNIFTY": ["NSE:MIDCPNIFTY-INDEX", next_expiry_date(datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), 0).strftime('%d-%b-%Y'), 25, 1],
             "FINNIFTY": ["NSE:FINNIFTY-INDEX", next_expiry_date(datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), 1).strftime('%d-%b-%Y'), 50, 2],
             "BANKNIFTY": ["NSE:NIFTYBANK-INDEX", next_expiry_date(datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), 2).strftime('%d-%b-%Y'), 100, 3],
@@ -478,12 +479,12 @@ def CallPutAction():
             for stock_obj in entries_list:
                 try:
                     if configuration_obj.place_order and stock_obj.order_id in ['0', 0]:
-                        order_id, order_status, price = Create_Order(configuration_obj, stock_obj, stock_obj.buy_price, angel_conn)
+                        order_id, order_status, price = Create_Order(configuration_obj, stock_obj, stock_obj.price, angel_conn)
                         stock_obj.order_id = order_id
                         stock_obj.order_status = order_status
                         stock_obj.save()
 
-                        Transaction.objects.filter(date__date=now.date(), index=stock_obj.symbol.index, mode=stock_obj.mode, indicate='ENTRY', type='BUY', price=stock_obj.buy_price, fixed_target=stock_obj.fixed_target).update(order_id=order_id, order_status=order_status)
+                        Transaction.objects.filter(date__date=now.date(), index=stock_obj.symbol.index, mode=stock_obj.mode, indicate='ENTRY', type='BUY', price=stock_obj.price, fixed_target=stock_obj.fixed_target).update(order_id=order_id, order_status=order_status)
 
                         write_info_log(logger, f'Buy Order Placed: {order_id} : {stock_obj.symbol} : {stock_obj.mode}')
                         return True
@@ -512,7 +513,7 @@ def CallPutAction():
                     write_info_log(logger, f"LTP: {stock_obj.mode} : {symbol} : {ltp} : {token}")
 
                     # Record Max gain hit:
-                    percent = (((ltp - stock_obj.buy_price)/stock_obj.buy_price)) * 100
+                    percent = (((ltp - stock_obj.price)/stock_obj.price)) * 100
                     data['percent'] = percent
                     if percent > stock_obj.max:
                         stock_obj.highest_price = round(ltp, 2)

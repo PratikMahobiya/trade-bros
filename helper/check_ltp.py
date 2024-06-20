@@ -30,8 +30,8 @@ def TargetExit(data, ltp):
             write_info_log(data['logger'], f'ANGEL EXIT: NOT ACCEPTING ORDER {order_id}, {order_status}')
             return True
 
-        diff = (ltp - data['stock_obj'].buy_price)
-        profit = round((((diff/data['stock_obj'].buy_price) * 100)), 2)
+        diff = (ltp - data['stock_obj'].price)
+        profit = round((((diff/data['stock_obj'].price) * 100)), 2)
         # TRANSACTION TABLE UPDATE
         symbol_ = f"{data['stock_obj'].symbol}{data['stock_obj'].mode}"
         Transaction.objects.create(mode=data['stock_obj'].mode,
@@ -72,8 +72,8 @@ def TrailingStopLossExit(data, ltp):
             write_info_log(data['logger'], f'ANGEL EXIT: NOT ACCEPTING ORDER {order_id}, {order_status}')
             return True
 
-        diff = (ltp - data['stock_obj'].buy_price)
-        profit = round((((diff/data['stock_obj'].buy_price) * 100)), 2)
+        diff = (ltp - data['stock_obj'].price)
+        profit = round((((diff/data['stock_obj'].price) * 100)), 2)
         # TRANSACTION TABLE UPDATE
         symbol_ = f"{data['stock_obj'].symbol}{data['stock_obj'].mode}"
         Transaction.objects.create(mode=data['stock_obj'].mode,
@@ -113,8 +113,8 @@ def SquareOff(data, ltp):
         write_info_log(data['logger'], f'ANGEL EXIT: NOT ACCEPTING ORDER {order_id}, {order_status}')
         return True
 
-    diff = (ltp - data['stock_obj'].buy_price)
-    profit = round((((diff/data['stock_obj'].buy_price) * 100)), 2)
+    diff = (ltp - data['stock_obj'].price)
+    profit = round((((diff/data['stock_obj'].price) * 100)), 2)
     # TRANSACTION TABLE UPDATE
     symbol_ = f"{data['stock_obj'].symbol}{data['stock_obj'].mode}"
     Transaction.objects.create(mode=data['stock_obj'].mode,

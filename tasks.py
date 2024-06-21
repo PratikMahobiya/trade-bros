@@ -424,11 +424,13 @@ def Minute1():
                             if data_frame['Low'].iloc[-1] < super_trend[-1]:
                                 write_info_log(logger, f"Force-Exit : {stock_obj.mode} : {stock_obj.symbol}")
                                 ForceExit([stock_obj], fyers_conn, angel_conn, configuration_obj)
+                                stock_obj.delete()
                                 pass
                         elif stock_obj.mode == 'PE':
                             if data_frame['High'].iloc[-1] > super_trend[-1]:
                                 write_info_log(logger, f"Force-Exit : {stock_obj.mode} : {stock_obj.symbol}")
                                 ForceExit([stock_obj], fyers_conn, angel_conn, configuration_obj)
+                                stock_obj.delete()
                                 pass
                         else:
                             write_info_log(logger, f"Mode not available : {stock_obj.mode} : {stock_obj.symbol}")

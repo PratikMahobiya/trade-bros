@@ -16,7 +16,7 @@ class KeyAdmin(ExportActionMixin, admin.ModelAdmin):
 
 @admin.register(Index)
 class IndexAdmin(ExportActionMixin, admin.ModelAdmin):
-    list_display = ('index', 'index_symbol', 'pivot', 'r1', 'r2', 'r3', 's1', 's2', 's3', 'target', 'stoploss', 'fixed_target', 'min_price', 'max_price', 'expiry_date', 'trailing_target', 'is_active')
+    list_display = ('index', 'index_symbol', 'pivot', 'r1', 'r2', 'r3', 's1', 's2', 's3', 'target', 'stoploss', 'fixed_target', 'min_price', 'max_price', 'expiry_date', 'trailing_target', 'chain_strike_price_diff', 'is_active')
 
 
 @admin.register(DailyRecord)

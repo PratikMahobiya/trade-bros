@@ -29,6 +29,7 @@ class Index(models.Model):
   max_price = models.FloatField(verbose_name='Max Price', default=200)
   trailing_target = models.BooleanField(verbose_name='Trailing Target', default=False)
   expiry_date = models.DateField(verbose_name='Expiry Date', null=True, blank=True)
+  chain_strike_price_diff = models.FloatField(verbose_name='Chain Strike Price Difference', default=0)
   pivot = models.FloatField(verbose_name='Pivot', default=0)
   r1 = models.FloatField(verbose_name='R1', default=0)
   s1 = models.FloatField(verbose_name='S1', default=0)

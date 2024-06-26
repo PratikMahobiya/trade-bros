@@ -54,9 +54,9 @@ def StockConfigs(data, logger):
             # STORE IN STOCK TABLE
             index_obj_list = Index.objects.filter(index=index)
             if not index_obj_list:
-                Index.objects.create(index=index, index_symbol=data_list[0], expiry_date=datetime.strptime(data_list[1], '%d-%b-%Y'))
+                Index.objects.create(index=index, index_symbol=data_list[0], expiry_date=datetime.strptime(data_list[1], '%d-%b-%Y'), chain_strike_price_diff=data_list[2])
             else:
-                index_obj_list.update(expiry_date=datetime.strptime(data_list[1], '%d-%b-%Y'), is_active=True)
+                index_obj_list.update(expiry_date=datetime.strptime(data_list[1], '%d-%b-%Y'), chain_strike_price_diff=data_list[2], is_active=True)
         except Exception as e:
             write_error_log(logger, f'{e} {index}')
         write_info_log(logger, f"Index Creation Completed")

@@ -114,6 +114,20 @@ class DailyStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         self.message_user(request, f'{accuracy} % Accuracy on {total_entry} Trades.')
         return HttpResponseRedirectToReferrer(request)
 
+    @button(change_form=True,
+            html_attrs={'style': 'background-color:#ee8623;color:black'})
+    def GOJO_LAST_MONTH(self, request):
+        # Calculate the first day of the next month
+        month_first_day = datetime(datetime.now().year, datetime.now().month, 1)
+        total_entry = Transaction.objects.filter(indicate='EXIT', created_at__gte=month_first_day,  is_active=True).order_by('date').count()
+        date_ = month_first_day.strftime("%d %B, %Y")
+        accuracy = round((len(Transaction.objects.filter(profit__gte=0, indicate='EXIT', created_at__gte=month_first_day, is_active=True))/total_entry) * 100, 2)
+        return_1 = round(sum(Transaction.objects.filter(indicate='EXIT', created_at__gte=month_first_day, is_active=True).values_list('profit', flat=True)), 2)
+        self.message_user(request, f'Sataru-Gojo: {return_1} % --- Gained Last Month from: {date_}')
+        self.message_user(request, f'{accuracy} % Accuracy on {total_entry} Trades.')
+        return HttpResponseRedirectToReferrer(request)
+
+
 @admin.register(Status)
 class StatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     actions = None

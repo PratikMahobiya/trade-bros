@@ -463,7 +463,7 @@ def CallPutAction():
             raise Exception("Square Off Stopped")
         elif now.time() > time(15, 29, 00):
             raise Exception("Market is Closed")
-        elif (now.time().second in [57, 58, 59, 0, 1, 2, 3, 4, 5]) and ((now.time().minute % 5 == 0) or now.time().minute in [59, 4, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54]):
+        elif (now.time().second in [57, 58, 59, 0, 1, 2, 3, 4, 5]):
             write_info_log(logger, f"LTP: 0th Second.")
             return True
 

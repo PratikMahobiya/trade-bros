@@ -6,6 +6,7 @@ class Configuration(models.Model):
     place_order = models.BooleanField(default=False, verbose_name="Activate Order Placement")
     buy_market_order = models.BooleanField(default=False)
     sell_market_order = models.BooleanField(default=True)
+    daily_fixed_stoploss = models.FloatField(verbose_name='Daily Fixed SL', default=0)
     daily_max_profit = models.FloatField(verbose_name='Daily Max-Profit', default=0)
     daily_max_profit_time = models.DateTimeField(null=True, blank=True)
     daily_max_loss = models.FloatField(verbose_name='Daily Max-Loss', default=0)

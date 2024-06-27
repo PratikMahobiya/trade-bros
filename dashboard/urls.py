@@ -14,18 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
 
-admin.site.site_header = 'Trade Bros'            # default: "Django Administration"
-admin.site.index_title = 'Features Area'         # default: "Site administration"
-admin.site.site_title = 'Trade Bros'             # default: "Django site admin"
+from django.urls import path
+from dashboard.views import DailyRecordAPI, TransactionAPI, StatusAPI, ActiveAPI
 
 urlpatterns = [
-    path('', admin.site.urls),
-    path('api/trade/', include('option.urls')),
-    path('api/dashboard/', include('dashboard.urls')),
+    path('daily-record/', DailyRecordAPI),
+    path('transaction/', TransactionAPI),
+    path('status/', StatusAPI),
+    path('active/', ActiveAPI),
 ]
-
-import clock
-clock.start()

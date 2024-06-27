@@ -87,10 +87,14 @@ WSGI_APPLICATION = "trade_bros.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    "default": dj_database_url.parse("postgres://trade_bros_oroh_user:OtYIDALz6yuccFMtLtCKRuFqZrcc8U9x@dpg-cpq3dgmehbks73cbvni0-a/trade_bros_oroh", conn_max_age=600),
-} if os.getenv("SERVER_DB", True) else {
-    "default": dj_database_url.parse("postgres://trade_bros_oroh_user:OtYIDALz6yuccFMtLtCKRuFqZrcc8U9x@dpg-cpq3dgmehbks73cbvni0-a.virginia-postgres.render.com/trade_bros_oroh", conn_max_age=600),
+    "default": dj_database_url.parse("postgresql://postgres.pjyrdqcxnarzksvxxrkw:TradeBros@18@aws-0-ap-south-1.pooler.supabase.com:6543/postgres", conn_max_age=600),
 }
+
+# DATABASES = {
+#     "default": dj_database_url.parse("postgres://trade_bros_oroh_user:OtYIDALz6yuccFMtLtCKRuFqZrcc8U9x@dpg-cpq3dgmehbks73cbvni0-a/trade_bros_oroh", conn_max_age=600),
+# } if os.getenv("SERVER_DB", True) else {
+#     "default": dj_database_url.parse("postgres://trade_bros_oroh_user:OtYIDALz6yuccFMtLtCKRuFqZrcc8U9x@dpg-cpq3dgmehbks73cbvni0-a.virginia-postgres.render.com/trade_bros_oroh", conn_max_age=600),
+# }
 
 
 # DATABASES = {

@@ -373,6 +373,8 @@ def Minute1():
                             mode = None
                         if days_difference == 0:
                             fix_target = index_obj.fixed_target
+                        elif index_obj.index in ['BANKNIFTY'] and days_difference == 6:
+                            fix_target = 17.33
                         elif days_difference in [1, 2, 3]:
                             fix_target = 13.33
                         else:

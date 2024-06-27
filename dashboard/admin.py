@@ -71,6 +71,9 @@ class DailyStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     @button(change_form=True,
             html_attrs={'style': 'background-color:#FFFD29;color:black'})
     def GOJO_TODAY(self, request):
+        daily_sl_obj = Configuration.objects.all()[0]
+        if (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT').values_list('profit', flat=True)) < -daily_sl_obj.daily_fixed_stoploss):
+            self.message_user(request, f'Trading Stopped because Daily Stoploss Hitted {daily_sl_obj.daily_fixed_stoploss} % at {(daily_sl_obj.daily_max_loss_time + timedelta(hours=5, minutes=30)).strftime("%T")}', level=messages.ERROR)
         now = datetime.now()
         transaction_list = Transaction.objects.filter(date__date = datetime.now().date(), indicate='EXIT', is_active=True).values('index').annotate(profit=Sum('profit'), trade=Count('indicate'))
         index_wise_str = ''

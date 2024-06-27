@@ -103,7 +103,12 @@ def NotifyUsers():
         if total_str == '':
             total_str = '*No Trade*'
 
-        recipient_phone_number_list = [("Pratik", "+917000681073"), ("Sudeep", '+919713113031'), ("Himanshu", '+917415535562')] #, ("Shambhu", '+919329561945'), ("Rahul", '+918109912368'), 
+        daily_sl_obj = Configuration.objects.all()[0]
+        if (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT').values_list('profit', flat=True)) < -daily_sl_obj.daily_fixed_stoploss):
+            total_str += '-----------------------------------'
+            total_str +=  '*' + f'Trading Stopped because Daily Stoploss Hitted {daily_sl_obj.daily_fixed_stoploss} % at {(daily_sl_obj.daily_max_loss_time + timedelta(hours=5, minutes=30)).strftime("%T")}' +  '*'
+
+        recipient_phone_number_list = [("Pratik", "+917000681073"), ("Sudeep", '+919713113031'), ("Himanshu", '+917415535562')] #, ("Shambhu", '+919329561945'), ("Rahul", '+918109912368'),
 
         for user_name, recipient_phone_number in recipient_phone_number_list:
             sleep(1)

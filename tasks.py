@@ -187,7 +187,7 @@ def FyersSetup():
     try:
         sleep(3)
         global angel_pratik_conn
-        angel_pratik_conn, _ = AngelOne('Angel-Pratik')
+        angel_pratik_conn, _ = AngelOne('Angel-Himanshu')
         user_profile_name = GenerateFyersToken('Fyers-Pratik')
         write_info_log(
             logger, f"Fyer's User Profile name is {user_profile_name}.")
@@ -276,7 +276,6 @@ def BasicSetupJob():
         StockConfigs(data, logger)
 
         # Initiate Connection
-        # conn, _ = AngelOne('Angel-Pratik')
         conn = Fyers('Fyers-Pratik')
 
         # Calculate Velocity

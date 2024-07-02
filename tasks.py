@@ -12,7 +12,7 @@ from logs.models import Log
 from option.models import DailyRecord, OptionSymbol, StockConfig, Transaction, Index
 from helper.fyer_auto_generate_key import GenerateFyersToken
 from helper.check_ltp import TargetExit, TrailingStopLossExit, TrailingTargetUpdate, SquareOff
-from helper.common import next_expiry_date, Entry_Call, Entry_Put
+from helper.common import Check_Entry, next_expiry_date, Entry_Call, Entry_Put
 from helper.connection import AngelOne, Fyers
 from helper.get_data import fyers_get_data
 from helper.indicator import PIVOT, SUPER_TREND
@@ -332,7 +332,7 @@ def Minute1():
                 entries_list = StockConfig.objects.filter(symbol__index=index_obj, is_active=True)
 
                 if not entries_list:
-                    if (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT').values_list('profit', flat=True)) < -configuration_obj.daily_fixed_stoploss) or (now.time() > time(15, 3, 00) and now.date() == index_obj.expiry_date) or (now.date() == index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > index_obj.fixed_target + 5)) or (now.date() != index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > index_obj.fixed_target/(days_difference+1))) or (now.date() != index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -index_obj.stoploss)) or (now.date() == index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -(index_obj.stoploss+20))):
+                    if Check_Entry(now, configuration_obj, index_obj, days_difference):
                         write_info_log(logger, f'Index: {index_obj.index} : Entry Passed')
                         pass
                     else:
@@ -375,6 +375,7 @@ def Minute1():
 
                         else:
                             mode = None
+
                         if days_difference == 0:
                             fix_target = index_obj.fixed_target
                         elif index_obj.index in ['BANKNIFTY'] and days_difference == 6:

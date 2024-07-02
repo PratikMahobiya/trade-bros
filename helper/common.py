@@ -1,6 +1,9 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta
+from zoneinfo import ZoneInfo
 from helper.indicator import SUPER_TREND
 from django.utils.html import format_html
+
+from option.models import Transaction
 
 def calculate_volatility(dt):
   dt['Return'] = 100 * (dt['Close'].pct_change())
@@ -40,3 +43,33 @@ def Entry_Put(data_frame, index_obj):
       return False
     return True
   return False
+
+
+def Check_Entry(now, configuration_obj, index_obj, days_difference):
+  # Check daily Stoploss
+  if sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT').values_list('profit', flat=True)) < -configuration_obj.daily_fixed_stoploss:
+    return True
+  
+  # Check expiry index Entry Time
+  elif now.time() > time(15, 3, 00) and now.date() == index_obj.expiry_date:
+    return True
+
+  # Check expiry index Target
+  elif now.date() == index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > index_obj.fixed_target + 5):
+    return True
+
+  # Check expiry index Stoploss
+  elif now.date() == index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -(index_obj.stoploss+20)):
+    return True
+
+  # Check non expiry index Target
+  elif now.date() != index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > index_obj.fixed_target/(days_difference+1)):
+    return True
+
+  # Check non expiry index Stoploss
+  elif now.date() != index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -index_obj.stoploss):
+    return True
+
+  # default false
+  else:
+    return False

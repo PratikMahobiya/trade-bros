@@ -380,7 +380,7 @@ def Minute1():
                             fix_target = index_obj.fixed_target
                         elif index_obj.index in ['BANKNIFTY'] and days_difference in [6]:
                             fix_target = 15
-                        elif index_obj.index in ['FINNIFTY'] and days_difference in [5]:
+                        elif index_obj.index in ['FINNIFTY'] and days_difference in [6, 5]:
                             fix_target = 13.33
                         elif days_difference in [1, 2, 3]:
                             fix_target = 13.33

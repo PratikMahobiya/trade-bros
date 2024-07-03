@@ -79,7 +79,7 @@ def NotifyUsers():
     try:
         now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
         phone_number_id = "139249165928488" # Phone number ID provided
-        access_token = "EAAPJg0jr5E0BOwSOFZAVl9kN4CvvRPa23NBUMyUIKZBC9msakFSWqmZAMLJYEP3KGDzAYDo6dCiQrGj9I2HV4nW2BnZALuBZCwbhVeZCq8N85dszDHnpJC7XZCah51lTmXJcbvHwXXnThvb7yE15je8JTcTDhXRZB1WbnOhZCJkZAsafZCBLZAJSAJaO9XruWlRoY1uN" # Your temporary access token
+        access_token = "EAAPJg0jr5E0BO5CMzFZAZB7qXwhs92hmLbWZCYY3aJEtnuJUo2zSHTpwnOL5amZBZBVRZA81hxCh5OsnwHnHpBb8O8tpqbOt9lAsNN6zGyT0xWitms5rUsMifZBokWhJDv68tgXoYZCUQJRN6BangKU1BBPkZB9HeMoZBjxFHZCUTcV7VG1pdZAoSGQqjIT27StPqJ8KMrwNKOZCLPaDqXvACoqMZD" # Your temporary access token
 
         day_date = now.strftime("%A, %d %B, %Y")
         price_action_obj = DailyRecord.objects.get(date=now.date(), is_active=True)
@@ -104,19 +104,20 @@ def NotifyUsers():
             total_str = '*No Trade*'
         else:
             daily_sl_obj = Configuration.objects.all()[0]
-            today_earning = round(daily_sl_obj.amount + (daily_sl_obj.amount*price_action_obj.p_l/100))
+            today_earning = round(daily_sl_obj.amount*price_action_obj.p_l/100)
+            earning = 'Profit' if today_earning > 0 else 'Loss'
             total_str += '-----------------------------------'
-            total_str +=  "Today's earning will be approx: " + '*' + f"{today_earning} /-" + '*' + " on per trade of approx amount: " + '*' + f"{daily_sl_obj.amount}" + '*'
+            total_str +=  f"Today's {earning} will be approx: " + '*' + f"{today_earning}" + '*' + " /- on per trade of approx amount: " + '*' + f"{daily_sl_obj.amount}" + '*' + '/-. '
 
             if (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT').values_list('profit', flat=True)) < -daily_sl_obj.daily_fixed_stoploss):
                 total_str += '-----------------------------------'
-                total_str +=  '*' + f'Trading Stopped because Daily Stoploss Hitted {daily_sl_obj.daily_fixed_stoploss} % at {(daily_sl_obj.daily_max_loss_time + timedelta(hours=5, minutes=30)).strftime("%T")}' +  '*'
+                total_str +=  '*' + f'Trading Stopped because Daily Stoploss Hitted {daily_sl_obj.daily_fixed_stoploss} % at {(daily_sl_obj.daily_max_loss_time + timedelta(hours=5, minutes=30)).strftime("%T")}' + '*' + '.'
 
         recipient_phone_number_list = [("Himanshu", '+917415535562'), ("Pratik", "+917000681073"), ("Sudeep", '+919713113031')] #, ("Shambhu", '+919329561945'), ("Rahul", '+918109912368'),
 
         for user_name, recipient_phone_number in recipient_phone_number_list:
             sleep(1)
-            url = f"https://graph.facebook.com/v13.0/{phone_number_id}/messages"
+            url = f"https://graph.facebook.com/v19.0/{phone_number_id}/messages"
             headers = {
                 "Authorization": f"Bearer {access_token}",
                 'Content-Type': 'application/json'
@@ -287,13 +288,19 @@ def BasicSetupJob():
         GetVelocity(data=data, conn=conn, logger=logger)
 
     
-        # Amount Update
-        daily_record_obj = DailyRecord.objects.get(date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), is_active=True)
-        system_conf_obj = Configuration.objects.filter(is_active=True)[0]
+        # Amount Update on friday
+        if datetime.now(tz=ZoneInfo("Asia/Kolkata")).weekday == 4:
+            to_date = datetime.now(tz=ZoneInfo("Asia/Kolkata")).date()
+            from_date = to_date - timedelta(days=6)
+            weekly_sum = Sum(DailyRecord.objects.filter(
+                date__gte=from_date,
+                date__lte=to_date,
+                is_active=True).values_list('p_l', flat=True))
+            system_conf_obj = Configuration.objects.filter(is_active=True)[0]
 
-        system_conf_obj.amount = system_conf_obj.amount + system_conf_obj.amount * ( 0.06 ) if daily_record_obj.p_l > 0 else system_conf_obj.amount - system_conf_obj.amount * ( 0.06 )
-        system_conf_obj
-        system_conf_obj.save()
+            system_conf_obj.amount = system_conf_obj.amount + system_conf_obj.amount * ( 0.1 ) if weekly_sum > 10 else system_conf_obj.amount - system_conf_obj.amount * ( 0.1 )
+            system_conf_obj
+            system_conf_obj.save()
 
     except Exception as e:
         write_error_log(logger, f'{e}')

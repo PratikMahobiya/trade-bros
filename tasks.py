@@ -79,7 +79,7 @@ def NotifyUsers():
     try:
         now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
         phone_number_id = "139249165928488" # Phone number ID provided
-        access_token = "EAAPJg0jr5E0BO5CMzFZAZB7qXwhs92hmLbWZCYY3aJEtnuJUo2zSHTpwnOL5amZBZBVRZA81hxCh5OsnwHnHpBb8O8tpqbOt9lAsNN6zGyT0xWitms5rUsMifZBokWhJDv68tgXoYZCUQJRN6BangKU1BBPkZB9HeMoZBjxFHZCUTcV7VG1pdZAoSGQqjIT27StPqJ8KMrwNKOZCLPaDqXvACoqMZD" # Your temporary access token
+        access_token = "EAAPJg0jr5E0BOwSOFZAVl9kN4CvvRPa23NBUMyUIKZBC9msakFSWqmZAMLJYEP3KGDzAYDo6dCiQrGj9I2HV4nW2BnZALuBZCwbhVeZCq8N85dszDHnpJC7XZCah51lTmXJcbvHwXXnThvb7yE15je8JTcTDhXRZB1WbnOhZCJkZAsafZCBLZAJSAJaO9XruWlRoY1uN" # Your temporary access token
 
         day_date = now.strftime("%A, %d %B, %Y")
         price_action_obj = DailyRecord.objects.get(date=now.date(), is_active=True)

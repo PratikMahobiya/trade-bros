@@ -64,7 +64,7 @@ def Check_Entry(now, configuration_obj, index_obj, days_difference):
 
   # Check Thrusday Banknifty index Target 
   elif index_obj.index in ['BANKNIFTY'] and days_difference in [6]:
-    if (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > 18):
+    if (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > 23):
       return True
     elif (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -index_obj.stoploss):
       return True

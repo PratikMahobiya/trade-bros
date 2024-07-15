@@ -83,7 +83,7 @@ class DailyStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             if index_obj.expiry_date == now.date() or ((index_obj.expiry_date - now.date()).days == 7):
                 daily_target = index_obj.fixed_target + 5
             elif index_obj.index in ['BANKNIFTY'] and days_difference in [6]:
-                daily_target = 18
+                daily_target = 23
             elif index_obj.index in ['FINNIFTY'] and days_difference in [6, 5]:
                 daily_target = 15
             else:

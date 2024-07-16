@@ -192,7 +192,7 @@ def FyersSetup():
     try:
         sleep(3)
         global angel_pratik_conn
-        angel_pratik_conn, _ = AngelOne('Angel-Himanshu')
+        angel_pratik_conn, _ = AngelOne('Angel-Pratik')
         user_profile_name = GenerateFyersToken('Fyers-Pratik')
         write_info_log(
             logger, f"Fyer's User Profile name is {user_profile_name}.")

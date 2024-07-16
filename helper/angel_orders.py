@@ -46,7 +46,7 @@ def Create_Order(system_conf_obj, stock_config_obj, price, angel_conn=None):
         if system_conf_obj.place_order:
             if not angel_conn:
                 # sleep(1)
-                angel_conn, broker_obj = AngelOne('Angel-Himanshu')
+                angel_conn, broker_obj = AngelOne('Angel-Pratik')
             if angel_conn:
                 order_status = 'CONNECTION OK'
                 order_id = angel_conn.placeOrder(orderparams)
@@ -87,7 +87,7 @@ def Exit_Order(system_conf_obj, stock_config_obj, price, angel_conn=None):
         if system_conf_obj.place_order:
             if not angel_conn:
                 # sleep(1)
-                angel_conn, broker_obj = AngelOne('Angel-Himanshu')
+                angel_conn, broker_obj = AngelOne('Angel-Pratik')
             if angel_conn:
                 order_status = 'CONNECTION OK'
                 order_id = angel_conn.placeOrder(orderparams)

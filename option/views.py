@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from django.http import HttpResponse
@@ -21,11 +22,14 @@ def AwakeAPI(request):
 @csrf_exempt
 def TelegramWebhook(request):
     try:
+        # Turn the body into a dict
+        body = json.loads(request.body.decode("utf-8"))
+        print(body)
         # create or get log in db
         logger = create_logger(
             file_name=f'telegram-{datetime.now(tz=ZoneInfo("Asia/Kolkata")).date()}')
         write_info_log(logger, f'API Time: {datetime.now(tz=ZoneInfo("Asia/Kolkata")).strftime("%d-%b-%Y %H:%M:%S")}')
-        write_info_log(logger, f'Request: {request}')
-        return HttpResponse(True)
+        write_info_log(logger, f'Request: {body}')
+        return HttpResponse("Success")
     except Exception as e:
         return HttpResponse(str(e))

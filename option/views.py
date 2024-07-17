@@ -19,18 +19,16 @@ def AwakeAPI(request):
         return HttpResponse(str(e))
 
 
-@csrf_exempt
+# @csrf_exempt
 def TelegramWebhook(request):
     try:
-        print(request)
         # Turn the body into a dict
         payload = json.loads(request.body.decode("utf-8"))
-        print(payload)
         # create or get log in db
         logger = create_logger(
             file_name=f'telegram-{datetime.now(tz=ZoneInfo("Asia/Kolkata")).date()}')
         write_info_log(logger, f'API Time: {datetime.now(tz=ZoneInfo("Asia/Kolkata")).strftime("%d-%b-%Y %H:%M:%S")}')
         write_info_log(logger, f'Request Payload: {payload}')
-        return HttpResponse("Success")
+        return HttpResponse(True)
     except Exception as e:
         return HttpResponse(str(e))

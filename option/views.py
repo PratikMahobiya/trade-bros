@@ -19,7 +19,7 @@ def AwakeAPI(request):
         return HttpResponse(str(e))
 
 
-# @csrf_exempt
+@csrf_exempt
 def TelegramWebhook(request):
     try:
         # Turn the body into a dict

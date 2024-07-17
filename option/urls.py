@@ -16,8 +16,9 @@ Including another URLconf
 """
 
 from django.urls import path
-from option.views import AwakeAPI
+from option.views import AwakeAPI, TelegramWebhook
 
 urlpatterns = [
     path('awake/', AwakeAPI),
+    path('telegram-webhook/', TelegramWebhook),
 ]

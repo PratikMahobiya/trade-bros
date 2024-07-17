@@ -145,3 +145,8 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Telegram Configuration
+TELEGRAM_APP_ID = '29604910'
+TELEGRAM_HASH_ID = 'a1645f10ee4abaf7ef0ebe4038fe5137'
+TELEGRAM_BOT = '7040073287:AAGO4tJeGsRCCALtMyXepttn_uLlI3nqJdk'

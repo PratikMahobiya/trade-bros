@@ -22,7 +22,7 @@ admin.site.index_title = 'Features Area'         # default: "Site administration
 admin.site.site_title = 'Trade Bros'             # default: "Django site admin"
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('', admin.site.urls),
     path('api/trade/', include('option.urls')),
     path('api/dashboard/', include('dashboard.urls')),
 ]

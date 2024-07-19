@@ -67,6 +67,9 @@ def TrailingStopLossExit(data, ltp):
             Transaction.objects.filter(order_id=data['stock_obj'].order_id).delete()
             return True
 
+        if exit_type == 'STOPLOSS':
+            data['configuration'].sell_market_order = True
+
         order_id, order_status = Exit_Order(data['configuration'], data['stock_obj'], ltp, data['conn'])
 
         if data['configuration'].place_order and (order_id in ['', 0, '0', None]):

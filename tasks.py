@@ -289,7 +289,7 @@ def BasicSetupJob():
 
     
         # Amount Update on friday
-        if datetime.now(tz=ZoneInfo("Asia/Kolkata")).weekday == 4:
+        if datetime.now(tz=ZoneInfo("Asia/Kolkata")).weekday() == 4:
             to_date = datetime.now(tz=ZoneInfo("Asia/Kolkata")).date()
             from_date = to_date - timedelta(days=6)
             weekly_sum = Sum(DailyRecord.objects.filter(

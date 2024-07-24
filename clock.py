@@ -31,7 +31,7 @@ def start():
     sched.add_job(BasicSetupJob, 'cron', day_of_week='mon-fri',
                 hour='15', minute='35', timezone='Asia/Kolkata')
     sched.add_job(CallPutAction, 'cron', day_of_week='mon-fri',
-                hour='9-15', second='*/5', timezone='Asia/Kolkata')
+                hour='9-15', second='*/4', timezone='Asia/Kolkata')
     sched.add_job(Minute1, 'cron', day_of_week='mon-fri',
                 hour='9-15', minute='*/1', timezone='Asia/Kolkata')
     sched.start()

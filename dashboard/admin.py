@@ -1,4 +1,3 @@
-from time import sleep
 from django.contrib import admin, messages
 from django.utils.html import format_html
 from django.db.models import Count, Sum
@@ -164,6 +163,5 @@ class StatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     def current(self, obj):
         ltp = Fyers(
             'Fyers-Pratik').quotes({"symbols": f'{obj.symbol}{obj.mode}'})['d'][0]['v']['lp']
-        # sleep(0.2)
         return up_model(ltp, obj.price)
         # return up_model(obj.curr_price, obj.price)

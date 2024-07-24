@@ -77,5 +77,5 @@ def ForceExit(stock_obj_list, fyers_conn, angel_conn, configuration_obj):
                                     order_id=order_id,
                                     order_status=order_status,
                                     lot=stock_obj.lot)
-        sleep(0.5)
+        # sleep(0.5)
     return True

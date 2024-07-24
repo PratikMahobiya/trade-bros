@@ -52,8 +52,8 @@ def TargetExit(data, ltp):
                                     lot=data['stock_obj'].lot)
         write_info_log(data['logger'], f'Exit of {symbol_} on price {ltp} : SQROFF : {order_id}')
         data['stock_obj'].delete()
-        if data['configuration'].place_order and (order_id not in ['', 0, '0', None]):
-            sleep(0.2)
+        # if data['configuration'].place_order and (order_id not in ['', 0, '0', None]):
+        #     sleep(0.2)
     return True
 
 
@@ -98,8 +98,8 @@ def TrailingStopLossExit(data, ltp):
                                     lot=data['stock_obj'].lot)
         write_info_log(data['logger'], f'Exit of {symbol_} on price {ltp} : SQROFF : {order_id}')
         data['stock_obj'].delete()
-        if data['configuration'].place_order and (order_id not in ['', 0, '0', None]):
-            sleep(0.2)
+        # if data['configuration'].place_order and (order_id not in ['', 0, '0', None]):
+        #     sleep(0.2)
     return True
 
 
@@ -140,6 +140,6 @@ def SquareOff(data, ltp):
                                 lot=data['stock_obj'].lot)
     write_info_log(data['logger'], f'Exit of {symbol_} on price {ltp} : SQROFF : {order_id}')
     data['stock_obj'].delete()
-    if data['configuration'].place_order and (order_id not in ['', 0, '0', None]):
-        sleep(0.2)
+    # if data['configuration'].place_order and (order_id not in ['', 0, '0', None]):
+    #     sleep(0.2)
     return True

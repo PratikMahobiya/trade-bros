@@ -24,6 +24,7 @@ class DailyRecordAdmin(ExportActionMixin, ExtraButtonsMixin, admin.ModelAdmin):
     date_hierarchy = 'date'
     list_display = ('date', 'p_l_s', 'total_entry', 'max_profit', 'daily_max_profit_time', 'max_loss', 'daily_max_loss_time', 'day', 'is_active')
     list_filter = ('day',)
+    list_per_page = 20
 
     def get_ordering(self, request):
         return ['-created_at']
@@ -70,6 +71,7 @@ class OptionSymbolAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = ('index', 'strike_price', 'symbol', 'call_token', 'put_token', 'call_angel_symbol', 'put_angel_symbol', 'lot', 'is_active')
     search_fields = ['symbol', 'index']
     list_filter = ['index', ]
+    list_per_page = 20
 
     def get_ordering(self, request):
         return ['-created_at']
@@ -92,7 +94,7 @@ class TransactionAdmin(ExportActionMixin, admin.ModelAdmin):
     list_display = ('index_', 'date', 'indicate', 'type', 'p_l', 'max_p', 'max_l_s', 'top_p', 'price', 'fixed_target', 'lot', 'order_id', 'order_status', 'mode', 'strike', 'target', 'stoploss')
     search_fields = ['symbol', ]
     list_filter = ('index', 'indicate', 'date', 'mode')
-    # list_per_page = 32
+    list_per_page = 20
 
     def get_ordering(self, request):
         return ['-date']

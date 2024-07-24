@@ -13,6 +13,7 @@ class LogAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     readonly_fields=('log_name','log_desc', 'error')
     search_fields = ['log_name', 'log_desc']
     list_filter = ('error',)
+    list_per_page = 50
 
     @button(change_form=True,
             html_attrs={'style': 'background-color:#F1502F;color:black'})

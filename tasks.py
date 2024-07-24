@@ -81,7 +81,7 @@ def NotifyUsers():
         phone_number_id = "139249165928488" # Phone number ID provided
         access_token = "EAAPJg0jr5E0BOwSOFZAVl9kN4CvvRPa23NBUMyUIKZBC9msakFSWqmZAMLJYEP3KGDzAYDo6dCiQrGj9I2HV4nW2BnZALuBZCwbhVeZCq8N85dszDHnpJC7XZCah51lTmXJcbvHwXXnThvb7yE15je8JTcTDhXRZB1WbnOhZCJkZAsafZCBLZAJSAJaO9XruWlRoY1uN" # Your temporary access token
 
-        day_date = now.strftime("%A, %d %B, %Y")
+        day_date = f'{now.strftime("%A, %d %B, %Y")}, Trade-Bros'
         price_action_obj = DailyRecord.objects.get(date=now.date(), is_active=True)
 
         price_action_str = ""

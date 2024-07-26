@@ -62,17 +62,8 @@ def Check_Entry(now, configuration_obj, index_obj, days_difference):
   elif now.date() == index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -(index_obj.stoploss+20)):
     return True
 
-  # Check Thrusday Banknifty index Target 
-  elif index_obj.index in ['BANKNIFTY'] and days_difference in [6]:
-    if (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > 23):
-      return True
-    elif (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -index_obj.stoploss):
-      return True
-    else:
-      return False
-
   # Check Thrusday, Friday Finnifty index Target
-  elif index_obj.index in ['FINNIFTY'] and days_difference in [6, 5]:
+  elif index_obj.index in ['FINNIFTY', 'BANKNIFTY'] and days_difference in [6, 5]:
     if (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > 15):
       return True
     elif (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -index_obj.stoploss):

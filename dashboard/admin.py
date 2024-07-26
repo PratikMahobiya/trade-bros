@@ -81,9 +81,7 @@ class DailyStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             days_difference = (index_obj.expiry_date - now.date()).days
             if index_obj.expiry_date == now.date() or ((index_obj.expiry_date - now.date()).days == 7):
                 daily_target = index_obj.fixed_target + 5
-            elif index_obj.index in ['BANKNIFTY'] and days_difference in [6]:
-                daily_target = 23
-            elif index_obj.index in ['FINNIFTY'] and days_difference in [6, 5]:
+            elif index_obj.index in ['FINNIFTY', 'BANKNIFTY'] and days_difference in [6, 5]:
                 daily_target = 15
             else:
                 daily_target = round(index_obj.fixed_target/(days_difference+1), 2)

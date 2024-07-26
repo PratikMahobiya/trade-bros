@@ -292,7 +292,7 @@ def BasicSetupJob():
         if datetime.now(tz=ZoneInfo("Asia/Kolkata")).weekday() == 4:
             to_date = datetime.now(tz=ZoneInfo("Asia/Kolkata")).date()
             from_date = to_date - timedelta(days=6)
-            weekly_sum = Sum(DailyRecord.objects.filter(
+            weekly_sum = sum(DailyRecord.objects.filter(
                 date__gte=from_date,
                 date__lte=to_date,
                 is_active=True).values_list('p_l', flat=True))

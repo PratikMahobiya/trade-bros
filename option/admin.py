@@ -1,6 +1,6 @@
 from import_export.admin import ExportActionMixin
-from admin_extra_buttons.api import ExtraButtonsMixin, button
-from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
+# from admin_extra_buttons.api import ExtraButtonsMixin, button
+# from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 
 from django.contrib import admin
 from option.models import DailyRecord, Index, Keys, OptionSymbol, StockConfig, Transaction
@@ -20,7 +20,8 @@ class IndexAdmin(ExportActionMixin, admin.ModelAdmin):
 
 
 @admin.register(DailyRecord)
-class DailyRecordAdmin(ExportActionMixin, ExtraButtonsMixin, admin.ModelAdmin):
+# class DailyRecordAdmin(ExportActionMixin, ExtraButtonsMixin, admin.ModelAdmin):
+class DailyRecordAdmin(ExportActionMixin, admin.ModelAdmin):
     date_hierarchy = 'date'
     list_display = ('date', 'p_l_s', 'total_entry', 'max_profit', 'daily_max_profit_time', 'max_loss', 'daily_max_loss_time', 'day', 'is_active')
     list_filter = ('day',)
@@ -41,29 +42,29 @@ class DailyRecordAdmin(ExportActionMixin, ExtraButtonsMixin, admin.ModelAdmin):
         return colour(obj.daily_max_loss)
     max_loss.short_description = 'Max Loss(%)'
  
-    @button(change_form=True,
-            html_attrs={'style': 'background-color:#2937ff;color:white'})
-    def PROFIT_LOSS_UPDATE(self, request):
-        self.message_user(request, 'P/L UPDATE Called')
-        daily_record_list = DailyRecord.objects.filter(is_active=True)
-        for obj in daily_record_list:
-            transaction_list = Transaction.objects.filter(date__date=obj.date, indicate='EXIT').order_by('date')
-            p_l = 0
-            obj.daily_max_profit = 0
-            obj.daily_max_loss = 0
-            obj.total_entry = len(transaction_list)
-            for t_obj in transaction_list:
-                p_l += t_obj.profit
-                if p_l > obj.daily_max_profit:
-                    obj.daily_max_profit = round(p_l, 2)
-                    obj.daily_max_profit_time = t_obj.date
-                elif p_l < obj.daily_max_loss:
-                    obj.daily_max_loss = round(p_l, 2)
-                    obj.daily_max_loss_time = t_obj.date
-            obj.p_l = round(p_l, 2)
-            obj.save()
-        self.message_user(request, 'P/L UPDATE Done')
-        return HttpResponseRedirectToReferrer(request)
+    # @button(change_form=True,
+    #         html_attrs={'style': 'background-color:#2937ff;color:white'})
+    # def PROFIT_LOSS_UPDATE(self, request):
+    #     self.message_user(request, 'P/L UPDATE Called')
+    #     daily_record_list = DailyRecord.objects.filter(is_active=True)
+    #     for obj in daily_record_list:
+    #         transaction_list = Transaction.objects.filter(date__date=obj.date, indicate='EXIT').order_by('date')
+    #         p_l = 0
+    #         obj.daily_max_profit = 0
+    #         obj.daily_max_loss = 0
+    #         obj.total_entry = len(transaction_list)
+    #         for t_obj in transaction_list:
+    #             p_l += t_obj.profit
+    #             if p_l > obj.daily_max_profit:
+    #                 obj.daily_max_profit = round(p_l, 2)
+    #                 obj.daily_max_profit_time = t_obj.date
+    #             elif p_l < obj.daily_max_loss:
+    #                 obj.daily_max_loss = round(p_l, 2)
+    #                 obj.daily_max_loss_time = t_obj.date
+    #         obj.p_l = round(p_l, 2)
+    #         obj.save()
+    #     self.message_user(request, 'P/L UPDATE Done')
+    #     return HttpResponseRedirectToReferrer(request)
 
 
 @admin.register(OptionSymbol)

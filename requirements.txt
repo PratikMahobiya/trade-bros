@@ -14,7 +14,7 @@ charset-normalizer==3.3.2
 diff-match-patch==20230430
 dj-database-url==2.2.0
 Django==5.0.6
-django-admin-extra-buttons==1.5.8
+# django-admin-extra-buttons==1.5.8
 django-import-export==4.0.9
 fastjsonschema==2.20.0
 frozenlist==1.4.1

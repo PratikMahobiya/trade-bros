@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "admin_extra_buttons",
+    "admin_extra_buttons",
     "import_export",
     
     "logs",

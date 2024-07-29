@@ -32,7 +32,6 @@ ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "https://trade-bros.onrender.com,https://localhost:8000,https://127.0.0.1:8000").split(",")
 
 BED_URL_DOMAIN = os.getenv("CSRF_TRUSTED_ORIGINS", "https://trade-bros.onrender.com")
-EXPIRY_KING_BED_URL_DOMAIN = "https://expiry-king.onrender.com"
 
 # Application definition
 
@@ -43,7 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "admin_extra_buttons",
+    "admin_extra_buttons",
     "import_export",
     
     "logs",
@@ -89,7 +88,7 @@ WSGI_APPLICATION = "trade_bros.wsgi.application"
 
 DATABASES = {
     "default": dj_database_url.parse("postgresql://trade_bros_xrie_user:ojB5nvjOdmlI6ubxEXTzVp1csuyCr4NH@dpg-cqb5h9aj1k6c73allb3g-a/trade_bros_xrie", conn_max_age=600),
-} if os.getenv("SERVER_DB", False) else {
+} if os.getenv("SERVER_DB", True) else {
     "default": dj_database_url.parse("postgresql://trade_bros_xrie_user:ojB5nvjOdmlI6ubxEXTzVp1csuyCr4NH@dpg-cqb5h9aj1k6c73allb3g-a.virginia-postgres.render.com/trade_bros_xrie", conn_max_age=600),
 }
 

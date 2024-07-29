@@ -27,5 +27,5 @@ urlpatterns = [
     path('api/dashboard/', include('dashboard.urls')),
 ]
 
-import clock
-clock.start()
+# import clock
+# clock.start()

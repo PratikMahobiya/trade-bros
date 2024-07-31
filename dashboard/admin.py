@@ -129,7 +129,7 @@ class DailyStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 @admin.register(Status)
 class StatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     actions = None
-    list_display = ('entry_time', 'index', 'current', 'max_p', 'max_l_s', 'highest_price', 'price', 'fixed_target', 'lot', 'order_id', 'order_status', 'mode', 'strike', 'target', 'stoploss', 'tr_hit', 'trailing_sl')
+    list_display = ('entry_time', 'index', 'current', 'max_p', 'max_l_s', 'highest_price', 'price', 'fixed_target', 'stoploss', 'lot', 'order_id', 'order_status', 'mode', 'strike', 'target', 'tr_hit', 'trailing_sl')
 
     def has_add_permission(self, request, obj=None):
         return False

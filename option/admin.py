@@ -90,7 +90,7 @@ class StockConfigAdmin(admin.ModelAdmin):
 @admin.register(Transaction)
 class TransactionAdmin(ExportActionMixin, admin.ModelAdmin):
     date_hierarchy = 'date'
-    list_display = ('index_', 'date', 'indicate', 'type', 'p_l', 'max_p', 'max_l_s', 'top_p', 'price', 'fixed_target', 'lot', 'order_id', 'order_status', 'mode', 'strike', 'target', 'stoploss')
+    list_display = ('index_', 'date', 'indicate', 'type', 'p_l', 'max_p', 'max_l_s', 'top_p', 'price', 'fixed_target', 'stoploss', 'lot', 'order_id', 'order_status', 'mode', 'strike', 'target')
     search_fields = ['symbol', ]
     list_filter = ('index', 'indicate', 'date', 'mode')
     list_per_page = 20

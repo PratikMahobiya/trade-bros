@@ -207,12 +207,12 @@ def FyersSetup():
 def StayAwake():
     now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
     # create or get log in db
-    logger = create_logger(
-        file_name=f'awake-{datetime.now(tz=ZoneInfo("Asia/Kolkata")).date()}')
-    write_info_log(logger, f"Calling URL: {BED_URL_DOMAIN}/api/trade/awake")
+    # logger = create_logger(
+    #    file_name=f'awake-{datetime.now(tz=ZoneInfo("Asia/Kolkata")).date()}')
+    # write_info_log(logger, f"Calling URL: {BED_URL_DOMAIN}/api/trade/awake")
     x = requests.get(f"{BED_URL_DOMAIN}/api/trade/awake", verify=False)
-    write_info_log(logger, f'SCHE: Time: {datetime.now(tz=ZoneInfo("Asia/Kolkata")).strftime("%d-%b-%Y %H:%M:%S")}, Status: {x.status_code}')
-    write_info_log(logger, f'Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    # write_info_log(logger, f'SCHE: Time: {datetime.now(tz=ZoneInfo("Asia/Kolkata")).strftime("%d-%b-%Y %H:%M:%S")}, Status: {x.status_code}')
+    # write_info_log(logger, f'Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True
 
 

@@ -19,7 +19,7 @@ def start():
     sched.add_job(FyersSetup, 'cron', day_of_week='mon-fri',
                 hour='9-15', minute='*/5', timezone='Asia/Kolkata')
     sched.add_job(StayAwake, 'cron', day_of_week='mon-fri',
-                hour='9-15', second='*/40', timezone='Asia/Kolkata')
+                second='*/40', timezone='Asia/Kolkata')
     sched.add_job(DeleteLogs, 'cron', day_of_week='mon-fri',
                 hour='9', minute='17', second='30', timezone='Asia/Kolkata')
     sched.add_job(NotifyUsers, 'cron', day_of_week='mon-fri',

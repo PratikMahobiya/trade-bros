@@ -113,7 +113,7 @@ def NotifyUsers():
                 total_str += '-----------------------------------'
                 total_str +=  '*' + f'Trading Stopped because Daily Stoploss Hitted {daily_sl_obj.daily_fixed_stoploss} % at {(daily_sl_obj.daily_max_loss_time + timedelta(hours=5, minutes=30)).strftime("%T")}' + '*' + '.'
 
-        recipient_phone_number_list = [("Himanshu", '+917415535562'), ("Pratik", "+917000681073"), ("Sudeep", '+919713113031')] #, ("Shambhu", '+919329561945'), ("Rahul", '+918109912368'),
+        recipient_phone_number_list = [("Pratik", "+917000681073"), ("Sudeep", '+919713113031'), ("Himanshu", '+917415535562'), ]
 
         for user_name, recipient_phone_number in recipient_phone_number_list:
             sleep(1)
@@ -318,6 +318,9 @@ def Minute1():
         logger = create_logger(
             file_name=f'{now.strftime("%d-%b-%Y %H:%M:%S")}-Minute_1')
         write_info_log(logger, 'Minute_1: Started')
+
+        if now.weekday() == 3:
+            raise Exception("Trading not allowed on Thursdays")
 
         if now.time() < time(9, 18, 00):
             raise Exception("Market Not Started")

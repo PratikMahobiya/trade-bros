@@ -22,6 +22,8 @@ from trade_bros.settings import BED_URL_DOMAIN
 
 
 def RecordUpdate():
+    if datetime.now(tz=ZoneInfo("Asia/Kolkata")).weekday() == 3:
+        return True
     # Record Daily Overall P/L% with total entries
     configuration_obj = Configuration.objects.filter(is_active=True)[0]
     DailyRecord.objects.create(

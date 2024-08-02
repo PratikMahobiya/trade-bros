@@ -1,9 +1,14 @@
+from time import sleep
 from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 from helper.indicator import SUPER_TREND
 from django.utils.html import format_html
+from django.dispatch import receiver
+from django.db import transaction
+from django.db.models.signals import post_save
 
 from option.models import Transaction
+from helper.angel_orders import ExitAction
 
 def calculate_volatility(dt):
   dt['Return'] = 100 * (dt['Close'].pct_change())
@@ -82,3 +87,10 @@ def Check_Entry(now, configuration_obj, index_obj, days_difference):
   # default false
   else:
     return False
+
+
+@receiver(post_save, sender=Transaction)
+def check_exit_order_status(sender, instance, created, **kwargs):
+  if created:
+    sleep(1)
+    transaction.on_commit(lambda: ExitAction(sender, instance, created))

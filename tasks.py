@@ -407,7 +407,7 @@ def Minute1():
                         else:
                             fix_target = index_obj.fixed_target/days_difference
                         
-                        if days_difference != 0 and configuration_obj.trailing_target:
+                        if days_difference != 0 and configuration_obj.place_order:
                             fix_target = 100
                         data = {
                             'mode': mode,

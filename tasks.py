@@ -325,8 +325,8 @@ def Minute1():
             file_name=f'{now.strftime("%d-%b-%Y %H:%M:%S")}-Minute_1')
         write_info_log(logger, 'Minute_1: Started')
 
-        #if now.weekday() == 3:
-        #    raise Exception("Trading not allowed on Thursdays")
+        if now.weekday() == 3:
+            raise Exception("Trading not allowed on Thursdays")
 
         if now.time() < time(9, 18, 00):
             raise Exception("Market Not Started")

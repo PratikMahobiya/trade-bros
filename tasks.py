@@ -234,10 +234,10 @@ def PivotUpdate():
         from_day = now - timedelta(days=10)
         write_info_log(logger, f'Pivot: Started')
         for index_obj in index_obj_list:
-            if now.date() == index_obj.expiry_date:
-                index_obj.trailing_target = False
-            else:
-                index_obj.trailing_target = True
+            # if now.date() == index_obj.expiry_date:
+            index_obj.trailing_target = False
+            # else:
+            #     index_obj.trailing_target = True
             data_frame = fyers_get_data(
                 index_obj.index_symbol , now, from_day, 'D', fyers_conn, logger=logger)
             sleep(0.2)

@@ -369,7 +369,7 @@ def Minute1():
 
                             super_trend = SUPER_TREND(high=data_frame_5['High'], low=data_frame_5['Low'], close=data_frame_5['Close'], length=10, multiplier=3)
 
-                            if data_frame_5['Close'].iloc[-1] > super_trend[-1]:
+                            if data_frame_5['Close'].iloc[-1] > super_trend.iloc[-1]:
                                 put_entry_stock_obj_list = StockConfig.objects.filter(mode='PE', symbol__index=index_obj)
                                 ForceExit(put_entry_stock_obj_list, fyers_conn, angel_conn, configuration_obj)
                                 put_entry_stock_obj_list.delete()
@@ -383,7 +383,7 @@ def Minute1():
                             
                             super_trend = SUPER_TREND(high=data_frame_5['High'], low=data_frame_5['Low'], close=data_frame_5['Close'], length=10, multiplier=3)
 
-                            if data_frame_5['Close'].iloc[-1] < super_trend[-1]:
+                            if data_frame_5['Close'].iloc[-1] < super_trend.iloc[-1]:
                                 call_entry_stock_obj_list = StockConfig.objects.filter(mode='CE', symbol__index=index_obj)
                                 ForceExit(call_entry_stock_obj_list, fyers_conn, angel_conn, configuration_obj)
                                 call_entry_stock_obj_list.delete()
@@ -452,13 +452,13 @@ def Minute1():
 
                     for stock_obj in entries_list:
                         if stock_obj.mode == 'CE':
-                            if data_frame['Low'].iloc[-1] < super_trend[-1]:
+                            if data_frame['Low'].iloc[-1] < super_trend.iloc[-1]:
                                 write_info_log(logger, f"Force-Exit : {stock_obj.mode} : {stock_obj.symbol}")
                                 ForceExit([stock_obj], fyers_conn, angel_conn, configuration_obj)
                                 stock_obj.delete()
                                 pass
                         elif stock_obj.mode == 'PE':
-                            if data_frame['High'].iloc[-1] > super_trend[-1]:
+                            if data_frame['High'].iloc[-1] > super_trend.iloc[-1]:
                                 write_info_log(logger, f"Force-Exit : {stock_obj.mode} : {stock_obj.symbol}")
                                 ForceExit([stock_obj], fyers_conn, angel_conn, configuration_obj)
                                 stock_obj.delete()

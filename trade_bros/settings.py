@@ -87,9 +87,9 @@ WSGI_APPLICATION = "trade_bros.wsgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    "default": dj_database_url.parse("postgresql://trade_bros_xgj5_user:oxXmLEaFEvZFaCRddrvojFOprJ18TbWf@dpg-cqllulbv2p9s73b38cug-a/trade_bros_xgj5", conn_max_age=600),
-} if os.getenv("SERVER_DB", True) else {
-    "default": dj_database_url.parse("postgresql://trade_bros_xgj5_user:oxXmLEaFEvZFaCRddrvojFOprJ18TbWf@dpg-cqllulbv2p9s73b38cug-a.virginia-postgres.render.com/trade_bros_xgj5", conn_max_age=600),
+    "default": dj_database_url.parse("postgresql://trade_bros_db_user:OEq07sNOhGtD0LLKva5SAJhVsAOpG7Rg@dpg-crhtti3v2p9s73bg9ek0-a/trade_bros_db", conn_max_age=0),
+} if os.getenv("SERVER_DB", False) else {
+    "default": dj_database_url.parse("postgresql://trade_bros_db_user:OEq07sNOhGtD0LLKva5SAJhVsAOpG7Rg@dpg-crhtti3v2p9s73bg9ek0-a.virginia-postgres.render.com/trade_bros_db", conn_max_age=0),
 }
 
 # DATABASES = {

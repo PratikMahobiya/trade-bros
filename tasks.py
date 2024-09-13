@@ -115,7 +115,7 @@ def NotifyUsers():
                 total_str += '-----------------------------------'
                 total_str +=  '*' + f'Trading Stopped because Daily Stoploss Hitted {daily_sl_obj.daily_fixed_stoploss} % at {(daily_sl_obj.daily_max_loss_time + timedelta(hours=5, minutes=30)).strftime("%T")}' + '*' + '.'
 
-        recipient_phone_number_list = [("Pratik", "+917000681073"), ("Sudeep", '+919713113031'), ("Himanshu", '+917415535562'), ]
+        recipient_phone_number_list = [("Pratik", "+917000681073")]
 
         for user_name, recipient_phone_number in recipient_phone_number_list:
             sleep(1)

@@ -1,15 +1,14 @@
 import pyotp
 import requests
+import threading
 from time import sleep
+from datetime import datetime
 from zoneinfo import ZoneInfo
 from SmartApi import SmartConnect
 from stock.models import StockConfig
-from datetime import datetime, time, timedelta
-from helper.common import calculate_volatility
-from helper.angel_function import historical_data
-from helper.trade_action import Price_Action_Trade
-from system_conf.models import Configuration, Symbol
-from trade.settings import BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TOTP_KEY, BROKER_USER_ID, broker_connection
+from helper.angel_socket import connect_to_socket
+from SmartApi.smartWebSocketV2 import SmartWebSocketV2
+from trade.settings import BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TOTP_KEY, BROKER_USER_ID, broker_connection, sws
 
 
 def stay_awake():
@@ -17,39 +16,6 @@ def stay_awake():
     print(f'Pratik: Stay Awake: Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
     x = requests.get(f"{BED_URL_DOMAIN}/api/trade/awake", verify=False)
     print(f'Pratik: Stay Awake: Execution Time(hh:mm:ss): {x.status_code} : {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
-    return True
-
-
-def SymbolSetup():
-    now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
-    print(f'Pratik: Symbol Setup: Started')
-    url = "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json"
-    data = requests.get(url).json()
-    
-    Symbol.objects.filter(expiry__lt=now.date(), is_active=True).delete()
-
-    for i in data:
-        product = None
-        expity_date = datetime.strptime(i['expiry'], '%d%b%Y') if i['expiry'] else None
-        if i['instrumenttype'] in ['OPTSTK'] and (expity_date.month == now.month): # , 'OPTIDX'
-            product = 'option'
-        # elif i['instrumenttype'] in ['OPTFUT']:
-        #     product = 'future'
-        elif i['symbol'].endswith('-EQ'):
-            product = 'equity'
-        if product is not None:
-            obj, _ = Symbol.objects.get_or_create(
-                product=product,
-                name=i['name'],
-                symbol=i['symbol']
-                )
-            obj.token=i['token']
-            obj.strike=int(i['strike'].split('.')[0])/100
-            obj.exchange=i['exch_seg']
-            obj.expiry=expity_date
-            obj.lot=int(i['lotsize'])
-            obj.save()
-    print(f'Pratik: Symbol Setup: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True
 
 
@@ -72,91 +38,58 @@ def BrokerConnection():
     return True
 
 
-def Equity_BreakOut_1():
+def socket_setup():
     now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
-    product = 'equity'
-    log_identifier = 'Equity_BreakOut_1'
-    print(f'Pratik: {log_identifier}: Runtime : {product} : {now.strftime("%d-%b-%Y %H:%M:%S")}')
+    print(f'Pratik: Socket Setup: Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
+
+    global broker_connection, sws
+    open_position = {}
+
+    BROKER_AUTH_TOKEN = broker_connection.access_token
+    BROKER_FEED_TOKEN = broker_connection.feed_token
+
+    correlation_id = "pratik-socket"
+    mode = 1
+    nse = []
+    nfo = []
+    bse = []
+    bfo = []
+    mcx = []
+
+    for i in StockConfig.objects.filter(is_active=True):
+        open_position[i.symbol.token] = False
+        if i.symbol.exchange == 'NSE':
+            nse.append(i.symbol.token)
+        elif i.symbol.exchange == 'NFO':
+            nfo.append(i.symbol.token)
+        elif i.symbol.exchange == 'BSE':
+            bse.append(i.symbol.token)
+        elif i.symbol.exchange == 'BFO':
+            bfo.append(i.symbol.token)
+        else:
+            mcx.append(i.symbol.token)
+
+    subscribe_list = []
+    for index, i in enumerate((nse,nfo,bse,bfo,mcx)):
+        if i:
+            subscribe_list.append({
+                "exchangeType": index+1,
+                "tokens": i
+            })
 
     try:
-        if now.time() < time(9, 18, 00):
-            raise Exception("Entry Not Started")
-        elif now.time() > time(15, 14, 00):
-            raise Exception("Entry Not Stopped")
-
-        configuration_obj = Configuration.objects.filter(product=product)[0]
-
-        symbol_list = Symbol.objects.filter(product=product, is_active=True)
-
-        print(f'Pratik: {log_identifier}: Total Equity Symbol Picked: {len(symbol_list)}')
-
-        for index, symbol_obj in enumerate(symbol_list):
-            try:
-                nop = len(StockConfig.objects.filter(symbol__product=product, is_active=True))
-
-                mode = None
-
-                entries_list = StockConfig.objects.filter(symbol=symbol_obj, is_active=True)
-                if not entries_list:
-                    if nop < configuration_obj.open_position:
-                        from_day = now - timedelta(days=60)
-                        data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_DAY')
-                        sleep(0.3)
-
-                        open = data_frame['Open'].iloc[-1]
-                        high = data_frame['High'].iloc[-1]
-                        low = data_frame['Low'].iloc[-1]
-                        close = data_frame['Close'].iloc[-1]
-                        max_high = max(data_frame['High'].iloc[-30:-1]) if len(data_frame) >= 32 else max(data_frame['High'].iloc[:-1])
-                        min_low = min(data_frame['Low'].iloc[-30:-1]) if len(data_frame) >= 32 else min(data_frame['Low'].iloc[:-1])
-                        daily_volatility = calculate_volatility(data_frame)
-                            
-    
-                        if (max_high < high):
-                            mode = 'CE'
-    
-                        # elif (min_low > low):
-                        #     mode = 'PE'
-    
-                        else:
-                            mode = None
-    
-                        if mode not in [None]:
-                            data = {
-                                'log_identifier': log_identifier,
-                                'configuration_obj': configuration_obj,
-                                'product': product,
-                                'symbol_obj': symbol_obj,
-                                'mode': mode,
-                                'ltp': close,
-                                'target': configuration_obj.target,
-                                'stoploss': configuration_obj.stoploss,
-                                'fixed_target': configuration_obj.fixed_target,
-                                'call_trsl_low': min(data_frame['Low'].iloc[-10:-1]) if len(data_frame) >= 11 else min(data_frame['Low'].iloc[:-1]),
-                                'put_trsl_high': max(data_frame['High'].iloc[-10:-1]) if len(data_frame) >= 11 else max(data_frame['High'].iloc[:-1])
-                            }
-    
-                            Price_Action_Trade(data)
-                # else:
-                #     stock_obj = entries_list[0]
-                #     from_day = now - timedelta(days=35)
-                #     data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_DAY')
-
-                #     call_trsl_low = min(data_frame['Low'].iloc[-10:-1]) if len(data_frame) >= 11 else min(data_frame['Low'].iloc[:-1])
-                #     put_trsl_high = max(data_frame['High'].iloc[-10:-1]) if len(data_frame) >= 11 else max(data_frame['High'].iloc[:-1])
-
-                #     stock_obj.trailing_sl = call_trsl_low if (call_trsl_low > stock_obj.stoploss and call_trsl_low >= stock_obj.trailing_sl) else stock_obj.stoploss if stock_obj.mode == 'CE' else put_trsl_high if (put_trsl_high < stock_obj.stoploss and put_trsl_high <= stock_obj.trailing_sl) else stock_obj.stoploss
-                    
-                #     stock_obj.tr_hit = True if ((stock_obj.mode == 'CE' and stock_obj.trailing_sl > stock_obj.stoploss) or (stock_obj.mode == 'PE' and stock_obj.trailing_sl < stock_obj.stoploss)) else False
-                #     stock_obj.save()
-                del mode, entries_list
-
-            except Exception as e:
-                StockConfig.objects.filter(symbol=symbol_obj, is_active=False).delete()
-                print(f'Pratik: {log_identifier}: Error: in Equity-Symbol: {symbol_obj.name} : {e}')
-        del symbol_list
-
+        if subscribe_list:
+            sws.unsubscribe(correlation_id, mode, subscribe_list)
+        sleep(1)
+        sws.close_connection()
+        sleep(2)
     except Exception as e:
-        print(f'Pratik: {log_identifier}: ERROR: Main: {e}')
-    print(f'Pratik: {log_identifier}: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+        print(f'Pratik: Socket Setup: Trying to close the connection : {e}')
+    
+    # Streaming threads for Open Positions
+    if subscribe_list:
+        sws = SmartWebSocketV2(BROKER_AUTH_TOKEN, BROKER_API_KEY, BROKER_USER_ID, BROKER_FEED_TOKEN)
+        socket_thread = threading.Thread(name=f"Streaming-{now.strftime('%d-%b-%Y %H:%M:%S')}", target=connect_to_socket, args=(correlation_id, mode, subscribe_list, open_position), daemon=True)
+        socket_thread.start()
+    print(f'Pratik: Socket Setup: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True

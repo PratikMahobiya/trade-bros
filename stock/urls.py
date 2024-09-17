@@ -17,8 +17,9 @@ Including another URLconf
 
 from django.urls import path
 
-from stock.views import AwakeAPI
+from stock.views import AwakeAPI, SocketStream
 
 urlpatterns = [
     path('awake/', AwakeAPI),
+    path('socket-stream/', SocketStream),
 ]

@@ -20,14 +20,14 @@ def Price_Action_Trade(data):
         # Place Order.
         if data['product'] == 'future':
             if data['mode'] == 'CE':
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'CARRYFORWARD', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'])
+                order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'CARRYFORWARD', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'], "LIMIT")
             else:
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'])
+                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'], "LIMIT")
         else:
             if data['mode'] == 'CE':
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'DELIVERY', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'])
+                order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'DELIVERY', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'], "LIMIT")
             else:
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'INTRADAY', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'])
+                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'INTRADAY', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'], "LIMIT")
         
         stock_config_obj.lot = data['lot']
         stock_config_obj.price = price

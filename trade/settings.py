@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse.onrender.com,https://localhost:8000,https://127.0.0.1:8000,https://pratikmahobiya-fuzzy-space-giggle-6474w56pgxxf4w9r-8000.preview.app.github.dev').split(',')
 
 BED_URL_DOMAIN = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse.onrender.com')
+SOCKET_STREAM_URL_DOMAIN = 'https://algo-nse-socket-service.onrender.com'
 
 # Application definition
 
@@ -46,8 +47,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "admin_extra_buttons",
+    "import_export",
 
     "system_conf",
+    "stock",
 ]
 
 MIDDLEWARE = [
@@ -143,3 +147,16 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Broker Detail
+BROKER_PIN = 4567
+BROKER_USER_ID = 'P567723'
+BROKER_API_KEY = 'ExEEsqVb'
+BROKER_TOTP_KEY = 'VF4PNLIJZSO5CK7AILPR2ETP2M'
+
+
+# Global Variable
+global broker_connection
+
+broker_connection = None
+

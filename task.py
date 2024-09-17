@@ -26,6 +26,8 @@ def SymbolSetup():
     url = "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json"
     data = requests.get(url).json()
     
+    Symbol.objects.filter(expiry__lt=now.date(), is_active=True).delete()
+
     for i in data:
         product = None
         expity_date = datetime.strptime(i['expiry'], '%d%b%Y') if i['expiry'] else None
@@ -77,10 +79,10 @@ def Equity_BreakOut_1():
     print(f'Pratik: {log_identifier}: Runtime : {product} : {now.strftime("%d-%b-%Y %H:%M:%S")}')
 
     try:
-        # if now.time() < time(9, 18, 00):
-        #     raise Exception("Entry Not Started")
-        # elif now.time() > time(15, 14, 00):
-        #     raise Exception("Entry Not Stopped")
+        if now.time() < time(9, 18, 00):
+            raise Exception("Entry Not Started")
+        elif now.time() > time(15, 14, 00):
+            raise Exception("Entry Not Stopped")
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
 

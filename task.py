@@ -99,6 +99,7 @@ def Equity_BreakOut_1():
                     if nop < configuration_obj.open_position:
                         from_day = now - timedelta(days=60)
                         data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_DAY')
+                        sleep(0.3)
 
                         open = data_frame['Open'].iloc[-1]
                         high = data_frame['High'].iloc[-1]
@@ -126,7 +127,6 @@ def Equity_BreakOut_1():
                                 'symbol_obj': symbol_obj,
                                 'mode': mode,
                                 'ltp': close,
-                                'leverage': configuration_obj.leverage,
                                 'target': configuration_obj.target,
                                 'stoploss': configuration_obj.stoploss,
                                 'fixed_target': configuration_obj.fixed_target,

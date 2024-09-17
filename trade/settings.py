@@ -158,5 +158,10 @@ BROKER_TOTP_KEY = 'VF4PNLIJZSO5CK7AILPR2ETP2M'
 # Global Variable
 global broker_connection
 
-broker_connection = None
+import pyotp
+from SmartApi import SmartConnect
+connection = SmartConnect(api_key=BROKER_API_KEY)
+connection.generateSession(BROKER_USER_ID, BROKER_PIN, totp=pyotp.TOTP(BROKER_TOTP_KEY).now())
+
+broker_connection = connection
 

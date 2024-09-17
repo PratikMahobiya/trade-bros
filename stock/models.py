@@ -28,14 +28,14 @@ class StockConfig(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.id}-{self.product}-{self.symbol}"
+        return f"{self.id}-{self.symbol}"
 
 
 class Transaction(models.Model):
     MODES = [('CE', "Call"),
             ('PE', "Put"),
             ('none', "N/A")]
-    product = models.CharField(default='equity', max_length=255, unique=True, verbose_name='Product')
+    product = models.CharField(default='equity', max_length=255, verbose_name='Product')
     symbol = models.CharField(max_length=255, verbose_name='Symbol')
     mode = models.CharField(max_length=50, choices=MODES,verbose_name='MODE', default='none')
     indicate = models.CharField(max_length=50, verbose_name='INDICATE')

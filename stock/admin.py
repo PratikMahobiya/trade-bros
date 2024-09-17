@@ -7,7 +7,7 @@ from stock.models import StockConfig, Transaction
 # Register your models here.
 @admin.register(StockConfig)
 class StockConfigAdmin(admin.ModelAdmin):
-    list_display = ('created_at', 'mode', 'symbol', 'ltp', 'tr_hit', 'trailing_sl', 'max', 'max_l', 'price', 'target', 'stoploss', 'fixed_target', 'highest_price', 'lot', 'order_status', 'is_active')
+    list_display = ('created_at', 'mode', 'symbol__name', 'ltp', 'tr_hit', 'trailing_sl', 'max', 'max_l', 'price', 'target', 'stoploss', 'fixed_target', 'highest_price', 'symbol__symbol', 'lot', 'order_status', 'is_active')
     search_fields = ['symbol', ]
 
     def get_ordering(self, request):

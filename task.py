@@ -77,10 +77,10 @@ def Equity_BreakOut_1():
     print(f'Pratik: {log_identifier}: Runtime : {product} : {now.strftime("%d-%b-%Y %H:%M:%S")}')
 
     try:
-        if now.time() < time(9, 18, 00):
-            raise Exception("Entry Not Started")
-        elif now.time() > time(15, 14, 00):
-            raise Exception("Entry Not Stopped")
+        # if now.time() < time(9, 18, 00):
+        #     raise Exception("Entry Not Started")
+        # elif now.time() > time(15, 14, 00):
+        #     raise Exception("Entry Not Stopped")
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
 

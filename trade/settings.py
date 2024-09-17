@@ -88,18 +88,18 @@ WSGI_APPLICATION = "trade.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': dj_database_url.parse("postgresql://crypto_bros_424l_user:OkfUQXu4bsaEeijVxBqzmdpdaUEiSQ3k@dpg-cr65avjv2p9s73amqva0-a/crypto_bros_424l", conn_max_age=0),
-# } if os.getenv('SERVER_DB', False) else {
-#     'default': dj_database_url.parse("postgresql://crypto_bros_424l_user:OkfUQXu4bsaEeijVxBqzmdpdaUEiSQ3k@dpg-cr65avjv2p9s73amqva0-a.virginia-postgres.render.com/crypto_bros_424l", conn_max_age=0),
-# }
-
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    'default': dj_database_url.parse("postgresql://trade_bros_db_nvcu_user:vNFCCZ3jGbmGPtulpuiHowNbcrnvN0oQ@dpg-crkn7o68ii6s73835erg-a/trade_bros_db_nvcu", conn_max_age=0),
+} if os.getenv('SERVER_DB', False) else {
+    'default': dj_database_url.parse("postgresql://trade_bros_db_nvcu_user:vNFCCZ3jGbmGPtulpuiHowNbcrnvN0oQ@dpg-crkn7o68ii6s73835erg-a.virginia-postgres.render.com/trade_bros_db_nvcu", conn_max_age=0),
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 
 
 # Password validation

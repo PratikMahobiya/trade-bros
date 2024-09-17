@@ -38,10 +38,10 @@ def SymbolSetup():
         if product is not None:
             obj, _ = Symbol.objects.get_or_create(
                 product=product,
-                name=i['name']
+                name=i['name'],
+                symbol=i['symbol']
                 )
             obj.token=i['token']
-            obj.symbol=i['symbol']
             obj.strike=int(i['strike'].split('.')[0])/100
             obj.exchange=i['exch_seg']
             obj.expiry=expity_date

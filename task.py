@@ -10,6 +10,8 @@ def Symbol_Setup():
         product = None
         if i['instrumenttype'] in ['OPTSTK', 'OPTIDX']:
             product = 'option'
+        # elif i['instrumenttype'] in ['OPTFUT']:
+        #     product = 'future'
         elif i['symbol'].endswith('-EQ'):
             product = 'equity'
         if product is not None:

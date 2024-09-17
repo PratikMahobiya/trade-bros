@@ -1,6 +1,6 @@
 from trade.settings import broker_connection
 
-def Create_Order(configuration_obj, transactiontype, producttype, token, symbol, exchange, price, quantity):
+def Create_Order(configuration_obj, transactiontype, producttype, token, symbol, exchange, price, quantity, ordertype):
     # Place an order
     order_id = 0
     order_status = 'Not Placed' if configuration_obj.place_order else 'In-Active'
@@ -16,7 +16,7 @@ def Create_Order(configuration_obj, transactiontype, producttype, token, symbol,
                     "quantity": quantity
                     }
 
-        if False:
+        if ordertype == "MARKET":
             orderparams['ordertype'] = "MARKET"
         else:
             orderparams['ordertype'] = "LIMIT"

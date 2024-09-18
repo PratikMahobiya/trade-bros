@@ -76,7 +76,7 @@ def socket_setup(log_identifier='Cron'):
                 "exchangeType": index+1,
                 "tokens": i
             })
-
+    print(f'Pratik: Socket Setup : {log_identifier} : Subscribe List : {subscribe_list}')
     try:
         # if subscribe_list:
         #     sws.unsubscribe(correlation_id, mode, subscribe_list)

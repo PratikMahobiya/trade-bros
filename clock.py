@@ -6,7 +6,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 def start():
     sched = BackgroundScheduler(timezone=str(tzlocal.get_localzone()), daemon=True)
 
-    socket_setup()
+    socket_setup(log_identifier='Restart')
 
     # Schedules job_function to be run on the Monday to Friday
     sched.add_job(stay_awake, 'cron', day_of_week='mon-fri',

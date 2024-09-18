@@ -38,9 +38,9 @@ def BrokerConnection():
     return True
 
 
-def socket_setup():
+def socket_setup(log_identifier='Cron'):
     now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
-    print(f'Pratik: Socket Setup: Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
+    print(f'Pratik: Socket Setup : {log_identifier} : Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
 
     global broker_connection, sws
     open_position = {}
@@ -81,15 +81,15 @@ def socket_setup():
         # if subscribe_list:
         #     sws.unsubscribe(correlation_id, mode, subscribe_list)
         sws.close_connection()
-        print(f'Pratik: Socket Setup: Connection Closed')
+        print(f'Pratik: Socket Setup : {log_identifier} : Connection Closed')
         sleep(2)
     except Exception as e:
-        print(f'Pratik: Socket Setup: Trying to close the connection : {e}')
+        print(f'Pratik: Socket Setup : {log_identifier} : Trying to close the connection : {e}')
     
     # Streaming threads for Open Positions
     if subscribe_list:
         sws = SmartWebSocketV2(BROKER_AUTH_TOKEN, BROKER_API_KEY, BROKER_USER_ID, BROKER_FEED_TOKEN)
         socket_thread = threading.Thread(name=f"Streaming-{now.strftime('%d-%b-%Y %H:%M:%S')}", target=connect_to_socket, args=(correlation_id, mode, subscribe_list, open_position), daemon=True)
         socket_thread.start()
-    print(f'Pratik: Socket Setup: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    print(f'Pratik: Socket Setup : {log_identifier} : Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True

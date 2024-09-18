@@ -136,9 +136,7 @@ def Equity_BreakOut_1():
                                 'ltp': close,
                                 'target': configuration_obj.target,
                                 'stoploss': configuration_obj.stoploss,
-                                'fixed_target': configuration_obj.fixed_target,
-                                'call_trsl_low': 0, # min(data_frame['Low'].iloc[-10:-1]) if len(data_frame) >= 11 else min(data_frame['Low'].iloc[:-1]),
-                                'put_trsl_high': 0, # max(data_frame['High'].iloc[-10:-1]) if len(data_frame) >= 11 else max(data_frame['High'].iloc[:-1])
+                                'fixed_target': configuration_obj.fixed_target
                             }
 
                             lot = symbol_obj.lot
@@ -249,9 +247,7 @@ def FnO_BreakOut_1():
                                 'mode': mode,
                                 'target': configuration_obj.target,
                                 'stoploss': configuration_obj.stoploss,
-                                'fixed_target': configuration_obj.fixed_target,
-                                'call_trsl_low': 0, # min(data_frame['Low'].iloc[-10:-1]) if len(data_frame) >= 11 else min(data_frame['Low'].iloc[:-1]),
-                                'put_trsl_high': 0, # max(data_frame['High'].iloc[-10:-1]) if len(data_frame) >= 11 else max(data_frame['High'].iloc[:-1])
+                                'fixed_target': configuration_obj.fixed_target
                             }
 
                             global broker_connection

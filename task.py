@@ -81,6 +81,7 @@ def socket_setup():
         # if subscribe_list:
         #     sws.unsubscribe(correlation_id, mode, subscribe_list)
         sws.close_connection()
+        print(f'Pratik: Socket Setup: Connection Closed')
         sleep(1)
     except Exception as e:
         print(f'Pratik: Socket Setup: Trying to close the connection : {e}')

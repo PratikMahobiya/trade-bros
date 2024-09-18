@@ -19,21 +19,16 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode):
 
                 # Record Max gain hit:
                 percent = round((((ltp - stock_obj.price)/stock_obj.price)) * 100, 2)
-                if stock_obj.mode == 'PE':
-                    if percent > 0:
-                        percent = -percent
-                    else:
-                        percent = -percent
                 data['percent'] = percent
-                if (stock_obj.mode == 'PE' and ltp < stock_obj.highest_price) or (stock_obj.mode == 'CE' and ltp > stock_obj.highest_price):
-                    stock_obj.highest_price = ltp
-                    stock_obj.max = percent
+                if percent > stock_obj.max:
+                    stock_obj.highest_price = round(ltp, 2)
+                    stock_obj.max = round(percent, 2)
                 elif percent < stock_obj.max_l:
-                    stock_obj.max_l = percent
+                    stock_obj.max_l = round(percent, 2)
                 stock_obj.ltp = ltp
                 stock_obj.save()
 
-                if (stock_obj.mode == 'CE' and ltp > stock_obj.fixed_target) or (stock_obj.mode == 'PE' and ltp < stock_obj.fixed_target):
+                if ltp > stock_obj.fixed_target:
                     TargetExit(data, ltp, open_position, correlation_id, socket_mode)
                 elif not TrailingTargetUpdate(data, ltp):
                     TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode)

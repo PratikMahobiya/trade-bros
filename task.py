@@ -163,7 +163,7 @@ def Equity_BreakOut_1():
 
         # Start Socket Streaming
         if new_entry:
-            print(f'Pratik: {data["log_identifier"]}: New Entries: {new_entry}')
+            print(f'Pratik: {data["log_identifier"]}: Total New Entry {len(new_entry)} : New Entries: {new_entry}')
             url = f"{SOCKET_STREAM_URL_DOMAIN}/api/trade/socket-stream/"
             response = requests.get(url, verify=False)
             print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')

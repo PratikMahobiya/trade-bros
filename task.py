@@ -97,11 +97,11 @@ def Equity_BreakOut_1():
         new_entry = []
         for index, symbol_obj in enumerate(symbol_list):
             try:
-                nop = len(StockConfig.objects.filter(symbol__product=product, is_active=True))
+                nop = len(StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True))
 
                 mode = None
 
-                entries_list = StockConfig.objects.filter(symbol=symbol_obj, is_active=True)
+                entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
                 if not entries_list:
                     if nop < configuration_obj.open_position:
                         from_day = now - timedelta(days=60)
@@ -117,7 +117,7 @@ def Equity_BreakOut_1():
                         daily_volatility = calculate_volatility(data_frame)
                             
     
-                        if (max_high < high):
+                        if (max_high < close):
                             mode = 'CE'
     
                         # elif (min_low > low):
@@ -140,25 +140,144 @@ def Equity_BreakOut_1():
                                 'call_trsl_low': min(data_frame['Low'].iloc[-10:-1]) if len(data_frame) >= 11 else min(data_frame['Low'].iloc[:-1]),
                                 'put_trsl_high': max(data_frame['High'].iloc[-10:-1]) if len(data_frame) >= 11 else max(data_frame['High'].iloc[:-1])
                             }
-    
-                            new_entry = Price_Action_Trade(data, new_entry)
-                # else:
-                #     stock_obj = entries_list[0]
-                #     from_day = now - timedelta(days=35)
-                #     data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_DAY')
 
-                #     call_trsl_low = min(data_frame['Low'].iloc[-10:-1]) if len(data_frame) >= 11 else min(data_frame['Low'].iloc[:-1])
-                #     put_trsl_high = max(data_frame['High'].iloc[-10:-1]) if len(data_frame) >= 11 else max(data_frame['High'].iloc[:-1])
-
-                #     stock_obj.trailing_sl = call_trsl_low if (call_trsl_low > stock_obj.stoploss and call_trsl_low >= stock_obj.trailing_sl) else stock_obj.stoploss if stock_obj.mode == 'CE' else put_trsl_high if (put_trsl_high < stock_obj.stoploss and put_trsl_high <= stock_obj.trailing_sl) else stock_obj.stoploss
-                    
-                #     stock_obj.tr_hit = True if ((stock_obj.mode == 'CE' and stock_obj.trailing_sl > stock_obj.stoploss) or (stock_obj.mode == 'PE' and stock_obj.trailing_sl < stock_obj.stoploss)) else False
-                #     stock_obj.save()
+                            lot = symbol_obj.lot
+                            chk_price = close * lot
+                            if chk_price < configuration_obj.amount:
+                                while True:
+                                    chk_price = close * lot
+                                    if chk_price >= configuration_obj.amount:
+                                        lot = lot - symbol_obj.lot
+                                        break
+                                    lot += symbol_obj.lot
+                                data['lot'] = lot
+                                new_entry = Price_Action_Trade(data, new_entry)
+                            else:
+                                print(f'Pratik: {log_identifier}: Equity-Symbol: Not Enough money to take entry {symbol_obj.name} : {chk_price} : {configuration_obj.amount}')
                 del mode, entries_list
 
             except Exception as e:
-                StockConfig.objects.filter(symbol=symbol_obj, is_active=False).delete()
+                StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=False).delete()
                 print(f'Pratik: {log_identifier}: Error: in Equity-Symbol: {symbol_obj.name} : {e}')
+        del symbol_list
+
+        # Start Socket Streaming
+        if new_entry:
+            print(f'Pratik: {data["log_identifier"]}: Total New Entry {len(new_entry)} : New Entries: {new_entry}')
+            url = f"{SOCKET_STREAM_URL_DOMAIN}/api/trade/socket-stream/"
+            query_params = {
+                "symbol": new_entry
+            }
+            response = requests.get(url, params=query_params, verify=False)
+            print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')
+
+    except Exception as e:
+        print(f'Pratik: {log_identifier}: ERROR: Main: {e}')
+    print(f'Pratik: {log_identifier}: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    return True
+
+
+def FnO_BreakOut_1():
+    now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
+    product = 'future'
+    log_identifier = 'FnO_BreakOut_1'
+    print(f'Pratik: {log_identifier}: Runtime : {product} : {now.strftime("%d-%b-%Y %H:%M:%S")}')
+
+    try:
+        if now.time() < time(9, 18, 00):
+            raise Exception("Entry Not Started")
+        elif now.time() > time(15, 14, 00):
+            raise Exception("Entry Not Stopped")
+
+        configuration_obj = Configuration.objects.filter(product=product)[0]
+
+        symbol_list = Symbol.objects.filter(product='equity', fno=True, is_active=True)
+
+        print(f'Pratik: {log_identifier}: Total FnO Symbol Picked: {len(symbol_list)}')
+
+        new_entry = []
+        for index, symbol_obj in enumerate(symbol_list):
+            try:
+                nop = len(StockConfig.objects.filter(symbol__product=product, is_active=True))
+
+                mode = None
+
+                entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
+                if not entries_list:
+                    if nop < configuration_obj.open_position:
+                        from_day = now - timedelta(days=60)
+                        data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_DAY')
+                        sleep(0.3)
+
+                        open = data_frame['Open'].iloc[-1]
+                        high = data_frame['High'].iloc[-1]
+                        low = data_frame['Low'].iloc[-1]
+                        close = data_frame['Close'].iloc[-1]
+                        max_high = max(data_frame['High'].iloc[-30:-1]) if len(data_frame) >= 32 else max(data_frame['High'].iloc[:-1])
+                        min_low = min(data_frame['Low'].iloc[-30:-1]) if len(data_frame) >= 32 else min(data_frame['Low'].iloc[:-1])
+                        daily_volatility = calculate_volatility(data_frame)
+                            
+    
+                        if (max_high < close):
+                            mode = 'CE'
+                            stock_future_symbol = Symbol.objects.filter(
+                                                        product='future',
+                                                        name=symbol_obj.name,
+                                                        symbol__endswith='CE',
+                                                        strike__gt=close,
+                                                        fno=True,
+                                                        is_active=True).order_by('strike')
+    
+                        elif (min_low > close):
+                            mode = 'PE'
+                            stock_future_symbol = Symbol.objects.filter(
+                                                        product='future',
+                                                        name=symbol_obj.name,
+                                                        symbol__endswith='PE',
+                                                        strike__lt=close,
+                                                        fno=True,
+                                                        is_active=True).order_by('-strike')
+    
+                        else:
+                            mode = None
+    
+                        if mode not in [None]:
+                            data = {
+                                'log_identifier': log_identifier,
+                                'configuration_obj': configuration_obj,
+                                'product': product,
+                                'mode': mode,
+                                'target': configuration_obj.target,
+                                'stoploss': configuration_obj.stoploss,
+                                'fixed_target': configuration_obj.fixed_target,
+                                'call_trsl_low': min(data_frame['Low'].iloc[-10:-1]) if len(data_frame) >= 11 else min(data_frame['Low'].iloc[:-1]),
+                                'put_trsl_high': max(data_frame['High'].iloc[-10:-1]) if len(data_frame) >= 11 else max(data_frame['High'].iloc[:-1])
+                            }
+
+                            global broker_connection
+                            for fut_sym_obj in stock_future_symbol:
+                                ltp = broker_connection.ltpData(fut_sym_obj.exchange, fut_sym_obj.symbol, fut_sym_obj.token)['data']['ltp']
+                                lot = fut_sym_obj.lot
+                                chk_price = ltp * lot
+                                if chk_price < configuration_obj.amount:
+                                    while True:
+                                        chk_price = ltp * lot
+                                        if chk_price >= configuration_obj.amount:
+                                            lot = lot - fut_sym_obj.lot
+                                            break
+                                        lot += fut_sym_obj.lot
+
+                                    data['ltp'] = ltp
+                                    data['lot'] = lot
+                                    data['symbol_obj'] = fut_sym_obj
+                                    new_entry = Price_Action_Trade(data, new_entry)
+                                    break
+
+                del mode, entries_list
+
+            except Exception as e:
+                StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=False).delete()
+                print(f'Pratik: {log_identifier}: Error: in FnO-Symbol: {symbol_obj.name} : {e}')
         del symbol_list
 
         # Start Socket Streaming

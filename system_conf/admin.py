@@ -3,7 +3,7 @@ from system_conf.models import Configuration, Symbol
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 
-from task import BrokerConnection, Equity_BreakOut_1, SymbolSetup
+from task import BrokerConnection, Equity_BreakOut_1, FnO_BreakOut_1, SymbolSetup
 
 # Register your models here.
 @admin.register(Configuration)
@@ -32,6 +32,14 @@ class SymbolAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         self.message_user(request, 'Equity BreakOut 1 called')
         Equity_BreakOut_1()
         self.message_user(request, 'Equity BreakOut 1 Done')
+        return HttpResponseRedirectToReferrer(request)
+    
+    @button(change_form=True,
+            html_attrs={'style': 'background-color:#F1502F;color:black'})
+    def FnO_BreakOut_1(self, request):
+        self.message_user(request, 'FnO BreakOut 1 called')
+        FnO_BreakOut_1()
+        self.message_user(request, 'FnO BreakOut 1 Done')
         return HttpResponseRedirectToReferrer(request)
     
     @button(change_form=True,

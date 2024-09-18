@@ -5,14 +5,6 @@ from stock.models import StockConfig, Transaction
 def Price_Action_Trade(data, new_entry):
     stock_config_obj, created = StockConfig.objects.get_or_create(mode=data['mode'], symbol=data['symbol_obj'], is_active=False)
     if created:
-        data['lot'] = data['symbol_obj'].lot
-        while True:
-            chk_price = data['ltp'] * data['lot']
-            if chk_price >= data['configuration_obj'].amount:
-                data['lot'] = data['lot'] - data['symbol_obj'].lot
-                break
-            data['lot'] += data['symbol_obj'].lot
-        data['lot'] = data['lot']
         stock_config_obj.lot = data['lot']
 
         # Place Order.

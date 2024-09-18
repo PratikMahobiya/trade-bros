@@ -32,7 +32,7 @@ def TargetExit(data, ltp, open_position, correlation_id, socket_mode):
             else:
                 order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
         else:
-            if data['mode'] == 'CE':
+            if data['stock_obj'].mode == 'CE':
                 order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
             else:
                 order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
@@ -84,7 +84,7 @@ def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode):
             else:
                 order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
         else:
-            if data['mode'] == 'CE':
+            if data['stock_obj'].mode == 'CE':
                 order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
             else:
                 order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")

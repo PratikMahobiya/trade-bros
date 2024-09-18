@@ -78,8 +78,8 @@ def socket_setup():
             })
 
     try:
-        if subscribe_list:
-            sws.unsubscribe(correlation_id, mode, subscribe_list)
+        # if subscribe_list:
+        #     sws.unsubscribe(correlation_id, mode, subscribe_list)
         sws.close_connection()
         sleep(1)
     except Exception as e:

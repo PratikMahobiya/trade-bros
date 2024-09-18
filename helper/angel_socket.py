@@ -50,7 +50,6 @@ def connect_to_socket(correlation_id, socket_mode, subscribe_list, open_position
         global sws
 
         def on_data(wsapp, message):
-            print(message)
             ltp = message['last_traded_price']/100
             token = message['token']
             # print(f'Pratik: {token} : {ltp} : {open_position}')

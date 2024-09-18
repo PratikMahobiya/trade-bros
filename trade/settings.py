@@ -33,10 +33,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse.onrender.com,https://localhost:8000,https://127.0.0.1:8000,https://pratikmahobiya-fuzzy-space-giggle-6474w56pgxxf4w9r-8000.preview.app.github.dev').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse-socket-service.onrender.com,https://localhost:8000,https://127.0.0.1:8000,https://pratikmahobiya-fuzzy-space-giggle-6474w56pgxxf4w9r-8000.preview.app.github.dev').split(',')
 
-BED_URL_DOMAIN = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse.onrender.com')
-SOCKET_STREAM_URL_DOMAIN = 'https://algo-nse-socket-service.onrender.com'
+BED_URL_DOMAIN = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse-socket-service.onrender.com')
 
 # Application definition
 

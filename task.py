@@ -165,7 +165,10 @@ def Equity_BreakOut_1():
         if new_entry:
             print(f'Pratik: {data["log_identifier"]}: Total New Entry {len(new_entry)} : New Entries: {new_entry}')
             url = f"{SOCKET_STREAM_URL_DOMAIN}/api/trade/socket-stream/"
-            response = requests.get(url, verify=False)
+            query_params = {
+                "symbol": new_entry
+            }
+            response = requests.get(url, params=query_params, verify=False)
             print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')
 
     except Exception as e:

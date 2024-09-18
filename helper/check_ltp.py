@@ -69,6 +69,7 @@ def TargetExit(data, ltp, open_position, correlation_id, socket_mode):
                                 lot=data['stock_obj'].lot)
         global sws
         sws.unsubscribe(correlation_id, socket_mode, [{"action": 0, "exchangeType": 1, "tokens": [data['stock_obj'].symbol.token]}])
+        print(f"Pratik: TARGET EXIT: Unsubscribed : {data['stock_obj'].symbol.symbol} : {data['stock_obj'].symbol.token}")
         data['stock_obj'].delete()
     return True
 
@@ -90,7 +91,7 @@ def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode):
                 order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
 
         if data['configuration_obj'].place_order and (order_id in ['', 0, '0', None]):
-            print(f"Pratik: TARGET EXIT: ERROR: Not Accepting Orders: {data['stock_obj'].symbol} : {order_id}, {order_status}")
+            print(f"Pratik: TRAILING/STOPLOSS EXIT: ERROR: Not Accepting Orders: {data['stock_obj'].symbol} : {order_id}, {order_status}")
             return False
 
         del open_position[data['stock_obj'].symbol.token]
@@ -121,5 +122,6 @@ def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode):
                                 lot=data['stock_obj'].lot)
         global sws
         sws.unsubscribe(correlation_id, socket_mode, [{"action": 0, "exchangeType": 1, "tokens": [data['stock_obj'].symbol.token]}])
+        print(f"Pratik: TRAILING/STOPLOSS EXIT: Unsubscribed : {data['stock_obj'].symbol.symbol} : {data['stock_obj'].symbol.token}")
         data['stock_obj'].delete()
     return False

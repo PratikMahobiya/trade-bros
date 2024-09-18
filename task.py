@@ -9,7 +9,7 @@ from helper.common import calculate_volatility
 from helper.angel_function import historical_data
 from helper.trade_action import Price_Action_Trade
 from system_conf.models import Configuration, Symbol
-from trade.settings import BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TOTP_KEY, BROKER_USER_ID, broker_connection
+from trade.settings import BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TOTP_KEY, BROKER_USER_ID, broker_connection, SOCKET_STREAM_URL_DOMAIN
 
 
 def stay_awake():
@@ -92,6 +92,7 @@ def Equity_BreakOut_1():
 
         print(f'Pratik: {log_identifier}: Total Equity Symbol Picked: {len(symbol_list)}')
 
+        new_entry = []
         for index, symbol_obj in enumerate(symbol_list):
             try:
                 nop = len(StockConfig.objects.filter(symbol__product=product, is_active=True))
@@ -138,7 +139,7 @@ def Equity_BreakOut_1():
                                 'put_trsl_high': max(data_frame['High'].iloc[-10:-1]) if len(data_frame) >= 11 else max(data_frame['High'].iloc[:-1])
                             }
     
-                            Price_Action_Trade(data)
+                            new_entry = Price_Action_Trade(data, new_entry)
                 # else:
                 #     stock_obj = entries_list[0]
                 #     from_day = now - timedelta(days=35)
@@ -157,6 +158,13 @@ def Equity_BreakOut_1():
                 StockConfig.objects.filter(symbol=symbol_obj, is_active=False).delete()
                 print(f'Pratik: {log_identifier}: Error: in Equity-Symbol: {symbol_obj.name} : {e}')
         del symbol_list
+
+        # Start Socket Streaming
+        if new_entry:
+            print(f'Pratik: {data["log_identifier"]}: New Entries: {new_entry}')
+            url = f"{SOCKET_STREAM_URL_DOMAIN}/api/trade/socket-stream/"
+            response = requests.get(url, verify=False)
+            print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')
 
     except Exception as e:
         print(f'Pratik: {log_identifier}: ERROR: Main: {e}')

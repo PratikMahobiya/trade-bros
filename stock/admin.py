@@ -20,7 +20,7 @@ class StatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         return self.model.objects.all()
     
     def symbol_(self, obj):
-        return f"{obj.symbol.product[:2]}-{obj.symbol.symbol}"
+        return f"{obj.symbol.symbol}"
     symbol_.short_description = 'Symbol'
     
     def entry_time(self, obj):

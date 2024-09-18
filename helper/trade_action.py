@@ -1,10 +1,8 @@
 
-import requests
 from helper.angel_order import Create_Order
 from stock.models import StockConfig, Transaction
-from trade.settings import SOCKET_STREAM_URL_DOMAIN
 
-def Price_Action_Trade(data):
+def Price_Action_Trade(data, new_entry):
     stock_config_obj, created = StockConfig.objects.get_or_create(mode=data['mode'], symbol=data['symbol_obj'], is_active=False)
     if created:
         data['lot'] = data['symbol_obj'].lot
@@ -107,14 +105,5 @@ def Price_Action_Trade(data):
                                     order_status=stock_config_obj.order_status,
                                     lot=stock_config_obj.lot)
         print(f'Pratik: {data["log_identifier"]}: Entry on {data["product"]} : {data["symbol_obj"].name} on {price}')
-        # Start Socket Streaming
-        url = f"{SOCKET_STREAM_URL_DOMAIN}/api/trade/socket-stream/"
-        query_params = {
-            "symbol": data["symbol_obj"].symbol,
-            "token": data["symbol_obj"].token,
-            "exchange": data["symbol_obj"].exchange,
-            "product": data["product"]
-        }
-        response = requests.get(url, params=query_params, verify=False)
-        print(f'Pratik: {data["log_identifier"]}: Streaming Response: {response.status_code}')
-    return True
+        new_entry.append(data["symbol_obj"].name)
+    return new_entry

@@ -18,7 +18,7 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode):
                 data['stoploss'] = configuration_obj.trail_stoploss_by / 100
 
                 # Record Max gain hit:
-                percent = (((ltp - stock_obj.price)/stock_obj.price)) * 100
+                percent = round((((ltp - stock_obj.price)/stock_obj.price)) * 100, 2)
                 if stock_obj.mode == 'PE':
                     if percent > 0:
                         percent = -percent

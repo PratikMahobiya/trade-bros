@@ -11,7 +11,7 @@ from stock.models import StockConfig, Transaction, Status
 @admin.register(Status)
 class StatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     actions = None
-    list_display = ('entry_time', 'mode', 'symbol_', 'current', 'max_p', 'max_l_s', 'ltp', 'fixed_target', 'price', 'stoploss', 'trailing_sl', 'target', 'highest_price', 'orderid', 'order_status', 'lot', 'tr_hit')
+    list_display = ('entry_time', 'name_', 'current', 'max_p', 'max_l_s', 'ltp', 'fixed_target', 'price', 'stoploss', 'trailing_sl', 'target', 'highest_price', 'orderid', 'order_status', 'lot', 'tr_hit', 'mode', 'product')
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -19,12 +19,19 @@ class StatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     def get_queryset(self, request):
         return self.model.objects.all()
     
-    def symbol_(self, obj):
-        return f"{obj.symbol.symbol}"
-    symbol_.short_description = 'Symbol'
+    def product(self, obj):
+        return f"{obj.symbol.product}"
+    product.short_description = 'Product'
+
+    def name_(self, obj):
+        if obj.symbol.product == 'future':
+            return f"{obj.symbol.name}-{obj.symbol.strike}-{obj.symbol.symbol[-2:]}"
+        else:
+            return f"{obj.symbol.symbol}"
+    name_.short_description = 'Name'
     
     def entry_time(self, obj):
-        return (obj.created_at + timedelta(hours=5, minutes=30)).strftime("%-I:%-M:%-S %p")
+        return (obj.created_at + timedelta(hours=5, minutes=30)).strftime("%d/%m/%y %-I:%-M:%-S %p")
     entry_time.short_description = 'Time'
 
     def max_p(self, obj):

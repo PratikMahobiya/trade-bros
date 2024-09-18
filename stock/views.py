@@ -1,3 +1,4 @@
+from time import sleep
 from task import socket_setup
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -15,6 +16,7 @@ def AwakeAPI(request):
 @csrf_exempt
 def SocketStream(request):
     try:
+        sleep(3)
         print(f'Pratik: Api Socket Stream: Started')
         status = socket_setup()
         print(f'Pratik: Api Socket Stream: Ended')

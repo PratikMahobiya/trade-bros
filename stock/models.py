@@ -59,3 +59,10 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.id}-{self.product}-{self.symbol}"
+
+
+class Status(StockConfig):
+    class Meta:
+        proxy = True
+        verbose_name = "Status"
+        verbose_name_plural = "Status"

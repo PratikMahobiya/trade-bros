@@ -17,7 +17,7 @@ class StatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         return False
 
     def get_queryset(self, request):
-        return StockConfig.objects.all()
+        return self.model.objects.all()
     
     def symbol_(self, obj):
         return f"{obj.symbol.product[:2]}-{obj.symbol.symbol}"

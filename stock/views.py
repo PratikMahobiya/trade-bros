@@ -15,8 +15,9 @@ def AwakeAPI(request):
 @csrf_exempt
 def SocketStream(request):
     try:
-        socket_setup()
         print(f'Pratik: Api Socket Stream: Started')
+        status = socket_setup()
+        print(f'Pratik: Api Socket Stream: Ended')
         return HttpResponse(True)
     except Exception as e:
         print(f'Pratik: Api Socket Stream: Error : {e}')

@@ -74,17 +74,18 @@ def BrokerConnection():
     return True
 
 
-def Equity_BreakOut_1():
+def Equity_BreakOut_1(auto_trigger=True):
     now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
     product = 'equity'
     log_identifier = 'Equity_BreakOut_1'
     print(f'Pratik: {log_identifier}: Runtime : {product} : {now.strftime("%d-%b-%Y %H:%M:%S")}')
 
     try:
-        if now.time() < time(9, 18, 00):
-            raise Exception("Entry Not Started")
-        elif now.time() > time(15, 14, 00):
-            raise Exception("Entry Not Stopped")
+        if auto_trigger:
+            if now.time() < time(9, 18, 00):
+                raise Exception("Entry Not Started")
+            elif now.time() > time(15, 29, 00):
+                raise Exception("Entry Not Stopped")
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
 
@@ -175,17 +176,18 @@ def Equity_BreakOut_1():
     return True
 
 
-def FnO_BreakOut_1():
+def FnO_BreakOut_1(auto_trigger=True):
     now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
     product = 'future'
     log_identifier = 'FnO_BreakOut_1'
     print(f'Pratik: {log_identifier}: Runtime : {product} : {now.strftime("%d-%b-%Y %H:%M:%S")}')
 
     try:
-        if now.time() < time(9, 18, 00):
-            raise Exception("Entry Not Started")
-        elif now.time() > time(15, 14, 00):
-            raise Exception("Entry Not Stopped")
+        if auto_trigger:
+            if now.time() < time(9, 18, 00):
+                raise Exception("Entry Not Started")
+            elif now.time() > time(15, 29, 00):
+                raise Exception("Entry Not Stopped")
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
 

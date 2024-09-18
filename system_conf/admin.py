@@ -30,7 +30,7 @@ class SymbolAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             html_attrs={'style': 'background-color:#F1502F;color:black'})
     def Equity_BreakOut_1(self, request):
         self.message_user(request, 'Equity BreakOut 1 called')
-        Equity_BreakOut_1()
+        Equity_BreakOut_1(auto_trigger=False)
         self.message_user(request, 'Equity BreakOut 1 Done')
         return HttpResponseRedirectToReferrer(request)
     
@@ -38,7 +38,7 @@ class SymbolAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             html_attrs={'style': 'background-color:#F1502F;color:black'})
     def FnO_BreakOut_1(self, request):
         self.message_user(request, 'FnO BreakOut 1 called')
-        FnO_BreakOut_1()
+        FnO_BreakOut_1(auto_trigger=False)
         self.message_user(request, 'FnO BreakOut 1 Done')
         return HttpResponseRedirectToReferrer(request)
     

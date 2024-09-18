@@ -31,10 +31,8 @@ def SymbolSetup():
     for i in data:
         product = None
         expity_date = datetime.strptime(i['expiry'], '%d%b%Y') if i['expiry'] else None
-        if i['instrumenttype'] in ['OPTSTK'] and (expity_date.month == now.month): # , 'OPTIDX'
+        if i['instrumenttype'] in ['OPTSTK'] and (expity_date.month == now.month): # , 'OPTIDX', 'OPTFUT'
             product = 'future'
-        # elif i['instrumenttype'] in ['OPTFUT']:
-        #     product = 'future'
         elif i['symbol'].endswith('-EQ'):
             product = 'equity'
         if product is not None:
@@ -48,7 +46,11 @@ def SymbolSetup():
             obj.exchange=i['exch_seg']
             obj.expiry=expity_date
             obj.lot=int(i['lotsize'])
+            if product == 'future':
+                obj.fno=True
             obj.save()
+    future_enables_symbols = set(Symbol.objects.filter(product='future', is_active=True).values_list('name', flat=True))
+    Symbol.objects.filter(product='equity', name__in=future_enables_symbols, is_active=True).update(fno=True)
     print(f'Pratik: Symbol Setup: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True
 
@@ -88,7 +90,7 @@ def Equity_BreakOut_1():
 
         option_enables_symbols = ['NESTLEIND', 'LTTS', 'WIPRO', 'M&MFIN', 'PVRINOX', 'SRF', 'SUNTV', 'TECHM', 'ADANIPORTS', 'TCS', 'BIOCON', 'UPL', 'TATACHEM', 'MFSL', 'GODREJPROP', 'DIVISLAB', 'MOTHERSON', 'VEDL', 'ZYDUSLIFE', 'INDIAMART', 'SYNGENE', 'CUB', 'LT', 'ACC', 'HDFCLIFE', 'DRREDDY', 'NATIONALUM', 'LAURUSLABS', 'MARUTI', 'BANKBARODA', 'HINDCOPPER', 'TATACONSUM', 'ABBOTINDIA', 'DIXON', 'BAJFINANCE', 'ASIANPAINT', 'ESCORTS', 'GUJGASLTD', 'INDUSINDBK', 'AARTIIND', 'BHARTIARTL', 'BANDHANBNK', 'SBIN', 'UBL', 'ASTRAL', 'RELIANCE', 'PETRONET', 'GNFC', 'MANAPPURAM', 'GRANULES', 'UNITDSPR', 'SAIL', 'INDIGO', 'TITAN', 'LTF', 'BAJAJFINSV', 'BHEL', 'DABUR', 'INDUSTOWER', 'ONGC', 'TATASTEEL', 'ABCAPITAL', 'ICICIBANK', 'KOTAKBANK', 'ULTRACEMCO', 'COLPAL', 'COALINDIA', 'OFSS', 'MARICO', 'TORNTPHARM', 'CROMPTON', 'SBILIFE', 'BOSCHLTD', 'RAMCOCEM', 'HINDALCO', 'BHARATFORG', 'BPCL', 'GAIL', 'BERGEPAINT', 'ALKEM', 'SUNPHARMA', 'TRENT', 'IDEA', 'HAL', 'PAGEIND', 'VOLTAS', 'LICHSGFIN', 'RECLTD', 'HDFCBANK', 'JSWSTEEL', 'FEDERALBNK', 'ASHOKLEY', 'IOC', 'COFORGE', 'ABB', 'JINDALSTEL', 'LUPIN', 'TATAPOWER', 'INDHOTEL', 'HCLTECH', 'JUBLFOOD', 'SHREECEM', 'IDFC', 'TATACOMM', 'HEROMOTOCO', 'BALRAMCHIN', 'BAJAJ-AUTO', 'LALPATHLAB', 'SBICARD', 'ITC', 'MPHASIS', 'NMDC', 'APOLLOTYRE', 'LTIM', 'MCX', 'PFC', 'PIIND', 'IGL', 'PNB', 'IEX', 'CONCOR', 'GLENMARK', 'DALBHARAT', 'POLYCAB', 'HINDPETRO', 'NAUKRI', 'HDFCAMC', 'ICICIGI', 'MGL', 'AUROPHARMA', 'PEL', 'PIDILITIND', 'TATAMOTORS', 'CHAMBLFERT', 'AUBANK', 'DEEPAKNTR', 'HINDUNILVR', 'METROPOLIS', 'BRITANNIA', 'IRCTC', 'DLF', 'PERSISTENT', 'SIEMENS', 'INFY', 'NTPC', 'HAVELLS', 'MUTHOOTFIN', 'MRF', 'BALKRISIND', 'POWERGRID', 'ICICIPRULI', 'CANBK', 'CANFINHOME', 'BSOFT', 'NAVINFLUOR', 'GRASIM', 'CHOLAFIN', 'CUMMINSIND', 'GODREJCP', 'APOLLOHOSP', 'RBLBANK', 'OBEROIRLTY', 'COROMANDEL', 'ADANIENT', 'EICHERMOT', 'IDFCFIRSTB', 'SHRIRAMFIN', 'BEL', 'JKCEMENT', 'AXISBANK', 'M&M', 'CIPLA', 'ATUL', 'BATAINDIA', 'GMRINFRA', 'TVSMOTOR', 'ABFRL', 'EXIDEIND', 'AMBUJACEM', 'IPCALAB']
 
-        symbol_list = Symbol.objects.filter(product=product, name__in=option_enables_symbols, is_active=True)
+        symbol_list = Symbol.objects.filter(product=product, fno=True, is_active=True)
 
         print(f'Pratik: {log_identifier}: Total Equity Symbol Picked: {len(symbol_list)}')
 

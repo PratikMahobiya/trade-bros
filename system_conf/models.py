@@ -28,6 +28,7 @@ class Symbol(models.Model):
   token = models.CharField(max_length=100, verbose_name='Token', null=True, blank=True, unique=True)
   expiry = models.DateField(verbose_name='Expiry', null=True, blank=True)
   lot = models.BigIntegerField(verbose_name='Lots', null=True, blank=True)
+  fno = models.BooleanField(verbose_name='FNO', default=False)
 
   is_active = models.BooleanField(default=True)
   created_at = models.DateTimeField(auto_now_add=True)

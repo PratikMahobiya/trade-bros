@@ -14,8 +14,8 @@ class ConfigurationAdmin(admin.ModelAdmin):
 
 @admin.register(Symbol)
 class SymbolAdmin(ExtraButtonsMixin, admin.ModelAdmin):
-    list_display = ('product', 'name', 'symbol', 'exchange', 'token', 'expiry', 'strike', 'lot', 'is_active')
-    list_filter = ('product', 'exchange', 'expiry', 'name')
+    list_display = ('product', 'exchange', 'name', 'fno', 'symbol', 'token', 'expiry', 'strike', 'lot', 'is_active')
+    list_filter = ('product', 'exchange', 'fno', 'name')
     search_fields = ['name', 'symbol']
 
     @button(change_form=True,

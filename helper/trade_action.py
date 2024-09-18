@@ -22,13 +22,13 @@ def Price_Action_Trade(data, new_entry):
         stock_config_obj.lot = data['lot']
         stock_config_obj.price = price
         stock_config_obj.highest_price = price
-        stock_config_obj.stoploss = round(price - price * (data['stoploss'])/100, len(str(price).split('.')[-1])) if data['mode'] == 'CE' else round(price + price * (data['stoploss'])/100, len(str(price).split('.')[-1]))
-        stock_config_obj.target = round(price + price * (data['target'])/100, len(str(price).split('.')[-1])) if data['mode'] == 'CE' else round(price - price * (data['target'])/100, len(str(price).split('.')[-1]))
-        stock_config_obj.fixed_target = round(price + price * (data['fixed_target'])/100 if data['mode'] == 'CE' else price - price * (data['fixed_target'])/100, len(str(price).split('.')[-1]))
+        stock_config_obj.stoploss = round(price - price * (data['stoploss'])/100, len(str(price).split('.')[-1]))
+        stock_config_obj.target = round(price + price * (data['target'])/100, len(str(price).split('.')[-1]))
+        stock_config_obj.fixed_target = round(price + price * (data['fixed_target'])/100, len(str(price).split('.')[-1]))
         stock_config_obj.order_id = order_id
         stock_config_obj.order_status = order_status
         stock_config_obj.is_active = True
-        stock_config_obj.trailing_sl = data['call_trsl_low'] if data['call_trsl_low'] > stock_config_obj.stoploss else stock_config_obj.stoploss if data['mode'] == 'CE' else data['put_trsl_high'] if data['put_trsl_high'] < stock_config_obj.stoploss else stock_config_obj.stoploss
+        stock_config_obj.trailing_sl = 0
 
         # Check for Resistance and Support
         # if data['mode'] == 'CE':

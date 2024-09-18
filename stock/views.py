@@ -1,7 +1,12 @@
+import threading
 from time import sleep
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from django.http import HttpResponse
 from stock.models import StockConfig
+from helper.angel_socket import connect_to_socket
 from django.views.decorators.csrf import csrf_exempt
+from SmartApi.smartWebSocketV2 import SmartWebSocketV2
 from trade.settings import BROKER_API_KEY, BROKER_USER_ID, broker_connection, sws
 
 
@@ -16,8 +21,10 @@ def AwakeAPI(request):
 
 @csrf_exempt
 def SocketStream(request):
+    now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
     try:
-        print(f'Pratik: Api Socket Stream: Started')
+        symbol = request.GET.getlist('symbol')
+        print(f'Pratik: Api Socket Stream: Started : {symbol}')
         global broker_connection, sws
         open_position = {}
     

@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from task import socket_setup
+from trade.settings import sws
 
 
 # Create your views here.
@@ -16,9 +16,12 @@ def AwakeAPI(request):
 @csrf_exempt
 def SocketStream(request):
     try:
-        symbol = request.GET.getlist('symbol')
-        print(f'Pratik: Api Socket Stream: Started : {symbol}')
-        socket_setup(log_identifier='Api')
+        correlation_id = request.GET.get('correlation_id')
+        socket_mode = request.GET.get('socket_mode')
+        subscribe_list = request.GET.getlist('subscribe_list')
+        print(f'Pratik: Api Socket Stream : Started : {subscribe_list}')
+        global sws
+        sws.subscribe(correlation_id, socket_mode, subscribe_list)
         print(f'Pratik: Api Socket Stream: Ended')
         return HttpResponse(True)
     except Exception as e:

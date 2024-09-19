@@ -16,9 +16,10 @@ def AwakeAPI(request):
 @csrf_exempt
 def SocketStream(request):
     try:
-        correlation_id = request.GET.get('correlation_id')
-        socket_mode = request.GET.get('socket_mode')
-        subscribe_list = request.GET.getlist('subscribe_list')
+        data = request.get_json()
+        correlation_id = data['correlation_id']
+        socket_mode = int(data['socket_mode'])
+        subscribe_list = data['subscribe_list']
         print(f'Pratik: Api Socket Stream : Started : {subscribe_list}')
         global sws
         sws.subscribe(correlation_id, socket_mode, subscribe_list)

@@ -28,7 +28,7 @@ def SocketStream(request):
 
         global sws, open_position
         for i in subscribe_list:
-            for j in i['token']:
+            for j in i['tokens']:
                 open_position[j] = False
         sws.subscribe(correlation_id, socket_mode, subscribe_list)
 

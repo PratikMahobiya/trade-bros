@@ -1,10 +1,20 @@
+from datetime import datetime, time
+from zoneinfo import ZoneInfo
+from trade.settings import sws
 from stock.models import StockConfig
 from system_conf.models import Configuration
-from trade.settings import sws
 from helper.check_ltp import TargetExit, TrailingStopLossExit, TrailingTargetUpdate
 
 def LTP_Action(token, ltp, open_position, correlation_id, socket_mode):
+    now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
     try:
+        if now.time() < time(9, 15, 2):
+            print("Market Not Started")
+            return True
+        elif now.time() > time(15, 29, 50):
+            print("Market Closed")
+            return True
+
         stock_obj = StockConfig.objects.filter(symbol__token=token, is_active=True)
         if stock_obj:
             stock_obj = stock_obj[0]

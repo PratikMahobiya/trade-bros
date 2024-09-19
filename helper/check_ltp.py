@@ -1,4 +1,3 @@
-from trade.settings import sws
 from stock.models import Transaction
 from helper.angel_order import Create_Order
 
@@ -14,7 +13,7 @@ def TrailingTargetUpdate(data, ltp):
     return False
 
 
-def TargetExit(data, ltp, open_position, correlation_id, socket_mode):
+def TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws):
     # TARGET Exit
     if (ltp > data['stock_obj'].fixed_target):
         # Exit Order.
@@ -51,14 +50,13 @@ def TargetExit(data, ltp, open_position, correlation_id, socket_mode):
                                 order_status=order_status,
                                 fixed_target=data['stock_obj'].fixed_target,
                                 lot=data['stock_obj'].lot)
-        global sws
         sws.unsubscribe(correlation_id, socket_mode, [{"action": 0, "exchangeType": 1, "tokens": [data['stock_obj'].symbol.token]}])
         print(f"Pratik: TARGET EXIT: Unsubscribed : {data['stock_obj'].symbol.symbol} : {data['stock_obj'].symbol.token}")
         data['stock_obj'].delete()
     return True
 
 
-def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode):
+def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode, sws):
     # StopLoss and Trailing StopLoss Exit
     price_value, exit_type = (data['stock_obj'].trailing_sl, 'TR-SL') if data['stock_obj'].tr_hit else (data['stock_obj'].stoploss, 'STOPLOSS')
     if (ltp <= price_value):
@@ -96,7 +94,6 @@ def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode):
                                 order_status=order_status,
                                 fixed_target=data['stock_obj'].fixed_target,
                                 lot=data['stock_obj'].lot)
-        global sws
         sws.unsubscribe(correlation_id, socket_mode, [{"action": 0, "exchangeType": 1, "tokens": [data['stock_obj'].symbol.token]}])
         print(f"Pratik: TRAILING/STOPLOSS EXIT: Unsubscribed : {data['stock_obj'].symbol.symbol} : {data['stock_obj'].symbol.token}")
         data['stock_obj'].delete()

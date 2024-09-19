@@ -24,7 +24,8 @@ def Create_Order(configuration_obj, transactiontype, producttype, token, symbol,
 
         if configuration_obj.place_order:
             global broker_connection
-            order_id = broker_connection.placeOrder(orderparams)
+            data = broker_connection.placeOrderFullResponse(orderparams)
+            order_id = f"{data['data']['uniqueorderid']}@{data['data']['orderid']}"
             order_status = 'Placed'
     except Exception as e:
         order_status = f"{e} : {price} : {order_status} : {orderparams}"
@@ -32,14 +33,27 @@ def Create_Order(configuration_obj, transactiontype, producttype, token, symbol,
 
 
 def Cancel_Order(order_id):
- # Place an order for exit
-  cancel_id = 0
-  error_status = 'Not Cancelled'
-  try:
+    # Place an order for exit
+    cancel_id = 0
+    error_status = 'Not Cancelled'
+    try:
+        global broker_connection
+        order_id = order_id.split('@')[-1]
+        data = broker_connection.cancelOrder(order_id=order_id,
+                                    variety="NORMAL")
+        cancel_id = f"{data['data']['uniqueorderid']}@{data['data']['orderid']}"
+        error_status = 'Cancelled'
+    except Exception as e:
+        error_status = str(e)
+    return cancel_id, error_status
+
+
+def Is_Order_Completed(order_id):
     global broker_connection
-    cancel_id = broker_connection.cancelOrder(order_id=order_id,
-                                  variety="NORMAL")['data']['orderid']
-    error_status = 'Cancelled'
-  except Exception as e:
-    error_status = e.args[0]
-  return cancel_id, error_status
+    order_id = order_id.split('@')[0]
+    data = broker_connection.individual_order_details(order_id)
+    if data['data'] is not None:
+        order_status = data['data']['orderstatus']
+        if order_status in ['complete']:
+            return True
+    return False

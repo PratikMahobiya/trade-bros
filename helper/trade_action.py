@@ -94,5 +94,5 @@ def Price_Action_Trade(data, new_entry):
                                     order_status=stock_config_obj.order_status,
                                     lot=stock_config_obj.lot)
         print(f'Pratik: {data["log_identifier"]}: Entry on {data["product"]} : {data["symbol_obj"].name} on {price}')
-        new_entry.append(data["symbol_obj"].name)
+        new_entry.append((data["symbol_obj"].exchange, data["symbol_obj"].name, data["symbol_obj"].token))
     return new_entry

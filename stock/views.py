@@ -1,3 +1,4 @@
+import json
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -16,13 +17,18 @@ def AwakeAPI(request):
 @csrf_exempt
 def SocketStream(request):
     try:
-        data = request.get_json()
+        print(f'Pratik: Api Socket Stream : Started')
+        data = json.loads(request.body)
+
         correlation_id = data['correlation_id']
         socket_mode = int(data['socket_mode'])
         subscribe_list = data['subscribe_list']
-        print(f'Pratik: Api Socket Stream : Started : {subscribe_list}')
+
+        print(f'Pratik: Api Socket Stream : Data : {correlation_id} : {socket_mode} : {subscribe_list}')
+
         global sws
         sws.subscribe(correlation_id, socket_mode, subscribe_list)
+
         print(f'Pratik: Api Socket Stream: Ended')
         return HttpResponse(True)
     except Exception as e:

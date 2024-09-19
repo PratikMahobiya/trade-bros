@@ -90,7 +90,7 @@ class TransactionAdmin(ExportActionMixin, admin.ModelAdmin):
     date_hierarchy = 'date'
     list_display = ('product', 'symbol', 'date', 'indicate', 'type', 'p_l', 'max_p', 'max_l_s', 'top_p', 'price', 'fixed_target', 'stoploss', 'target', 'lot', 'order_id', 'order_status', 'mode')
     search_fields = ['symbol', ]
-    list_filter = ('indicate', 'date', 'mode')
+    list_filter = ('indicate', 'date', 'mode', 'symbol')
     list_per_page = 20
 
     def get_ordering(self, request):

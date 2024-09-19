@@ -20,6 +20,34 @@ def stay_awake():
     return True
 
 
+def MarketDataUpdate():
+    now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
+    print(f'Pratik: Market data Update: Started : Runtime : {now.strftime("%d-%b-%Y %H:%M:%S")}')
+    if now.time().minute in [0, 10, 20, 30, 40, 50]:
+        sleep(5)
+    nse_tokens = list(Symbol.objects.filter(exchange='NSE', is_active=True).values_list('token', flat=True))
+    token_list = [nse_tokens[x:x+50] for x in range(0, len(nse_tokens), 50)]
+    global broker_connection
+    for list_ in token_list:
+        data = broker_connection.getMarketData(mode="FULL", exchangeTokens={"NSE": list_})
+        if data.get('data'):
+            fetched = data.get('data')['fetched']
+            for i in fetched:
+                Symbol.objects.filter(token=i['symbolToken'],
+                                    is_active=True).update(
+                                        volume=i['tradeVolume'],
+                                        oi=i['opnInterest'],
+                                        percentchange=i['percentChange'],
+                                        valuechange=i['netChange'],
+                                        ltp=i['ltp'],
+                                        weekhigh52=i['52WeekHigh'],
+                                        weeklow52=i['52WeekLow']
+                                    )
+        sleep(1)
+    print(f'Pratik: Market data Update: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    return True
+
+
 def SymbolSetup():
     now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
     print(f'Pratik: Symbol Setup: Started')
@@ -31,24 +59,26 @@ def SymbolSetup():
     for i in data:
         product = None
         expity_date = datetime.strptime(i['expiry'], '%d%b%Y') if i['expiry'] else None
-        if i['instrumenttype'] in ['OPTSTK'] and (expity_date.month == now.month): # , 'OPTIDX', 'OPTFUT'
-            product = 'future'
-        elif i['symbol'].endswith('-EQ'):
-            product = 'equity'
-        if product is not None:
-            obj, _ = Symbol.objects.get_or_create(
-                product=product,
-                name=i['name'],
-                symbol=i['symbol']
-                )
-            obj.token=i['token']
-            obj.strike=int(i['strike'].split('.')[0])/100
-            obj.exchange=i['exch_seg']
-            obj.expiry=expity_date
-            obj.lot=int(i['lotsize'])
-            if product == 'future':
-                obj.fno=True
-            obj.save()
+        if i['exch_seg'] in ['NSE', 'NFO']:
+            if i['instrumenttype'] in ['OPTSTK'] and (expity_date.month == now.month): # , 'OPTIDX', 'OPTFUT'
+                product = 'future'
+            elif i['symbol'].endswith('-EQ'):
+                product = 'equity'
+            if product is not None:
+                obj, _ = Symbol.objects.get_or_create(
+                    product=product,
+                    name=i['name'],
+                    symbol=i['symbol']
+                    )
+                obj.token=i['token']
+                obj.strike=int(i['strike'].split('.')[0])/100
+                obj.exchange=i['exch_seg']
+                obj.expiry=expity_date
+                obj.lot=int(i['lotsize'])
+                if product == 'future':
+                    obj.fno=True
+                obj.save()
+
     future_enables_symbols = set(Symbol.objects.filter(product='future', is_active=True).values_list('name', flat=True))
     Symbol.objects.filter(product='equity', name__in=future_enables_symbols, is_active=True).update(fno=True)
     print(f'Pratik: Symbol Setup: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
@@ -89,9 +119,7 @@ def Equity_BreakOut_1(auto_trigger=True):
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
 
-        option_enables_symbols = ['NESTLEIND', 'LTTS', 'WIPRO', 'M&MFIN', 'PVRINOX', 'SRF', 'SUNTV', 'TECHM', 'ADANIPORTS', 'TCS', 'BIOCON', 'UPL', 'TATACHEM', 'MFSL', 'GODREJPROP', 'DIVISLAB', 'MOTHERSON', 'VEDL', 'ZYDUSLIFE', 'INDIAMART', 'SYNGENE', 'CUB', 'LT', 'ACC', 'HDFCLIFE', 'DRREDDY', 'NATIONALUM', 'LAURUSLABS', 'MARUTI', 'BANKBARODA', 'HINDCOPPER', 'TATACONSUM', 'ABBOTINDIA', 'DIXON', 'BAJFINANCE', 'ASIANPAINT', 'ESCORTS', 'GUJGASLTD', 'INDUSINDBK', 'AARTIIND', 'BHARTIARTL', 'BANDHANBNK', 'SBIN', 'UBL', 'ASTRAL', 'RELIANCE', 'PETRONET', 'GNFC', 'MANAPPURAM', 'GRANULES', 'UNITDSPR', 'SAIL', 'INDIGO', 'TITAN', 'LTF', 'BAJAJFINSV', 'BHEL', 'DABUR', 'INDUSTOWER', 'ONGC', 'TATASTEEL', 'ABCAPITAL', 'ICICIBANK', 'KOTAKBANK', 'ULTRACEMCO', 'COLPAL', 'COALINDIA', 'OFSS', 'MARICO', 'TORNTPHARM', 'CROMPTON', 'SBILIFE', 'BOSCHLTD', 'RAMCOCEM', 'HINDALCO', 'BHARATFORG', 'BPCL', 'GAIL', 'BERGEPAINT', 'ALKEM', 'SUNPHARMA', 'TRENT', 'IDEA', 'HAL', 'PAGEIND', 'VOLTAS', 'LICHSGFIN', 'RECLTD', 'HDFCBANK', 'JSWSTEEL', 'FEDERALBNK', 'ASHOKLEY', 'IOC', 'COFORGE', 'ABB', 'JINDALSTEL', 'LUPIN', 'TATAPOWER', 'INDHOTEL', 'HCLTECH', 'JUBLFOOD', 'SHREECEM', 'IDFC', 'TATACOMM', 'HEROMOTOCO', 'BALRAMCHIN', 'BAJAJ-AUTO', 'LALPATHLAB', 'SBICARD', 'ITC', 'MPHASIS', 'NMDC', 'APOLLOTYRE', 'LTIM', 'MCX', 'PFC', 'PIIND', 'IGL', 'PNB', 'IEX', 'CONCOR', 'GLENMARK', 'DALBHARAT', 'POLYCAB', 'HINDPETRO', 'NAUKRI', 'HDFCAMC', 'ICICIGI', 'MGL', 'AUROPHARMA', 'PEL', 'PIDILITIND', 'TATAMOTORS', 'CHAMBLFERT', 'AUBANK', 'DEEPAKNTR', 'HINDUNILVR', 'METROPOLIS', 'BRITANNIA', 'IRCTC', 'DLF', 'PERSISTENT', 'SIEMENS', 'INFY', 'NTPC', 'HAVELLS', 'MUTHOOTFIN', 'MRF', 'BALKRISIND', 'POWERGRID', 'ICICIPRULI', 'CANBK', 'CANFINHOME', 'BSOFT', 'NAVINFLUOR', 'GRASIM', 'CHOLAFIN', 'CUMMINSIND', 'GODREJCP', 'APOLLOHOSP', 'RBLBANK', 'OBEROIRLTY', 'COROMANDEL', 'ADANIENT', 'EICHERMOT', 'IDFCFIRSTB', 'SHRIRAMFIN', 'BEL', 'JKCEMENT', 'AXISBANK', 'M&M', 'CIPLA', 'ATUL', 'BATAINDIA', 'GMRINFRA', 'TVSMOTOR', 'ABFRL', 'EXIDEIND', 'AMBUJACEM', 'IPCALAB']
-
-        symbol_list = Symbol.objects.filter(product=product, fno=True, is_active=True)
+        symbol_list = Symbol.objects.filter(product=product, fno=True, is_active=True).order_by('-volume')
 
         print(f'Pratik: {log_identifier}: Total Equity Symbol Picked: {len(symbol_list)}')
 
@@ -220,7 +248,7 @@ def FnO_BreakOut_1(auto_trigger=True):
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
 
-        symbol_list = Symbol.objects.filter(product='equity', fno=True, is_active=True)
+        symbol_list = Symbol.objects.filter(product='equity', fno=True, is_active=True).order_by('-volume')
 
         print(f'Pratik: {log_identifier}: Total FnO Symbol Picked: {len(symbol_list)}')
 

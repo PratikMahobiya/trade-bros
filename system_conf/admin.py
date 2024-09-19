@@ -1,9 +1,10 @@
 from django.contrib import admin
+from helper.common import colour
 from system_conf.models import Configuration, Symbol
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 
-from task import BrokerConnection, Equity_BreakOut_1, FnO_BreakOut_1, SymbolSetup
+from task import BrokerConnection, Equity_BreakOut_1, FnO_BreakOut_1, SymbolSetup, MarketDataUpdate
 
 # Register your models here.
 @admin.register(Configuration)
@@ -14,9 +15,16 @@ class ConfigurationAdmin(admin.ModelAdmin):
 
 @admin.register(Symbol)
 class SymbolAdmin(ExtraButtonsMixin, admin.ModelAdmin):
-    list_display = ('product', 'exchange', 'name', 'fno', 'symbol', 'token', 'expiry', 'strike', 'lot', 'is_active')
+    list_display = ('fno', 'name', 'percentchange_', 'volume', 'valuechange', 'ltp', 'weekhigh52', 'weeklow52', 'strike', 'exchange', 'symbol', 'product', 'expiry', 'token', 'oi', 'lot', 'is_active')
     list_filter = ('product', 'exchange', 'fno', 'name')
-    search_fields = ['name', 'symbol']
+    search_fields = ['name', 'symbol', 'token']
+
+    def get_ordering(self, request):
+        return ['-percentchange']
+    
+    def percentchange_(self, obj):
+        return colour(obj.percentchange)
+    percentchange_.short_description = 'Change(%)'
 
     @button(change_form=True,
             html_attrs={'style': 'background-color:#F1502F;color:black'})
@@ -24,6 +32,14 @@ class SymbolAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         self.message_user(request, 'Symbol Setup called')
         SymbolSetup()
         self.message_user(request, 'Symbol Setup Done')
+        return HttpResponseRedirectToReferrer(request)
+
+    @button(change_form=True,
+            html_attrs={'style': 'background-color:#F1502F;color:black'})
+    def Market_Data_Update(self, request):
+        self.message_user(request, 'Market data Update called')
+        MarketDataUpdate()
+        self.message_user(request, 'Market data Update Done')
         return HttpResponseRedirectToReferrer(request)
     
     @button(change_form=True,

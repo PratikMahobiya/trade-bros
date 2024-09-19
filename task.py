@@ -162,7 +162,7 @@ def Equity_BreakOut_1(auto_trigger=True):
 
         # Start Socket Streaming
         if new_entry:
-            print(f'Pratik: {data["log_identifier"]}: Total New Entry {len(new_entry)} : New Entries: {new_entry}')
+            print(f'Pratik: {log_identifier}: Total New Entry {len(new_entry)} : New Entries: {new_entry}')
             correlation_id = "pratik-socket"
             socket_mode = 1
             nse = []
@@ -197,7 +197,7 @@ def Equity_BreakOut_1(auto_trigger=True):
                 "socket_mode": socket_mode
             }
             response = requests.post(url, json=data, verify=False)
-            print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')
+            print(f'Pratik: {log_identifier}: New Entries: Streaming Response: {response.status_code}')
 
     except Exception as e:
         print(f'Pratik: {log_identifier}: ERROR: Main: {e}')
@@ -309,7 +309,7 @@ def FnO_BreakOut_1(auto_trigger=True):
 
         # Start Socket Streaming
         if new_entry:
-            print(f'Pratik: {data["log_identifier"]}: Total New Entry {len(new_entry)} : New Entries: {new_entry}')
+            print(f'Pratik: {log_identifier}: Total New Entry {len(new_entry)} : New Entries: {new_entry}')
             correlation_id = "pratik-socket"
             socket_mode = 1
             nse = []
@@ -344,7 +344,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                 "socket_mode": socket_mode
             }
             response = requests.post(url, json=data, verify=False)
-            print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')
+            print(f'Pratik: {log_identifier}: New Entries: Streaming Response: {response.status_code}')
 
     except Exception as e:
         print(f'Pratik: {log_identifier}: ERROR: Main: {e}')

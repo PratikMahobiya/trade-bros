@@ -46,7 +46,7 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode, sws):
 
                         # Unsubscribe Token
                         sws.unsubscribe(correlation_id, socket_mode, [{"action": 0, "exchangeType": 1, "tokens": [stock_obj.symbol.token]}])
-                        print(f"Pratik: TARGET EXIT: Unsubscribed : {stock_obj.symbol.symbol} : {stock_obj.symbol.token}")
+                        print(f"Pratik: Cancelled: Unsubscribed : {stock_obj.symbol.symbol} : {stock_obj.symbol.token}")
                         stock_obj.delete()
                         return True
                     TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws)
@@ -57,12 +57,16 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode, sws):
 
                         # Unsubscribe Token
                         sws.unsubscribe(correlation_id, socket_mode, [{"action": 0, "exchangeType": 1, "tokens": [stock_obj.symbol.token]}])
-                        print(f"Pratik: TARGET EXIT: Unsubscribed : {stock_obj.symbol.symbol} : {stock_obj.symbol.token}")
+                        print(f"Pratik: Cancelled: Unsubscribed : {stock_obj.symbol.symbol} : {stock_obj.symbol.token}")
                         stock_obj.delete()
                         return True
                     TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode, sws)
             except Exception as e:
                 print(f'Pratik: LTP ACTION: Loop Error: {stock_obj.symbol} : {stock_obj.mode} : {e}')
+        else:
+            # Unsubscribe Token
+            sws.unsubscribe(correlation_id, socket_mode, [{"action": 0, "exchangeType": 1, "tokens": [token]}])
+            print(f"Pratik: Token Removed: Unsubscribed : {token}")
 
     except Exception as e:
         print(f'Pratik: LTP ACTION: ERROR: {e}')

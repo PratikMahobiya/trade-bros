@@ -165,7 +165,9 @@ connection.generateSession(BROKER_USER_ID, BROKER_PIN, totp=pyotp.TOTP(BROKER_TO
 
 broker_connection = connection
 
-global sws
+global sws, open_position
+
+open_position = {}
 
 from SmartApi.smartWebSocketV2 import SmartWebSocketV2
 BROKER_AUTH_TOKEN = broker_connection.access_token

@@ -14,6 +14,6 @@ def start():
     sched.add_job(BrokerConnection, 'cron', day_of_week='mon-fri',
                 hour='8', minute='55', timezone='Asia/Kolkata')
     sched.add_job(socket_setup, 'cron', day_of_week='mon-fri',
-                hour='*/1', timezone='Asia/Kolkata')
+                minute='*/15', timezone='Asia/Kolkata')
     sched.start()
     return True

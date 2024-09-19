@@ -26,7 +26,10 @@ def SocketStream(request):
 
         print(f'Pratik: Api Socket Stream : Data : {correlation_id} : {socket_mode} : {subscribe_list}')
 
-        global sws
+        global sws, open_position
+        for i in subscribe_list:
+            for j in i['token']:
+                open_position[j] = False
         sws.subscribe(correlation_id, socket_mode, subscribe_list)
 
         print(f'Pratik: Api Socket Stream: Ended')

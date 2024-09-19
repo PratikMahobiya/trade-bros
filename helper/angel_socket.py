@@ -1,7 +1,7 @@
 from zoneinfo import ZoneInfo
-from trade.settings import sws
 from datetime import datetime, time
 from system_conf.models import Configuration
+from trade.settings import sws, open_position
 from stock.models import StockConfig, Transaction
 from helper.angel_order import Is_Order_Completed, Cancel_Order
 from helper.check_ltp import TargetExit, TrailingStopLossExit, TrailingTargetUpdate
@@ -73,9 +73,9 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode, sws):
     return True
 
 
-def connect_to_socket(correlation_id, socket_mode, subscribe_list, open_position):
+def connect_to_socket(correlation_id, socket_mode, subscribe_list):
     try: 
-        global sws
+        global sws, open_position
 
         def on_data(wsapp, message):
             ltp = message['last_traded_price']/100

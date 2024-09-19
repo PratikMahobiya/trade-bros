@@ -20,8 +20,8 @@ def start():
                 hour='8', minute='45', timezone='Asia/Kolkata')
     sched.add_job(BrokerConnection, 'cron', day_of_week='mon-fri',
                 hour='9', minute='5', timezone='Asia/Kolkata')
-    # sched.add_job(Equity_BreakOut_1, 'cron', day_of_week='mon-fri',
-    #             hour='9-15', minute='*/5', timezone='Asia/Kolkata')
+    sched.add_job(Equity_BreakOut_1, 'cron', day_of_week='mon-fri',
+                hour='9-15', minute='*/5', timezone='Asia/Kolkata')
     sched.add_job(FnO_BreakOut_1, 'cron', day_of_week='mon-fri',
                 hour='9-15', minute='*/5', timezone='Asia/Kolkata')
     sched.start()

@@ -163,11 +163,40 @@ def Equity_BreakOut_1(auto_trigger=True):
         # Start Socket Streaming
         if new_entry:
             print(f'Pratik: {data["log_identifier"]}: Total New Entry {len(new_entry)} : New Entries: {new_entry}')
+            correlation_id = "pratik-socket"
+            socket_mode = 1
+            nse = []
+            nfo = []
+            bse = []
+            bfo = []
+            mcx = []
+
+            for exchange, name, token in new_entry:
+                if exchange == 'NSE':
+                    nse.append(token)
+                elif exchange == 'NFO':
+                    nfo.append(token)
+                elif exchange == 'BSE':
+                    bse.append(token)
+                elif exchange == 'BFO':
+                    bfo.append(token)
+                else:
+                    mcx.append(token)
+
+            subscribe_list = []
+            for index, i in enumerate((nse,nfo,bse,bfo,mcx)):
+                if i:
+                    subscribe_list.append({
+                        "exchangeType": index+1,
+                        "tokens": i
+                    })
             url = f"{SOCKET_STREAM_URL_DOMAIN}/api/trade/socket-stream/"
-            query_params = {
-                "symbol": new_entry
+            data = {
+                "subscribe_list": subscribe_list,
+                "correlation_id": correlation_id,
+                "socket_mode": socket_mode
             }
-            response = requests.get(url, params=query_params, verify=False)
+            response = requests.post(url, json=data, verify=False)
             print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')
 
     except Exception as e:
@@ -309,12 +338,12 @@ def FnO_BreakOut_1(auto_trigger=True):
                         "tokens": i
                     })
             url = f"{SOCKET_STREAM_URL_DOMAIN}/api/trade/socket-stream/"
-            query_params = {
+            data = {
                 "subscribe_list": subscribe_list,
                 "correlation_id": correlation_id,
                 "socket_mode": socket_mode
             }
-            response = requests.get(url, params=query_params, verify=False)
+            response = requests.post(url, json=data, verify=False)
             print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')
 
     except Exception as e:

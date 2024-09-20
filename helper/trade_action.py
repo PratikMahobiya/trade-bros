@@ -126,11 +126,11 @@ def Price_Action_Trade(data, new_entry):
                     "tokens": i
                 })
         url = f"{SOCKET_STREAM_URL_DOMAIN}/api/trade/socket-stream/"
-        data = {
+        data_json = {
             "subscribe_list": subscribe_list,
             "correlation_id": correlation_id,
             "socket_mode": socket_mode
         }
-        response = requests.post(url, json=data, verify=False)
+        response = requests.post(url, json=data_json, verify=False)
         print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')
     return new_entry

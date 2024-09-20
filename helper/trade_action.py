@@ -1,6 +1,8 @@
 
+import requests
 from helper.angel_order import Create_Order
 from stock.models import StockConfig, Transaction
+from trade.settings import SOCKET_STREAM_URL_DOMAIN
 
 def Price_Action_Trade(data, new_entry):
     stock_config_obj, created = StockConfig.objects.get_or_create(mode=data['mode'], symbol=data['symbol_obj'], is_active=False)
@@ -95,4 +97,40 @@ def Price_Action_Trade(data, new_entry):
                                     lot=stock_config_obj.lot)
         print(f'Pratik: {data["log_identifier"]}: Entry on {data["product"]} : {data["symbol_obj"].name} on {price}')
         new_entry.append((data["symbol_obj"].exchange, data["symbol_obj"].name, data["symbol_obj"].token))
+
+        # Start Socket Streaming
+        correlation_id = "pratik-socket"
+        socket_mode = 1
+        nse = []
+        nfo = []
+        bse = []
+        bfo = []
+        mcx = []
+
+        if data["symbol_obj"].exchange == 'NSE':
+            nse.append(data["symbol_obj"].token)
+        elif data["symbol_obj"].exchange == 'NFO':
+            nfo.append(data["symbol_obj"].token)
+        elif data["symbol_obj"].exchange == 'BSE':
+            bse.append(data["symbol_obj"].token)
+        elif data["symbol_obj"].exchange == 'BFO':
+            bfo.append(data["symbol_obj"].token)
+        else:
+            mcx.append(data["symbol_obj"].token)
+
+        subscribe_list = []
+        for index, i in enumerate((nse,nfo,bse,bfo,mcx)):
+            if i:
+                subscribe_list.append({
+                    "exchangeType": index+1,
+                    "tokens": i
+                })
+        url = f"{SOCKET_STREAM_URL_DOMAIN}/api/trade/socket-stream/"
+        data = {
+            "subscribe_list": subscribe_list,
+            "correlation_id": correlation_id,
+            "socket_mode": socket_mode
+        }
+        response = requests.post(url, json=data, verify=False)
+        print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')
     return new_entry

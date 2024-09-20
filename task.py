@@ -4,10 +4,10 @@ import pandas as pd
 from time import sleep
 from zoneinfo import ZoneInfo
 from SmartApi import SmartConnect
-from stock.models import StockConfig
 from datetime import datetime, time, timedelta
 from helper.common import calculate_volatility
 from helper.angel_function import historical_data
+from stock.models import StockConfig, Transaction
 from helper.trade_action import Price_Action_Trade
 from system_conf.models import Configuration, Symbol
 from trade.settings import BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TOTP_KEY, BROKER_USER_ID, broker_connection
@@ -166,10 +166,10 @@ def Equity_BreakOut_1(auto_trigger=True):
                         R3 = pivot + 2*(pivot_candle['High'] - pivot_candle['Low'])
                         S3 = pivot - 2*(pivot_candle['High'] - pivot_candle['Low'])
     
-                        if (max_high < close):
+                        if (max_high < close):# and not ((high >= R3 >= open) or (high >= R2 >= open) or (high >= R1 >= open) or (high >= pivot >= open) or (high >= S1 >= open) or (high >= S2 >= open) or (high >= S2 >= open)):
                             mode = 'CE'
     
-                        # elif (min_low > low):
+                        # elif (min_low > close):# and not ((low <= R3 <= open) or (low <= R2 <= open) or (low <= R1 <= open) or (low <= pivot <= open) or (low <= S1 <= open) or (low <= S2 <= open) or (low <= S2 <= open)):
                         #     mode = 'PE'
     
                         else:
@@ -236,8 +236,12 @@ def FnO_BreakOut_1(auto_trigger=True):
                 raise Exception("Entry Not Stopped")
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
+        
+        exclude_symbols = Transaction.objects.filter(product=product, indicate='EXIT', date__date=now.date(), is_active=True).values_list('symbol', flat=True)
 
-        symbol_list = Symbol.objects.filter(product='equity', fno=True, is_active=True).order_by('-volume')
+        exclude_symbols_names = set(Symbol.objects.filter(symbol__in=exclude_symbols, is_active=True).values_list('name', flat=True))
+
+        symbol_list = Symbol.objects.filter(product='equity', fno=True, is_active=True).exclude(name__in=exclude_symbols_names).order_by('-volume')
 
         print(f'Pratik: {log_identifier}: Total FnO Symbol Picked: {len(symbol_list)}')
 
@@ -279,7 +283,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                         R3 = pivot + 2*(pivot_candle['High'] - pivot_candle['Low'])
                         S3 = pivot - 2*(pivot_candle['High'] - pivot_candle['Low'])
     
-                        if (max_high < close) and not ((high >= R3 >= open) or (high >= R2 >= open) or (high >= R1 >= open) or (high >= pivot >= open) or (high >= S1 >= open) or (high >= S2 >= open) or (high >= S2 >= open)) :
+                        if (max_high < close) and not ((high >= R3 >= open) or (high >= R2 >= open) or (high >= R1 >= open) or (high >= pivot >= open) or (high >= S1 >= open) or (high >= S2 >= open) or (high >= S2 >= open)):
                             mode = 'CE'
                             stock_future_symbol = Symbol.objects.filter(
                                                         product='future',

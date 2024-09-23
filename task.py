@@ -134,7 +134,7 @@ def Equity_BreakOut_1(auto_trigger=True):
         new_entry = []
         for index, symbol_obj in enumerate(symbol_list):
             try:
-                nop = len(StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True))
+                nop = len(StockConfig.objects.filter(symbol__product=product, is_active=True))
 
                 mode = None
 

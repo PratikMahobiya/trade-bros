@@ -240,7 +240,7 @@ def FnO_BreakOut_1(auto_trigger=True):
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
         
-        exclude_symbols = Transaction.objects.filter(product=product, indicate='EXIT', created_at__date=now.date(), is_active=True).values_list('symbol', flat=True)
+        exclude_symbols = Transaction.objects.filter(product=product, indicate='ENTRY', created_at__date=now.date(), is_active=True).values_list('symbol', flat=True)
 
         exclude_symbols_names = Symbol.objects.filter(symbol__in=exclude_symbols, is_active=True).values_list('name', flat=True)
 

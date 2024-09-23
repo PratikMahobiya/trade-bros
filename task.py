@@ -55,7 +55,8 @@ def socket_setup(log_identifier='Cron'):
     bfo = []
     mcx = []
 
-    for i in StockConfig.objects.filter(is_active=True):
+    entries = StockConfig.objects.filter(is_active=True)
+    for i in entries:
         open_position[i.symbol.token] = False
         if i.symbol.exchange == 'NSE':
             nse.append(i.symbol.token)
@@ -75,6 +76,14 @@ def socket_setup(log_identifier='Cron'):
                 "exchangeType": index+1,
                 "tokens": i
             })
+
+    if not entries:
+        # {"token":"99926009","symbol":"Nifty Bank","name":"BANKNIFTY","expiry":"","strike":"0.000000","lotsize":"1","instrumenttype":"AMXIDX","exch_seg":"NSE","tick_size":"0.000000"}
+        subscribe_list.append({
+                "exchangeType": 1,
+                "tokens": '99926009'
+            })
+
     print(f'Pratik: Socket Setup : {log_identifier} : Subscribe List : {subscribe_list}')
     try:
         # if subscribe_list:

@@ -226,7 +226,7 @@ def Equity_BreakOut_1(auto_trigger=True):
 
 
 def FnO_BreakOut_1(auto_trigger=True):
-    now = datetime.now()
+    now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
     product = 'future'
     log_identifier = 'FnO_BreakOut_1'
     print(f'Pratik: {log_identifier}: Runtime : {product} : {now.strftime("%d-%b-%Y %H:%M:%S")}')

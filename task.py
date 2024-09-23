@@ -242,7 +242,7 @@ def FnO_BreakOut_1(auto_trigger=True):
         
         exclude_symbols = Transaction.objects.filter(product=product, indicate='EXIT', date__date=now.date(), is_active=True).values_list('symbol', flat=True)
 
-        exclude_symbols_names = set(Symbol.objects.filter(symbol__in=exclude_symbols, is_active=True).values_list('name', flat=True))
+        exclude_symbols_names = Symbol.objects.filter(symbol__in=exclude_symbols, is_active=True).values_list('name', flat=True)
 
         symbol_list = Symbol.objects.filter(product='equity', fno=True, is_active=True).exclude(name__in=exclude_symbols_names).order_by('-volume')
 

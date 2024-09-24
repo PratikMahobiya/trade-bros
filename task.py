@@ -270,23 +270,23 @@ def FnO_BreakOut_1(auto_trigger=True):
                         min_low = min(data_frame['Low'].iloc[-30:-1]) if len(data_frame) >= 32 else min(data_frame['Low'].iloc[:-1])
                         daily_volatility = calculate_volatility(data_frame)
 
-                        # # Calculate Pivots
-                        # pivot_data_frame = data_frame
-                        # pivot_data_frame.index = pd.to_datetime(pivot_data_frame['date'], format='%Y-%m-%d')
-                        # logic = {'date': 'first', 'Open': 'first', 'High': 'max', 'Low':'min', 'Close': 'last', 'Volume': 'sum',}
-                        # pivot_data_frame = pivot_data_frame.resample('MS').agg(logic)
-                        # pivot_data_frame.reset_index(drop=True, inplace=True)
+                        # Calculate Pivots
+                        pivot_data_frame = data_frame
+                        pivot_data_frame.index = pd.to_datetime(pivot_data_frame['date'], format='%Y-%m-%d')
+                        logic = {'date': 'first', 'Open': 'first', 'High': 'max', 'Low':'min', 'Close': 'last', 'Volume': 'sum',}
+                        pivot_data_frame = pivot_data_frame.resample('MS').agg(logic)
+                        pivot_data_frame.reset_index(drop=True, inplace=True)
 
-                        # pivot_candle = pivot_data_frame.iloc[-2]
-                        # pivot = (pivot_candle['High'] + pivot_candle['Low'] + pivot_candle['Close'])/3
-                        # R1 = 2*pivot - pivot_candle['Low']
-                        # S1 = 2*pivot - pivot_candle['High']
-                        # R2 = pivot + (pivot_candle['High'] - pivot_candle['Low'])
-                        # S2 = pivot - (pivot_candle['High'] - pivot_candle['Low'])
-                        # R3 = pivot + 2*(pivot_candle['High'] - pivot_candle['Low'])
-                        # S3 = pivot - 2*(pivot_candle['High'] - pivot_candle['Low'])
+                        pivot_candle = pivot_data_frame.iloc[-2]
+                        pivot = (pivot_candle['High'] + pivot_candle['Low'] + pivot_candle['Close'])/3
+                        R1 = 2*pivot - pivot_candle['Low']
+                        S1 = 2*pivot - pivot_candle['High']
+                        R2 = pivot + (pivot_candle['High'] - pivot_candle['Low'])
+                        S2 = pivot - (pivot_candle['High'] - pivot_candle['Low'])
+                        R3 = pivot + 2*(pivot_candle['High'] - pivot_candle['Low'])
+                        S3 = pivot - 2*(pivot_candle['High'] - pivot_candle['Low'])
     
-                        if (max_high < close):# and not ((high >= R3 >= open) or (high >= R2 >= open) or (high >= R1 >= open) or (high >= pivot >= open) or (high >= S1 >= open) or (high >= S2 >= open) or (high >= S2 >= open)):
+                        if (max_high < close) and not ((high >= R3 >= open) or (high >= R2 >= open) or (high >= R1 >= open) or (high >= pivot >= open) or (high >= S1 >= open) or (high >= S2 >= open) or (high >= S2 >= open)):
                             mode = 'CE'
                             stock_future_symbol = Symbol.objects.filter(
                                                         product='future',
@@ -296,7 +296,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                                         fno=True,
                                                         is_active=True).order_by('strike')
     
-                        elif (min_low > close):# and not ((low <= R3 <= open) or (low <= R2 <= open) or (low <= R1 <= open) or (low <= pivot <= open) or (low <= S1 <= open) or (low <= S2 <= open) or (low <= S2 <= open)):
+                        elif (min_low > close) and not ((low <= R3 <= open) or (low <= R2 <= open) or (low <= R1 <= open) or (low <= pivot <= open) or (low <= S1 <= open) or (low <= S2 <= open) or (low <= S2 <= open)):
                             mode = 'PE'
                             stock_future_symbol = Symbol.objects.filter(
                                                         product='future',

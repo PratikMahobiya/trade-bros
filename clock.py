@@ -14,13 +14,13 @@ def start():
         print('Superuser has been created.')
 
     # Schedules job_function to be run on the Monday to Friday
-    sched.add_job(stay_awake, 'cron',
+    sched.add_job(stay_awake, 'cron', day_of_week='mon-fri',
                 second='*/40', timezone='Asia/Kolkata')
-    sched.add_job(BrokerConnection, 'cron',
+    sched.add_job(BrokerConnection, 'cron', day_of_week='mon-fri',
                 hour='9', minute='5', timezone='Asia/Kolkata')
-    sched.add_job(SymbolSetup, 'cron',
+    sched.add_job(SymbolSetup, 'cron', day_of_week='mon-fri',
                 hour='8', minute='45', timezone='Asia/Kolkata')
-    sched.add_job(MarketDataUpdate, 'cron',
+    sched.add_job(MarketDataUpdate, 'cron', day_of_week='mon-fri',
                 hour='9-15', minute='*/10', timezone='Asia/Kolkata')
     sched.add_job(Equity_BreakOut_1, 'cron', day_of_week='mon-fri',
                 hour='9-15', minute='*/5', timezone='Asia/Kolkata')

@@ -1,5 +1,5 @@
 import tzlocal
-from task import BrokerConnection, socket_setup, stay_awake
+from task import BrokerConnection, socket_setup, stay_awake, stop_socket_setup
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
@@ -15,5 +15,7 @@ def start():
                 hour='8', minute='55', timezone='Asia/Kolkata')
     sched.add_job(socket_setup, 'cron', day_of_week='mon-fri',
                 hour='9', minute='5', timezone='Asia/Kolkata')
+    sched.add_job(stop_socket_setup, 'cron', day_of_week='mon-fri',
+                hour='2', minute='5', timezone='Asia/Kolkata')
     sched.start()
     return True

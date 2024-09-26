@@ -38,11 +38,28 @@ def BrokerConnection():
     return True
 
 
+def stop_socket_setup(log_identifier='Cron'):
+    now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
+    print(f'Pratik: Stop Socket Setup : {log_identifier} : Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
+
+    global sws
+    try:
+        sleep(2)
+        sws.close_connection()
+        print(f'Pratik: Stop Socket Setup : {log_identifier} : Connection Closed')
+        sleep(2)
+    except Exception as e:
+        print(f'Pratik: Stop Socket Setup : {log_identifier} : Trying to close the connection : {e}')
+    print(f'Pratik: Stop Socket Setup : {log_identifier} : Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    return True
+
+
 def socket_setup(log_identifier='Cron'):
     now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
     print(f'Pratik: Socket Setup : {log_identifier} : Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
 
     global broker_connection, sws, open_position
+    sleep(2)
 
     BROKER_AUTH_TOKEN = broker_connection.access_token
     BROKER_FEED_TOKEN = broker_connection.feed_token
@@ -76,23 +93,13 @@ def socket_setup(log_identifier='Cron'):
                 "exchangeType": index+1,
                 "tokens": i
             })
-
+    print(f'Pratik: Socket Setup : {log_identifier} : Subscribe List : {subscribe_list}')
     if not entries:
         # {"token":"99926009","symbol":"Nifty Bank","name":"BANKNIFTY","expiry":"","strike":"0.000000","lotsize":"1","instrumenttype":"AMXIDX","exch_seg":"NSE","tick_size":"0.000000"}
         subscribe_list.append({
                 "exchangeType": 1,
                 "tokens": '99926009'
             })
-
-    print(f'Pratik: Socket Setup : {log_identifier} : Subscribe List : {subscribe_list}')
-    try:
-        # if subscribe_list:
-        #     sws.unsubscribe(correlation_id, mode, subscribe_list)
-        sws.close_connection()
-        print(f'Pratik: Socket Setup : {log_identifier} : Connection Closed')
-        sleep(2)
-    except Exception as e:
-        print(f'Pratik: Socket Setup : {log_identifier} : Trying to close the connection : {e}')
     
     # Streaming threads for Open Positions
     if subscribe_list:

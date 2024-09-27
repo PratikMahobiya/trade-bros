@@ -91,9 +91,13 @@ def connect_to_socket(correlation_id, socket_mode, subscribe_list):
             print(f'Pratik: CONNECT TO SOCKET: Opened : {subscribe_list}')
             sws.subscribe(correlation_id, socket_mode, subscribe_list)
 
+        def on_error(wsapp, error):
+            print(f'Pratik: CONNECT TO SOCKET: Error : {error}')
+
         # Assign the callbacks.
         sws.on_open = on_open
         sws.on_data = on_data
+        sws.on_error = on_error
 
         sws.connect()
     except Exception as e:

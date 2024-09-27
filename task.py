@@ -68,7 +68,7 @@ def SymbolSetup():
         product = None
         expity_date = datetime.strptime(i['expiry'], '%d%b%Y') if i['expiry'] else None
         if i['exch_seg'] in ['NSE', 'NFO'] and i['name'] not in exclude_symbol:
-            if i['instrumenttype'] in ['OPTSTK'] and (expity_date.month == now.month): # , 'OPTIDX', 'OPTFUT'
+            if i['instrumenttype'] in ['OPTSTK'] and (expity_date.month == now.month+1): # , 'OPTIDX', 'OPTFUT'
                 product = 'future'
             elif i['symbol'].endswith('-EQ'):
                 product = 'equity'

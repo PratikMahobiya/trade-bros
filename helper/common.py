@@ -1,3 +1,5 @@
+import calendar
+from datetime import datetime, timedelta
 from django.utils.html import format_html
 
 def colour(value):
@@ -25,3 +27,17 @@ def up_model(obj, price):
     #   if profit > 0:
     #     return format_html('<strong style="color:Red;">{}</strong>', -profit)
     #   return format_html('<strong style="color:Green;">{}</strong>', -profit)
+
+
+def last_thursday(now):
+    # Get the last day of the month
+    last_day = calendar.monthrange(now.date().year, now.date().month)[1]
+    
+    # Create a date object for the last day of the month
+    last_date = datetime(now.date().year, now.date().month, last_day)
+    
+    # Find the last Thursday
+    while last_date.weekday() != calendar.THURSDAY:
+        last_date -= timedelta(days=1)
+        
+    return last_date

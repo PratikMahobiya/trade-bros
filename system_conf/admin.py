@@ -4,7 +4,7 @@ from system_conf.models import Configuration, Symbol
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 
-from task import BrokerConnection, Equity_BreakOut_1, FnO_BreakOut_1, SymbolSetup, MarketDataUpdate
+from task import BrokerConnection, Equity_BreakOut_1, FnO_BreakOut_1, SquareOff, SymbolSetup, MarketDataUpdate
 
 # Register your models here.
 @admin.register(Configuration)
@@ -64,4 +64,12 @@ class SymbolAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         self.message_user(request, 'Connect called')
         BrokerConnection()
         self.message_user(request, 'Connect Done')
+        return HttpResponseRedirectToReferrer(request)
+    
+    @button(change_form=True,
+            html_attrs={'style': 'background-color:#F1502F;color:black'})
+    def SquareOff(self, request):
+        self.message_user(request, 'Square Off called')
+        SquareOff()
+        self.message_user(request, 'Square Off Done')
         return HttpResponseRedirectToReferrer(request)

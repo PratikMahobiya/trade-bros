@@ -134,3 +134,42 @@ def Price_Action_Trade(data, new_entry):
         response = requests.post(url, json=data_json, verify=False)
         print(f'Pratik: {data["log_identifier"]}: New Entries: Streaming Response: {response.status_code}')
     return new_entry
+
+
+def Stock_Square_Off(data, ltp):
+    # Exit Order.
+    if data['stock_obj'].symbol.product == 'future':
+        order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+    else:
+        if data['stock_obj'].mode == 'CE':
+            order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+        else:
+            order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+
+    if data['configuration_obj'].place_order and (order_id in ['', 0, '0', None]):
+        print(f"Pratik: SQUARE OFF EXIT: ERROR: Not Accepting Orders: {data['stock_obj'].symbol} : {order_id}, {order_status}")
+        return False
+
+    diff = (price - data['stock_obj'].price)
+    profit = round((((diff/data['stock_obj'].price) * 100)), 2)
+    # TRANSACTION TABLE UPDATE
+    Transaction.objects.create(
+                            product=data['stock_obj'].symbol.product,
+                            mode=data['stock_obj'].mode,
+                            symbol=data['stock_obj'].symbol.symbol,
+                            indicate='EXIT',
+                            type='SQ-OFF',
+                            price=price,
+                            target=data['stock_obj'].target,
+                            stoploss=data['stock_obj'].stoploss,
+                            profit=profit,
+                            max=data['stock_obj'].max,
+                            max_l=data['stock_obj'].max_l,
+                            highest_price=data['stock_obj'].highest_price,
+                            order_id=order_id,
+                            order_status=order_status,
+                            fixed_target=data['stock_obj'].fixed_target,
+                            lot=data['stock_obj'].lot)
+    print(f"Pratik: SQUARE OFF EXIT: Unsubscribed : {data['stock_obj'].symbol.symbol} : {data['stock_obj'].symbol.token}")
+    data['stock_obj'].delete()
+    return True

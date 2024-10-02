@@ -7,7 +7,7 @@ from datetime import datetime, time, timedelta
 from helper.common import calculate_volatility, last_thursday
 from helper.angel_function import historical_data
 from stock.models import StockConfig, Transaction
-from helper.trade_action import Price_Action_Trade
+from helper.trade_action import Price_Action_Trade, Stock_Square_Off
 from system_conf.models import Configuration, Symbol
 from trade.settings import BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TOTP_KEY, BROKER_USER_ID, broker_connection
 
@@ -362,4 +362,35 @@ def FnO_BreakOut_1(auto_trigger=True):
     except Exception as e:
         print(f'Pratik: {log_identifier}: ERROR: Main: {e}')
     print(f'Pratik: {log_identifier}: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    return True
+
+
+def SquareOff():
+    now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
+    product = 'future'
+    print(f'Pratik: SQUARE OFF: Runtime : {product} : {now.strftime("%d-%b-%Y %H:%M:%S")}')
+
+    try:
+        configuration_obj = Configuration.objects.filter(product=product)[0]
+
+        entries_list = StockConfig.objects.filter(symbol__product=product, is_active=True)
+
+        print(f'Pratik: SQUARE OFF: Loop Started: Total Entries {len(entries_list)}')
+        if entries_list:
+            for stock_obj in entries_list:
+                try:
+                    data = {
+                        'configuration_obj': configuration_obj,
+                        'stock_obj': stock_obj
+                    }
+                    Stock_Square_Off(data, stock_obj.ltp)
+                    stock_obj.delete()
+                except Exception as e:
+                    print(f'Pratik: SQUARE OFF: Loop Error: {stock_obj.symbol.symbol} : {stock_obj.mode} : {e}')
+        print(f'Pratik: SQUARE OFF: Loop Ended')
+
+    except Exception as e:
+        print(f'Pratik: SQUARE OFF: ERROR: Main:{e}')
+
+    print(f'Pratik: SQUARE OFF: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True

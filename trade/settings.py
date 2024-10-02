@@ -33,7 +33,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse.onrender.com,https://localhost:8000,https://127.0.0.1:8000,https://pratikmahobiya-fuzzy-space-giggle-6474w56pgxxf4w9r-8000.preview.app.github.dev').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse.onrender.com,https://localhost:8000,https://127.0.0.1:8000').split(',')
 
 BED_URL_DOMAIN = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse.onrender.com')
 SOCKET_STREAM_URL_DOMAIN = 'https://algo-nse-socket-service.onrender.com'
@@ -90,9 +90,9 @@ WSGI_APPLICATION = "trade.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.parse("postgresql://trade_bros_db_nvcu_user:vNFCCZ3jGbmGPtulpuiHowNbcrnvN0oQ@dpg-crkn7o68ii6s73835erg-a/trade_bros_db_nvcu", conn_max_age=0),
+    'default': dj_database_url.parse("postgresql://algo_nse_db_user:QUM04U7WO2IDtTNzcemXZzpHCzS5B35u@dpg-cruo0clumphs73amh1c0-a/algo_nse_db", conn_max_age=0),
 } if os.getenv('SERVER_DB', False) else {
-    'default': dj_database_url.parse("postgresql://trade_bros_db_nvcu_user:vNFCCZ3jGbmGPtulpuiHowNbcrnvN0oQ@dpg-crkn7o68ii6s73835erg-a.virginia-postgres.render.com/trade_bros_db_nvcu", conn_max_age=0),
+    'default': dj_database_url.parse("postgresql://algo_nse_db_user:QUM04U7WO2IDtTNzcemXZzpHCzS5B35u@dpg-cruo0clumphs73amh1c0-a.virginia-postgres.render.com/algo_nse_db", conn_max_age=0),
 }
 
 # DATABASES = {

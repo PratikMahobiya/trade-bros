@@ -64,6 +64,7 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode, sws):
             except Exception as e:
                 print(f'Pratik: LTP ACTION: Loop Error: {stock_obj.symbol} : {stock_obj.mode} : {e}')
         else:
+            del open_position[token]
             # Unsubscribe Token
             sws.unsubscribe(correlation_id, socket_mode, [{"action": 0, "exchangeType": 1, "tokens": [token]}])
             print(f"Pratik: Token Removed: Unsubscribed : {token}")

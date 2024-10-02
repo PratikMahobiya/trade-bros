@@ -33,10 +33,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse.onrender.com,https://localhost:8000,https://127.0.0.1:8000').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://nse-ai.onrender.com,https://localhost:8000,https://127.0.0.1:8000').split(',')
 
-BED_URL_DOMAIN = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://algo-nse.onrender.com')
-SOCKET_STREAM_URL_DOMAIN = 'https://algo-nse-socket-service.onrender.com'
+BED_URL_DOMAIN = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://nse-ai.onrender.com')
+SOCKET_STREAM_URL_DOMAIN = 'https://nse-ai-socket-service.onrender.com'
 
 # Application definition
 

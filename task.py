@@ -1,6 +1,5 @@
 import pyotp
 import requests
-import pandas as pd
 from time import sleep
 from zoneinfo import ZoneInfo
 from SmartApi import SmartConnect
@@ -241,7 +240,7 @@ def FnO_BreakOut_1(auto_trigger=True):
         if auto_trigger:
             if now.time() < time(9, 18, 00):
                 raise Exception("Entry Not Started")
-            elif now.time() > time(15, 29, 00):
+            elif now.time() > time(15, 11, 00):
                 raise Exception("Entry Not Stopped")
 
         configuration_obj = Configuration.objects.filter(product=product)[0]

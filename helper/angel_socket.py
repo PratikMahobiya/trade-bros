@@ -42,6 +42,10 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode, sws):
                 if ltp >= stock_obj.fixed_target:
                     if configuration_obj.place_order and not Is_Order_Completed(stock_obj.order_id):
                         cancel_id, error_status = Cancel_Order(stock_obj.order_id)
+                        if stock_obj.stoploss_order_placed:
+                            cancel_id, error_status = Cancel_Order(stock_obj.stoploss_order_id)
+                        if stock_obj.target_order_placed:
+                            cancel_id, error_status = Cancel_Order(stock_obj.target_order_id)
                         Transaction.objects.filter(order_id=stock_obj.order_id, is_active=True).delete()
 
                         # Unsubscribe Token
@@ -53,6 +57,10 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode, sws):
                 elif not TrailingTargetUpdate(data, ltp):
                     if configuration_obj.place_order and not Is_Order_Completed(stock_obj.order_id):
                         cancel_id, error_status = Cancel_Order(stock_obj.order_id)
+                        if stock_obj.stoploss_order_placed:
+                            cancel_id, error_status = Cancel_Order(stock_obj.stoploss_order_id)
+                        if stock_obj.target_order_placed:
+                            cancel_id, error_status = Cancel_Order(stock_obj.target_order_id)
                         Transaction.objects.filter(order_id=stock_obj.order_id, is_active=True).delete()
 
                         # Unsubscribe Token

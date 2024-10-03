@@ -17,13 +17,16 @@ def TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws):
     # TARGET Exit
     if (ltp >= data['stock_obj'].fixed_target):
         # Exit Order.
-        if data['stock_obj'].symbol.product == 'future':
-            order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
-        else:
-            if data['stock_obj'].mode == 'CE':
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+        if not data['stock_obj'].target_order_placed:
+            if data['stock_obj'].symbol.product == 'future':
+                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
             else:
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+                if data['stock_obj'].mode == 'CE':
+                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+                else:
+                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+        else:
+            order_id, order_status, price = data['stock_obj'].target_order_id, 'Placed', data['stock_obj'].fixed_target
 
         if data['configuration_obj'].place_order and (order_id in ['', 0, '0', None]):
             print(f"Pratik: TARGET EXIT: ERROR: Not Accepting Orders: {data['stock_obj'].symbol} : {order_id}, {order_status}")
@@ -62,13 +65,16 @@ def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode, 
     price_value, exit_type = (data['stock_obj'].trailing_sl, 'TR-SL') if data['stock_obj'].tr_hit else (data['stock_obj'].stoploss, 'STOPLOSS')
     if (ltp <= price_value):
         # Exit Order.
-        if data['stock_obj'].symbol.product == 'future':
-            order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
-        else:
-            if data['stock_obj'].mode == 'CE':
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+        if not data['stock_obj'].stoploss_order_placed:
+            if data['stock_obj'].symbol.product == 'future':
+                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
             else:
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+                if data['stock_obj'].mode == 'CE':
+                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+                else:
+                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+        else:
+            order_id, order_status, price = data['stock_obj'].stoploss_order_id, 'Placed', data['stock_obj'].price_value
 
         if data['configuration_obj'].place_order and (order_id in ['', 0, '0', None]):
             print(f"Pratik: TRAILING/STOPLOSS EXIT: ERROR: Not Accepting Orders: {data['stock_obj'].symbol} : {order_id}, {order_status}")

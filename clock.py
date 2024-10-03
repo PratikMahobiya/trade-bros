@@ -16,6 +16,6 @@ def start():
     sched.add_job(socket_setup, 'cron', day_of_week='mon-fri',
                 hour='9', minute='5', timezone='Asia/Kolkata')
     sched.add_job(stop_socket_setup, 'cron', day_of_week='mon-fri',
-                hour='2', minute='5', timezone='Asia/Kolkata')
+                hour='5', minute='5', timezone='Asia/Kolkata')
     sched.start()
     return True

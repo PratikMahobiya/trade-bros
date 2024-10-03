@@ -64,6 +64,9 @@ def socket_setup(log_identifier='Cron'):
     BROKER_AUTH_TOKEN = broker_connection.access_token
     BROKER_FEED_TOKEN = broker_connection.feed_token
 
+    sws = SmartWebSocketV2(BROKER_AUTH_TOKEN, BROKER_API_KEY, BROKER_USER_ID, BROKER_FEED_TOKEN)
+    sleep(2)
+
     correlation_id = "pratik-socket"
     mode = 1
     nse = []
@@ -96,15 +99,15 @@ def socket_setup(log_identifier='Cron'):
     print(f'Pratik: Socket Setup : {log_identifier} : Subscribe List : {subscribe_list}')
     if not entries:
         # {"token":"99926009","symbol":"Nifty Bank","name":"BANKNIFTY","expiry":"","strike":"0.000000","lotsize":"1","instrumenttype":"AMXIDX","exch_seg":"NSE","tick_size":"0.000000"}
+        # {"token":"99926000","symbol":"Nifty 50","name":"NIFTY","expiry":"","strike":"0.000000","lotsize":"1","instrumenttype":"AMXIDX","exch_seg":"NSE","tick_size":"0.000000"}
         subscribe_list.append({
                 "exchangeType": 1,
-                "tokens": '99926009'
+                "tokens": '99926000'
             })
     
     # Streaming threads for Open Positions
-    if subscribe_list:
-        sws = SmartWebSocketV2(BROKER_AUTH_TOKEN, BROKER_API_KEY, BROKER_USER_ID, BROKER_FEED_TOKEN)
-        socket_thread = threading.Thread(name=f"Streaming-{now.strftime('%d-%b-%Y %H:%M:%S')}", target=connect_to_socket, args=(correlation_id, mode, subscribe_list), daemon=True)
-        socket_thread.start()
+    socket_thread = threading.Thread(name=f"Streaming-{now.strftime('%d-%b-%Y %H:%M:%S')}", target=connect_to_socket, args=(correlation_id, mode, subscribe_list), daemon=True)
+    socket_thread.start()
+
     print(f'Pratik: Socket Setup : {log_identifier} : Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True

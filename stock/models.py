@@ -22,6 +22,10 @@ class StockConfig(models.Model):
     tr_hit = models.BooleanField(verbose_name='Target Hit', default=False)
     trailing_sl = models.FloatField(verbose_name='Trailing SL', default=0)
     ltp = models.FloatField(verbose_name='Ltp', blank=True, null=True, default=0)
+    stoploss_order_placed = models.BooleanField(verbose_name='SL Ord Placed', default=False)
+    stoploss_order_id = models.CharField(max_length=255, verbose_name='SL ORDER ID', blank=True, null=True, default='0')
+    target_order_placed = models.BooleanField(verbose_name='TR Ord Placed', default=False)
+    target_order_id = models.CharField(max_length=255, verbose_name='Tr ORDER ID', blank=True, null=True, default='0')
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

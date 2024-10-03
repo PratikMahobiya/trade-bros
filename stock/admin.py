@@ -11,7 +11,7 @@ from stock.models import StockConfig, Transaction, FnO_Status, Equity_Status
 @admin.register(FnO_Status)
 class FnOStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     actions = None
-    list_display = ('entry_time', 'name_', 'current', 'max_p', 'max_l_s', 'ltp', 'fixed_target', 'price', 'stoploss', 'trailing_sl', 'target', 'highest_price', 'orderid', 'order_status', 'lot', 'tr_hit', 'mode', 'product')
+    list_display = ('entry_time', 'name_', 'current', 'max_p', 'max_l_s', 'ltp', 'fixed_target', 'price', 'stoploss', 'trailing_sl', 'target', 'highest_price', 'orderid', 'order_status', 'stoploss_order_placed', 'target_order_placed', 'stoploss_order_id', 'target_order_id', 'lot', 'tr_hit', 'mode', 'product')
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -66,7 +66,7 @@ class FnOStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 @admin.register(Equity_Status)
 class EquityStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     actions = None
-    list_display = ('entry_time', 'name_', 'current', 'max_p', 'max_l_s', 'ltp', 'fixed_target', 'price', 'stoploss', 'trailing_sl', 'target', 'highest_price', 'orderid', 'order_status', 'lot', 'tr_hit', 'indics', 'mode', 'product')
+    list_display = ('entry_time', 'name_', 'current', 'max_p', 'max_l_s', 'ltp', 'fixed_target', 'price', 'stoploss', 'trailing_sl', 'target', 'highest_price', 'orderid', 'order_status', 'stoploss_order_placed', 'target_order_placed', 'stoploss_order_id', 'target_order_id', 'lot', 'tr_hit', 'indics', 'mode', 'product')
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -143,7 +143,7 @@ class EquityStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
 @admin.register(StockConfig)
 class StockConfigAdmin(admin.ModelAdmin):
-    list_display = ('created_at', 'mode', 'symbol__name', 'ltp', 'tr_hit', 'trailing_sl', 'max', 'max_l', 'price', 'target', 'stoploss', 'fixed_target', 'highest_price', 'symbol__symbol', 'lot', 'order_status', 'is_active')
+    list_display = ('created_at', 'mode', 'symbol__name', 'ltp', 'tr_hit', 'trailing_sl', 'max', 'max_l', 'price', 'target', 'stoploss', 'fixed_target', 'highest_price', 'symbol__symbol', 'lot', 'order_status', 'stoploss_order_placed', 'target_order_placed', 'stoploss_order_id', 'target_order_id', 'is_active')
     search_fields = ['symbol', ]
 
     def get_ordering(self, request):

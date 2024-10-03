@@ -7,10 +7,10 @@ from datetime import datetime, time, timedelta
 from helper.angel_function import historical_data
 from stock.models import StockConfig, Transaction
 from system_conf.models import Configuration, Symbol
-from helper.angel_order import Cancel_Order, Is_Order_Completed
+from helper.common import calculate_volatility, last_thursday
 from helper.trade_action import Price_Action_Trade, Stock_Square_Off
+from helper.angel_order import Cancel_Order, Create_Order, Is_Order_Completed
 from trade.settings import BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TOTP_KEY, BROKER_USER_ID, broker_connection
-from helper.common import calculate_volatility, get_midcpnifty100, get_midcpnifty150, get_midcpnifty50, get_nifty100, get_nifty200, get_nifty50, get_smallcpnifty100, get_smallcpnifty250, get_smallcpnifty50, last_thursday
 
 
 def stay_awake():
@@ -421,6 +421,20 @@ def FnO_BreakOut_1(auto_trigger=True):
                                     data['symbol_obj'] = fut_sym_obj
                                     new_entry = Price_Action_Trade(data, new_entry)
                                     break
+                else:
+                    stock_config_obj = entries_list[0]
+                    # Place Stoploss Limit Order
+                    if configuration_obj.place_order and not stock_config_obj.stoploss_order_placed and Is_Order_Completed(stock_config_obj.order_id):
+                        order_id, order_status, price = Create_Order(configuration_obj, 'sell', 'CARRYFORWARD', stock_config_obj.symbol.token, stock_config_obj.symbol.symbol, stock_config_obj.symbol.exchange, stock_config_obj.stoploss, stock_config_obj.lot, "LIMIT")
+                        stock_config_obj.stoploss_order_placed = True
+                        stock_config_obj.stoploss_order_id = order_id
+
+                    # Place Target Limit Order
+                    # if configuration_obj.place_order and not stock_config_obj.target_order_placed and Is_Order_Completed(stock_config_obj.order_id):
+                    #     order_id, order_status, price = Create_Order(configuration_obj, 'sell', 'CARRYFORWARD', stock_config_obj.symbol.token, stock_config_obj.symbol.symbol, stock_config_obj.symbol.exchange, stock_config_obj.fixed_target, stock_config_obj.lot, "LIMIT")
+                    #     stock_config_obj.target_order_placed = True
+                    #     stock_config_obj.target_order_id = order_id
+                    stock_config_obj.save()
 
                 del mode, entries_list
 
@@ -457,6 +471,10 @@ def SquareOff():
                     if configuration_obj.place_order and not Is_Order_Completed(stock_obj.order_id):
                         print(f"Pratik: SQUARE OFF: Cancel Buy Order : {stock_obj.symbol.symbol} : {stock_obj.symbol.token}")
                         cancel_id, error_status = Cancel_Order(stock_obj.order_id)
+                        if stock_obj.stoploss_order_placed:
+                            cancel_id, error_status = Cancel_Order(stock_obj.stoploss_order_id)
+                        if stock_obj.target_order_placed:
+                            cancel_id, error_status = Cancel_Order(stock_obj.target_order_id)
                         Transaction.objects.filter(order_id=stock_obj.order_id, is_active=True).delete()
                     else:
                         Stock_Square_Off(data, stock_obj.ltp)

@@ -478,7 +478,6 @@ def SquareOff():
                         Transaction.objects.filter(order_id=stock_obj.order_id, is_active=True).delete()
                     else:
                         Stock_Square_Off(data, stock_obj.ltp)
-                    stock_obj.delete()
                 except Exception as e:
                     print(f'Pratik: SQUARE OFF: Loop Error: {stock_obj.symbol.symbol} : {stock_obj.mode} : {e}')
         print(f'Pratik: SQUARE OFF: Loop Ended')

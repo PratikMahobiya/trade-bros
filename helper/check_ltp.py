@@ -74,7 +74,8 @@ def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode, 
             return False
 
         del open_position[data['stock_obj'].symbol.token]
-        diff = (price - data['stock_obj'].price)
+        # diff = (price - data['stock_obj'].price)
+        diff = (price_value - data['stock_obj'].price)
         profit = round((((diff/data['stock_obj'].price) * 100)), 2)
         # TRANSACTION TABLE UPDATE
         Transaction.objects.create(
@@ -83,7 +84,8 @@ def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode, 
                                 symbol=data['stock_obj'].symbol.symbol,
                                 indicate='EXIT',
                                 type=exit_type,
-                                price=price,
+                                # price=price,
+                                price=price_value,
                                 target=data['stock_obj'].target,
                                 stoploss=data['stock_obj'].stoploss,
                                 profit=profit,

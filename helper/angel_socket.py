@@ -39,7 +39,7 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode, sws):
                 stock_obj.ltp = ltp
                 stock_obj.save()
 
-                if ltp > stock_obj.fixed_target:
+                if ltp >= stock_obj.fixed_target:
                     if configuration_obj.place_order and not Is_Order_Completed(stock_obj.order_id):
                         cancel_id, error_status = Cancel_Order(stock_obj.order_id)
                         Transaction.objects.filter(order_id=stock_obj.order_id, is_active=True).delete()

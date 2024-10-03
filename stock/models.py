@@ -62,8 +62,15 @@ class Transaction(models.Model):
         return f"{self.id}-{self.product}-{self.symbol}"
 
 
-class Status(StockConfig):
+class FnO_Status(StockConfig):
     class Meta:
         proxy = True
-        verbose_name = "Status"
-        verbose_name_plural = "Status"
+        verbose_name = "FnO Status"
+        verbose_name_plural = "FnO Status"
+
+
+class Equity_Status(StockConfig):
+    class Meta:
+        proxy = True
+        verbose_name = "Equity Status"
+        verbose_name_plural = "Equity Status"

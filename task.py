@@ -4,11 +4,12 @@ from time import sleep
 from zoneinfo import ZoneInfo
 from SmartApi import SmartConnect
 from datetime import datetime, time, timedelta
-from helper.common import calculate_volatility, last_thursday
 from helper.angel_function import historical_data
 from stock.models import StockConfig, Transaction
-from helper.trade_action import Price_Action_Trade, Stock_Square_Off
 from system_conf.models import Configuration, Symbol
+from helper.common import calculate_volatility, last_thursday
+from helper.angel_order import Cancel_Order, Is_Order_Completed
+from helper.trade_action import Price_Action_Trade, Stock_Square_Off
 from trade.settings import BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TOTP_KEY, BROKER_USER_ID, broker_connection
 
 
@@ -409,7 +410,12 @@ def SquareOff():
                         'configuration_obj': configuration_obj,
                         'stock_obj': stock_obj
                     }
-                    Stock_Square_Off(data, stock_obj.ltp)
+                    if configuration_obj.place_order and not Is_Order_Completed(stock_obj.order_id):
+                        print(f"Pratik: SQUARE OFF: Cancel Buy Order : {stock_obj.symbol.symbol} : {stock_obj.symbol.token}")
+                        cancel_id, error_status = Cancel_Order(stock_obj.order_id)
+                        Transaction.objects.filter(order_id=stock_obj.order_id, is_active=True).delete()
+                    else:
+                        Stock_Square_Off(data, stock_obj.ltp)
                     stock_obj.delete()
                 except Exception as e:
                     print(f'Pratik: SQUARE OFF: Loop Error: {stock_obj.symbol.symbol} : {stock_obj.mode} : {e}')

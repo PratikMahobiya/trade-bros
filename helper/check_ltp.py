@@ -15,7 +15,7 @@ def TrailingTargetUpdate(data, ltp):
 
 def TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws):
     # TARGET Exit
-    if (ltp > data['stock_obj'].fixed_target):
+    if (ltp >= data['stock_obj'].fixed_target):
         # Exit Order.
         if data['stock_obj'].symbol.product == 'future':
             order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")

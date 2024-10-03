@@ -146,7 +146,7 @@ def Equity_BreakOut_1(auto_trigger=True):
                 entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
                 if not entries_list:
                     if nop < configuration_obj.open_position:
-                        from_day = now - timedelta(days=60)
+                        from_day = now - timedelta(days=400)
                         data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_DAY')
                         sleep(0.3)
 
@@ -154,8 +154,8 @@ def Equity_BreakOut_1(auto_trigger=True):
                         high = data_frame['High'].iloc[-1]
                         low = data_frame['Low'].iloc[-1]
                         close = data_frame['Close'].iloc[-1]
-                        max_high = max(data_frame['High'].iloc[-30:-1]) if len(data_frame) >= 32 else max(data_frame['High'].iloc[:-1])
-                        min_low = min(data_frame['Low'].iloc[-30:-1]) if len(data_frame) >= 32 else min(data_frame['Low'].iloc[:-1])
+                        max_high = max(data_frame['High'].iloc[-200:-1]) if len(data_frame) >= 202 else max(data_frame['High'].iloc[:-1])
+                        min_low = min(data_frame['Low'].iloc[-200:-1]) if len(data_frame) >= 202 else min(data_frame['Low'].iloc[:-1])
                         daily_volatility = calculate_volatility(data_frame)
 
                         # # Calculate Pivots
@@ -216,6 +216,32 @@ def Equity_BreakOut_1(auto_trigger=True):
                                 new_entry = Price_Action_Trade(data, new_entry)
                             else:
                                 print(f'Pratik: {log_identifier}: Equity-Symbol: Not Enough money to take entry {symbol_obj.name} : {chk_price} : {configuration_obj.amount}')
+                else:
+                    stock_config_obj = entries_list[0]
+                    from_day = now - timedelta(days=100)
+                    data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_DAY')
+                    sleep(0.3)
+
+                    trsl_ce = min(data_frame['Low'].iloc[-50:-1]) if len(data_frame) >= 52 else max(data_frame['Low'].iloc[:-1])
+                    trsl_pe = max(data_frame['High'].iloc[-50:-1]) if len(data_frame) >= 52 else max(data_frame['High'].iloc[:-1])
+
+                    if stock_config_obj.mode == 'CE':
+                        if not stock_config_obj.tr_hit and (stock_config_obj.stoploss < trsl_ce):
+                            stock_config_obj.tr_hit = True
+                            stock_config_obj.trailing_sl = trsl_ce
+                            print(f'Pratik: {log_identifier}: {stock_config_obj.mode} : Stoploss --> Trailing SL : {symbol_obj.symbol}')
+                        elif stock_config_obj.tr_hit and (stock_config_obj.trailing_sl < trsl_ce):
+                            stock_config_obj.trailing_sl = trsl_ce
+                            print(f'Pratik: {log_identifier}: {stock_config_obj.mode} : Old Trailing SL --> New Trailing SL : {symbol_obj.symbol}')
+                    else:
+                        if not stock_config_obj.tr_hit and (stock_config_obj.stoploss > trsl_pe):
+                            stock_config_obj.tr_hit = True
+                            stock_config_obj.trailing_sl = trsl_pe
+                            print(f'Pratik: {log_identifier}: {stock_config_obj.mode} : Stoploss --> Trailing SL : {symbol_obj.symbol}')
+                        elif stock_config_obj.tr_hit and (stock_config_obj.trailing_sl > trsl_pe):
+                            stock_config_obj.trailing_sl = trsl_pe
+                            print(f'Pratik: {log_identifier}: {stock_config_obj.mode} : Old Trailing SL --> New Trailing SL : {symbol_obj.symbol}')
+                    stock_config_obj.save()
                 del mode, entries_list
 
             except Exception as e:

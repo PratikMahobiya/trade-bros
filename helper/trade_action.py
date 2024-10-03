@@ -158,7 +158,7 @@ def Stock_Square_Off(data, ltp):
                             product=data['stock_obj'].symbol.product,
                             mode=data['stock_obj'].mode,
                             symbol=data['stock_obj'].symbol.symbol,
-                            name=data['symbol_obj'].symbol.name,
+                            name=data['stock_obj'].symbol.name,
                             indicate='EXIT',
                             type='SQ-OFF',
                             price=price,

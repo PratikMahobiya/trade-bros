@@ -7,10 +7,10 @@ from datetime import datetime, time, timedelta
 from helper.angel_function import historical_data
 from stock.models import StockConfig, Transaction
 from system_conf.models import Configuration, Symbol
-from helper.common import calculate_volatility, last_thursday
 from helper.angel_order import Cancel_Order, Is_Order_Completed
 from helper.trade_action import Price_Action_Trade, Stock_Square_Off
 from trade.settings import BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TOTP_KEY, BROKER_USER_ID, broker_connection
+from helper.common import calculate_volatility, get_midcpnifty100, get_midcpnifty150, get_midcpnifty50, get_nifty100, get_nifty200, get_nifty50, get_smallcpnifty100, get_smallcpnifty250, get_smallcpnifty50, last_thursday
 
 
 def stay_awake():
@@ -69,6 +69,22 @@ def SymbolSetup():
         month_num = now.month + 1
     else:
         month_num = now.month
+
+    print(f'Pratik: Symbol Setup: Fetch Index Symbol List : Started')
+
+    nifty50 = get_nifty50()
+    nifty100 = get_nifty100()
+    nifty200 = get_nifty200()
+
+    midcpnifty50 = get_midcpnifty50()
+    midcpnifty100 = get_midcpnifty100()
+    midcpnifty150 = get_midcpnifty150()
+    
+    smallcpnifty50 = get_smallcpnifty50()
+    smallcpnifty100 = get_smallcpnifty100()
+    smallcpnifty250 = get_smallcpnifty250()
+
+    print(f'Pratik: Symbol Setup: Fetch Index Symbol List : Ended')
 
     for i in data:
         product = None

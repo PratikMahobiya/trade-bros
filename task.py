@@ -107,6 +107,28 @@ def SymbolSetup():
                 obj.lot=int(i['lotsize'])
                 if product == 'future':
                     obj.fno=True
+
+                if i['name'] in nifty50:
+                    obj.nifty50 = True
+                if i['name'] in nifty100:
+                    obj.nifty100 = True
+                if i['name'] in nifty200:
+                    obj.nifty200 = True
+
+                if i['name'] in midcpnifty50:
+                    obj.midcpnifty50 = True
+                if i['name'] in midcpnifty100:
+                    obj.midcpnifty100 = True
+                if i['name'] in midcpnifty150:
+                    obj.midcpnifty150 = True
+
+                if i['name'] in smallcpnifty50:
+                    obj.smallcpnifty50 = True
+                if i['name'] in smallcpnifty100:
+                    obj.smallcpnifty100 = True
+                if i['name'] in smallcpnifty250:
+                    obj.smallcpnifty250 = True
+
                 obj.save()
 
     future_enables_symbols = set(Symbol.objects.filter(product='future', is_active=True).values_list('name', flat=True))
@@ -149,7 +171,7 @@ def Equity_BreakOut_1(auto_trigger=True):
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
 
-        symbol_list = Symbol.objects.filter(product=product, fno=True, is_active=True).order_by('-volume')
+        symbol_list = Symbol.objects.filter(product=product, smallcpnifty100=True, nifty100=True, is_active=True).order_by('-volume')
 
         print(f'Pratik: {log_identifier}: Total Equity Symbol Picked: {len(symbol_list)}')
 

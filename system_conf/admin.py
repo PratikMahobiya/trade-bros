@@ -16,7 +16,7 @@ class ConfigurationAdmin(admin.ModelAdmin):
 @admin.register(Symbol)
 class SymbolAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     list_display = ('fno', 'name', 'percentchange_', 'volume', 'valuechange', 'ltp', 'weekhigh52', 'weeklow52', 'strike', 'exchange', 'symbol', 'product', 'expiry', 'token', 'oi', 'lot', 'is_active')
-    list_filter = ('product', 'exchange', 'fno', 'name')
+    list_filter = ('product', 'exchange', 'fno', 'nifty50', 'nifty100', 'nifty200', 'midcpnifty50', 'midcpnifty100', 'midcpnifty150', 'smallcpnifty50', 'smallcpnifty100', 'smallcpnifty250', 'name')
     search_fields = ['name', 'symbol', 'token']
 
     def get_ordering(self, request):

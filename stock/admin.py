@@ -66,7 +66,7 @@ class FnOStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 @admin.register(Equity_Status)
 class EquityStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     actions = None
-    list_display = ('entry_time', 'name_', 'current', 'max_p', 'max_l_s', 'ltp', 'fixed_target', 'price', 'stoploss', 'trailing_sl', 'target', 'highest_price', 'orderid', 'order_status', 'lot', 'tr_hit', 'mode', 'product')
+    list_display = ('entry_time', 'name_', 'current', 'max_p', 'max_l_s', 'ltp', 'fixed_target', 'price', 'stoploss', 'trailing_sl', 'target', 'highest_price', 'orderid', 'order_status', 'lot', 'tr_hit', 'indics', 'mode', 'product')
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -74,6 +74,29 @@ class EquityStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
     def get_queryset(self, request):
         return self.model.objects.filter(symbol__product='equity')
     
+    def indics(self, obj):
+        ind_str = ''
+        if obj.symbol.nifty50:
+            ind_str += '-N50-'
+        if obj.symbol.nifty100:
+            ind_str += '-N100-'
+        if obj.symbol.nifty200:
+            ind_str += '-N200-'
+        if obj.symbol.midcpnifty50:
+            ind_str += '-MDCP50-'
+        if obj.symbol.midcpnifty100:
+            ind_str += '-MDCP100-'
+        if obj.symbol.midcpnifty150:
+            ind_str += '-MDCP150-'
+        if obj.symbol.smallcpnifty50:
+            ind_str += '-SMCP50-'
+        if obj.symbol.smallcpnifty100:
+            ind_str += '-SMCP100-'
+        if obj.symbol.smallcpnifty250:
+            ind_str += '-SMCP250-'
+        return ind_str
+    indics.short_description = 'Indics'
+
     def product(self, obj):
         return f"{obj.symbol.product}"
     product.short_description = 'Product'

@@ -85,7 +85,7 @@ def Price_Action_Trade(data, new_entry):
         Transaction.objects.create(
                                     product=data['symbol_obj'].product,
                                     symbol=data['symbol_obj'].symbol,
-                                    name=data['symbol_obj'].symbol.name,
+                                    name=data['symbol_obj'].name,
                                     mode=data['mode'],
                                     indicate='ENTRY',
                                     type='LONG' if data['mode'] == 'CE' else 'SHORT',

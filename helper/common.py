@@ -229,7 +229,7 @@ def get_smallcpnifty50():
         'Accept-Language': 'en-US,en;q=0.9,hi;q=0.8',
     }
 
-    s = requests.get("https://nsearchives.nseindia.com/content/indices/ind_niftysmallcap_50list.csv", headers=headers)
+    s = requests.get("https://nsearchives.nseindia.com/content/indices/ind_niftysmallcap50list.csv", headers=headers)
 
     # Decode the byte string
     decoded_data = s.content.decode('utf-8')

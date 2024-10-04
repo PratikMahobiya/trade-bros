@@ -144,7 +144,7 @@ class EquityStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 @admin.register(FnO_Transaction)
 class FnOTransactionAdmin(ExportActionMixin, admin.ModelAdmin):
     date_hierarchy = 'date'
-    list_display = ('name', 'date', 'indicate', 'type', 'p_l', 'max_p', 'max_l_s', 'top_p', 'price', 'fixed_target', 'stoploss', 'target', 'lot', 'order_id', 'order_status', 'symbol', 'mode')
+    list_display = ('symbol', 'date', 'indicate', 'type', 'p_l', 'max_p', 'max_l_s', 'top_p', 'price', 'fixed_target', 'stoploss', 'target', 'lot', 'order_id', 'order_status', 'name', 'mode')
     search_fields = ['symbol', ]
     list_filter = ('indicate', 'date', 'mode', 'name')
     list_per_page = 20

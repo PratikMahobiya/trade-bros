@@ -13,9 +13,9 @@ from trade.settings import BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TO
 
 def stay_awake():
     now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
-    print(f'Pratik: Stay Awake: Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
+    print(f'Pra: Stay Awake: Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
     x = requests.get(f"{BED_URL_DOMAIN}/api/trade/awake", verify=False)
-    print(f'Pratik: Stay Awake: Execution Time(hh:mm:ss): {x.status_code} : {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    print(f'Pra: Stay Awake: Execution Time(hh:mm:ss): {x.status_code} : {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True
 
 

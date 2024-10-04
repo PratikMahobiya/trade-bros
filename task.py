@@ -34,16 +34,26 @@ def MarketDataUpdate():
         if data.get('data'):
             fetched = data.get('data')['fetched']
             for i in fetched:
-                Symbol.objects.filter(token=i['symbolToken'],
-                                    is_active=True).update(
-                                        volume=i['tradeVolume'],
-                                        oi=i['opnInterest'],
-                                        percentchange=i['percentChange'],
-                                        valuechange=i['netChange'],
-                                        ltp=i['ltp'],
-                                        weekhigh52=i['52WeekHigh'],
-                                        weeklow52=i['52WeekLow']
-                                    )
+                if now.time() > time(9, 7, 00) and now.time() < time(9, 13, 00):
+                    Symbol.objects.filter(token=i['symbolToken'],
+                                            is_active=True).update(
+                                                volume=i['tradeVolume'],
+                                                oi=i['opnInterest'],
+                                                percentchange=i['percentChange'],
+                                                valuechange=i['netChange'],
+                                                ltp=i['ltp'],
+                                                weekhigh52=i['52WeekHigh'],
+                                                weeklow52=i['52WeekLow']
+                                            )
+                else:
+                    Symbol.objects.filter(token=i['symbolToken'],
+                                            is_active=True).update(
+                                                volume=i['tradeVolume'],
+                                                oi=i['opnInterest'],
+                                                percentchange=i['percentChange'],
+                                                valuechange=i['netChange'],
+                                                ltp=i['ltp']
+                                            )
         sleep(1)
     print(f'Pratik: Market data Update: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True
@@ -193,17 +203,17 @@ def Equity_BreakOut_1(auto_trigger=True):
                 entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
                 if not entries_list:
                     if nop < configuration_obj.open_position:
-                        from_day = now - timedelta(days=400)
+                        from_day = now - timedelta(days=5)
                         data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_DAY')
                         sleep(0.3)
 
-                        open = data_frame['Open'].iloc[-1]
-                        high = data_frame['High'].iloc[-1]
-                        low = data_frame['Low'].iloc[-1]
+                        # open = data_frame['Open'].iloc[-1]
+                        # high = data_frame['High'].iloc[-1]
+                        # low = data_frame['Low'].iloc[-1]
                         close = data_frame['Close'].iloc[-1]
-                        max_high = max(data_frame['High'].iloc[-200:-1]) if len(data_frame) >= 202 else max(data_frame['High'].iloc[:-1])
-                        min_low = min(data_frame['Low'].iloc[-200:-1]) if len(data_frame) >= 202 else min(data_frame['Low'].iloc[:-1])
-                        daily_volatility = calculate_volatility(data_frame)
+                        # max_high = max(data_frame['High'].iloc[-200:-1]) if len(data_frame) >= 202 else max(data_frame['High'].iloc[:-1])
+                        # min_low = min(data_frame['Low'].iloc[-200:-1]) if len(data_frame) >= 202 else min(data_frame['Low'].iloc[:-1])
+                        # daily_volatility = calculate_volatility(data_frame)
 
                         # # Calculate Pivots
                         # pivot_data_frame = data_frame
@@ -221,10 +231,10 @@ def Equity_BreakOut_1(auto_trigger=True):
                         # R3 = pivot + 2*(pivot_candle['High'] - pivot_candle['Low'])
                         # S3 = pivot - 2*(pivot_candle['High'] - pivot_candle['Low'])
     
-                        if (max_high < close):# and not ((high >= R3 >= open) or (high >= R2 >= open) or (high >= R1 >= open) or (high >= pivot >= open) or (high >= S1 >= open) or (high >= S2 >= open) or (high >= S2 >= open)):
+                        if (symbol_obj.weekhigh52 < close):# and not ((high >= R3 >= open) or (high >= R2 >= open) or (high >= R1 >= open) or (high >= pivot >= open) or (high >= S1 >= open) or (high >= S2 >= open) or (high >= S2 >= open)):
                             mode = 'CE'
     
-                        # elif (min_low > close):# and not ((low <= R3 <= open) or (low <= R2 <= open) or (low <= R1 <= open) or (low <= pivot <= open) or (low <= S1 <= open) or (low <= S2 <= open) or (low <= S2 <= open)):
+                        # elif (symbol_obj.weeklow52 > close):# and not ((low <= R3 <= open) or (low <= R2 <= open) or (low <= R1 <= open) or (low <= pivot <= open) or (low <= S1 <= open) or (low <= S2 <= open) or (low <= S2 <= open)):
                         #     mode = 'PE'
     
                         else:
@@ -340,13 +350,13 @@ def FnO_BreakOut_1(auto_trigger=True):
                         data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_DAY')
                         sleep(0.3)
 
-                        open = data_frame['Open'].iloc[-1]
-                        high = data_frame['High'].iloc[-1]
-                        low = data_frame['Low'].iloc[-1]
+                        # open = data_frame['Open'].iloc[-1]
+                        # high = data_frame['High'].iloc[-1]
+                        # low = data_frame['Low'].iloc[-1]
                         close = data_frame['Close'].iloc[-1]
                         max_high = max(data_frame['High'].iloc[-30:-1]) if len(data_frame) >= 32 else max(data_frame['High'].iloc[:-1])
                         min_low = min(data_frame['Low'].iloc[-30:-1]) if len(data_frame) >= 32 else min(data_frame['Low'].iloc[:-1])
-                        daily_volatility = calculate_volatility(data_frame)
+                        # daily_volatility = calculate_volatility(data_frame)
 
                         # Calculate Pivots
                         #pivot_data_frame = data_frame

@@ -23,7 +23,7 @@ def start():
     sched.add_job(MarketDataUpdate, 'cron', day_of_week='mon-fri',
                 hour='9-15', minute='*/10', timezone='Asia/Kolkata')
     sched.add_job(SquareOff, 'cron', day_of_week='mon-fri',
-                hour='15', minute='15', timezone='Asia/Kolkata')
+                hour='15', minute='17', timezone='Asia/Kolkata')
     sched.add_job(Equity_BreakOut_1, 'cron', day_of_week='mon-fri',
                 hour='9-15', minute='*/5', timezone='Asia/Kolkata')
     sched.add_job(FnO_BreakOut_1, 'cron', day_of_week='mon-fri',

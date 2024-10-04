@@ -7,8 +7,14 @@ from apscheduler.schedulers.background import BackgroundScheduler
 def start():
     sched = BackgroundScheduler(timezone=str(tzlocal.get_localzone()), daemon=True)
     if not User.objects.filter(username='TradeBros').exists():
-        User.objects.create_superuser(
+        User.objects.create_user(
             username='TradeBros',
+            password='admin'
+        )
+        print('User has been created.')
+    if not User.objects.filter(username='Master').exists():
+        User.objects.create_superuser(
+            username='Master',
             password='admin'
         )
         print('Superuser has been created.')

@@ -78,3 +78,17 @@ class Equity_Status(StockConfig):
         proxy = True
         verbose_name = "Equity Status"
         verbose_name_plural = "Equity Status"
+
+
+class Equity_Transaction(Transaction):
+    class Meta:
+        proxy = True
+        verbose_name = "Equity Transaction"
+        verbose_name_plural = "Equity Transactions"
+
+
+class FnO_Transaction(Transaction):
+    class Meta:
+        proxy = True
+        verbose_name = "FnO Transaction"
+        verbose_name_plural = "FnO Transactions"

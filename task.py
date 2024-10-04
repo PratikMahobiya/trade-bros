@@ -177,7 +177,9 @@ def Equity_BreakOut_1(auto_trigger=True):
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
 
-        symbol_list = Symbol.objects.filter(product=product, smallcpnifty100=True, nifty100=True, is_active=True).order_by('-volume')
+        symbol_list_1 = list(Symbol.objects.filter(product=product, smallcpnifty100=True, is_active=True).order_by('-volume'))
+        symbol_list_2 = list(Symbol.objects.filter(product=product, nifty100=True, is_active=True).order_by('-volume'))
+        symbol_list = symbol_list_1 + symbol_list_2
 
         print(f'Pratik: {log_identifier}: Total Equity Symbol Picked: {len(symbol_list)}')
 

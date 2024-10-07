@@ -437,13 +437,13 @@ def FnO_BreakOut_1(auto_trigger=True):
                     stock_config_obj = entries_list[0]
                     # Place Stoploss Limit Order
                     if configuration_obj.place_order and not stock_config_obj.stoploss_order_placed and Is_Order_Completed(stock_config_obj.order_id):
-                        order_id, order_status, price = Create_Order(configuration_obj, 'sell', 'CARRYFORWARD', stock_config_obj.symbol.token, stock_config_obj.symbol.symbol, stock_config_obj.symbol.exchange, stock_config_obj.stoploss, stock_config_obj.lot, "LIMIT")
+                        order_id, order_status, price = Create_Order(configuration_obj, 'SELL', 'CARRYFORWARD', stock_config_obj.symbol.token, stock_config_obj.symbol.symbol, stock_config_obj.symbol.exchange, stock_config_obj.stoploss, stock_config_obj.lot, "LIMIT")
                         stock_config_obj.stoploss_order_placed = True
                         stock_config_obj.stoploss_order_id = order_id
 
                     # Place Target Limit Order
                     # if configuration_obj.place_order and not stock_config_obj.target_order_placed and Is_Order_Completed(stock_config_obj.order_id):
-                    #     order_id, order_status, price = Create_Order(configuration_obj, 'sell', 'CARRYFORWARD', stock_config_obj.symbol.token, stock_config_obj.symbol.symbol, stock_config_obj.symbol.exchange, stock_config_obj.fixed_target, stock_config_obj.lot, "LIMIT")
+                    #     order_id, order_status, price = Create_Order(configuration_obj, 'SELL', 'CARRYFORWARD', stock_config_obj.symbol.token, stock_config_obj.symbol.symbol, stock_config_obj.symbol.exchange, stock_config_obj.fixed_target, stock_config_obj.lot, "LIMIT")
                     #     stock_config_obj.target_order_placed = True
                     #     stock_config_obj.target_order_id = order_id
                     stock_config_obj.save()

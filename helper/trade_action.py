@@ -11,12 +11,12 @@ def Price_Action_Trade(data, new_entry):
 
         # Place Order.
         if data['product'] == 'future':
-            order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'CARRYFORWARD', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'], "MARKET")
+            order_id, order_status, price = Create_Order(data['configuration_obj'], 'BUY', 'CARRYFORWARD', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'], "MARKET")
         else:
             if data['mode'] == 'CE':
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'DELIVERY', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'], "LIMIT")
+                order_id, order_status, price = Create_Order(data['configuration_obj'], 'BUY', 'DELIVERY', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'], "LIMIT")
             else:
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'INTRADAY', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'], "LIMIT")
+                order_id, order_status, price = Create_Order(data['configuration_obj'], 'SELL', 'INTRADAY', data['symbol_obj'].token, data['symbol_obj'].symbol, data['symbol_obj'].exchange, data['ltp'], data['lot'], "LIMIT")
         
         stock_config_obj.lot = data['lot']
         stock_config_obj.price = price
@@ -140,12 +140,12 @@ def Price_Action_Trade(data, new_entry):
 def Stock_Square_Off(data, ltp):
     # Exit Order.
     if data['stock_obj'].symbol.product == 'future':
-        order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+        order_id, order_status, price = Create_Order(data['configuration_obj'], 'SELL', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
     else:
         if data['stock_obj'].mode == 'CE':
-            order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+            order_id, order_status, price = Create_Order(data['configuration_obj'], 'SELL', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
         else:
-            order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+            order_id, order_status, price = Create_Order(data['configuration_obj'], 'BUY', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
 
     if data['configuration_obj'].place_order and (order_id in ['', 0, '0', None]):
         print(f"Pratik: SQUARE OFF EXIT: ERROR: Not Accepting Orders: {data['stock_obj'].symbol} : {order_id}, {order_status}")

@@ -149,10 +149,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Broker Detail
-BROKER_PIN = 4567
-BROKER_USER_ID = 'P567723'
-BROKER_API_KEY = 'ExEEsqVb'
-BROKER_TOTP_KEY = 'VF4PNLIJZSO5CK7AILPR2ETP2M'
+BROKER_PIN = int(os.getenv("BROKER_PIN", '0000'))
+BROKER_USER_ID = os.getenv("BROKER_USER_ID", 'User-Id Required')
+BROKER_API_KEY = os.getenv("BROKER_API_KEY", 'Api Key Required')
+BROKER_TOTP_KEY = os.getenv("BROKER_TOTP_KEY", 'TOTP Key required')
 
 
 # Global Variable

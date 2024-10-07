@@ -19,12 +19,12 @@ def TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws):
         # Exit Order.
         if not data['stock_obj'].target_order_placed:
             if data['stock_obj'].symbol.product == 'future':
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+                order_id, order_status, price = Create_Order(data['configuration_obj'], 'SELL', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
             else:
                 if data['stock_obj'].mode == 'CE':
-                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'SELL', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
                 else:
-                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'BUY', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
         else:
             order_id, order_status, price = data['stock_obj'].target_order_id, 'Placed', data['stock_obj'].fixed_target
 
@@ -67,12 +67,12 @@ def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode, 
         # Exit Order.
         if not data['stock_obj'].stoploss_order_placed:
             if data['stock_obj'].symbol.product == 'future':
-                order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+                order_id, order_status, price = Create_Order(data['configuration_obj'], 'SELL', 'CARRYFORWARD', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
             else:
                 if data['stock_obj'].mode == 'CE':
-                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'sell', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'SELL', 'DELIVERY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
                 else:
-                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'buy', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
+                    order_id, order_status, price = Create_Order(data['configuration_obj'], 'BUY', 'INTRADAY', data['stock_obj'].symbol.token, data['stock_obj'].symbol.symbol, data['stock_obj'].symbol.exchange, ltp, data['stock_obj'].lot, "MARKET")
         else:
             order_id, order_status, price = data['stock_obj'].stoploss_order_id, 'Placed', data['stock_obj'].price_value
 

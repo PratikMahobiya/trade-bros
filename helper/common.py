@@ -29,12 +29,12 @@ def ExitAction(sender, instance, created):
         if configuration_obj.place_order and instance.indicate == 'EXIT' and not Is_Order_Completed(instance.order_id):
             symbol_obj = Symbol.objects.get(product=instance.product, symbol=instance.symbol, is_active=True)
             if instance.product == 'future':
-                order_id, order_status, price = Create_Order(configuration_obj, 'sell', 'CARRYFORWARD', symbol_obj.token, instance.symbol, symbol_obj.exchange, instance.price, instance.lot, "MARKET")
+                order_id, order_status, price = Create_Order(configuration_obj, 'SELL', 'CARRYFORWARD', symbol_obj.token, instance.symbol, symbol_obj.exchange, instance.price, instance.lot, "MARKET")
             else:
                 if instance.mode == 'CE':
-                    order_id, order_status, price = Create_Order(configuration_obj, 'sell', 'DELIVERY', symbol_obj.token, instance.symbol, symbol_obj.exchange, instance.price, instance.lot, "MARKET")
+                    order_id, order_status, price = Create_Order(configuration_obj, 'SELL', 'DELIVERY', symbol_obj.token, instance.symbol, symbol_obj.exchange, instance.price, instance.lot, "MARKET")
                 else:
-                    order_id, order_status, price = Create_Order(configuration_obj, 'buy', 'INTRADAY', symbol_obj.token, instance.symbol, symbol_obj.exchange, instance.price, instance.lot, "MARKET")
+                    order_id, order_status, price = Create_Order(configuration_obj, 'BUY', 'INTRADAY', symbol_obj.token, instance.symbol, symbol_obj.exchange, instance.price, instance.lot, "MARKET")
             
             if configuration_obj.place_order and (order_id in ['', 0, '0', None]):
                 print(f"Pratik: POST EXIT: ERROR: Not Accepting Orders: {instance.symbol} : {order_id}, {order_status}")

@@ -1,105 +1,56 @@
-from time import sleep
-from datetime import datetime, time, timedelta
-from zoneinfo import ZoneInfo
-from helper.indicator import SUPER_TREND
+import calendar
+from datetime import datetime, timedelta
 from django.utils.html import format_html
-from django.dispatch import receiver
-from django.db import transaction
-from django.db.models.signals import post_save
 
-from option.models import Transaction
-from helper.angel_orders import ExitAction
-
-def calculate_volatility(dt):
-  dt['Return'] = 100 * (dt['Close'].pct_change())
-  daily_volatility = dt['Return'].std()
-  return round(daily_volatility,4)
-
-
-def next_expiry_date(date, weekday):
-    days_ahead = weekday - date.weekday()
-    if days_ahead <= 0: # Target day already happened this week
-        days_ahead += 7
-    return date + timedelta(days_ahead)
-
-
-
-def colour(value):
+def colour(value, text=''):
     if value == 0:
         return value
     elif value < 0:
-        return format_html('<strong style="color:Red;">{}</strong>', value)
-    return format_html('<strong style="color:Green;">{}</strong>', value)
+        return format_html('{}<strong style="color:Red;">{}</strong>', text, value)
+    return format_html('{}<strong style="color:Green;">{}</strong>', text, value)
 
 
-def Entry_Call(data_frame, index_obj):
-  super_trend = SUPER_TREND(high=data_frame['High'], low=data_frame['Low'], close=data_frame['Close'], length=10, multiplier=3)
-  if data_frame['Low'].iloc[-1] > super_trend.iloc[-1] and data_frame['Close'].iloc[-2] < super_trend.iloc[-2]:
-    if (abs(data_frame['Close'].iloc[-1] - data_frame['Open'].iloc[-2]) > index_obj.chain_strike_price_diff) or (data_frame['High'].iloc[-1] > index_obj.r1 and data_frame['Low'].iloc[-1] < index_obj.r1) or (data_frame['High'].iloc[-1] > index_obj.r2 and data_frame['Low'].iloc[-1] < index_obj.r2) or (data_frame['High'].iloc[-1] > index_obj.pivot and data_frame['Low'].iloc[-1] < index_obj.pivot):
-      return False
-    return True
-  return False
+def calculate_volatility(dt):
+    dt['Return'] = 100 * (dt['Close'].pct_change())
+    daily_volatility = dt['Return'].std()
+    return daily_volatility
 
 
-def Entry_Put(data_frame, index_obj):
-  super_trend = SUPER_TREND(high=data_frame['High'], low=data_frame['Low'], close=data_frame['Close'], length=10, multiplier=3)
-  if data_frame['High'].iloc[-1] < super_trend.iloc[-1] and data_frame['Close'].iloc[-2] > super_trend.iloc[-2]:
-    if (abs(data_frame['Open'].iloc[-2] - data_frame['Close'].iloc[-1]) > index_obj.chain_strike_price_diff) or (data_frame['High'].iloc[-1] > index_obj.s1 and data_frame['Low'].iloc[-1] < index_obj.s1) or (data_frame['High'].iloc[-1] > index_obj.s2 and data_frame['Low'].iloc[-1] < index_obj.s2) or (data_frame['High'].iloc[-1] > index_obj.pivot and data_frame['Low'].iloc[-1] < index_obj.pivot):
-      return False
-    return True
-  return False
+def colour_indicator(obj, price):
+    diff = price - obj.price
+    profit = round(((diff/obj.price) * 100), 2)
+    if profit < 0:
+      return format_html('<strong style="color:Red;">{}</strong>', profit)
+    return format_html('<strong style="color:Green;">{}</strong>', profit)
 
 
-def Check_Entry(now, configuration_obj, index_obj, days_difference):
-  # Check daily Stoploss
-  if sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT').values_list('profit', flat=True)) < -configuration_obj.daily_fixed_stoploss:
-    return True
-  
-  # Check expiry index Entry Time
-  elif now.time() > time(15, 3, 00) and now.date() == index_obj.expiry_date:
-    return True
+def last_thursday(now):
+    # Get the last day of the month
+    last_day = calendar.monthrange(now.date().year, now.date().month)[1]
+    
+    # Create a date object for the last day of the month
+    last_date = datetime(now.date().year, now.date().month, last_day)
+    
+    # Find the last Thursday
+    while last_date.weekday() != calendar.THURSDAY:
+        last_date -= timedelta(days=1)
+        
+    return last_date
 
-  # Check expiry index Target
-  elif now.date() == index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > index_obj.fixed_target + 5):
-    return True
+def next_multiple_of_5_after_decimal(num):
+    # Get the decimal part, int value
+    decimal_part = num - int(num)
+    int_num = num - decimal_part
+    
+    if decimal_part == 0.0:
+        return num
+    
+    # Convert the decimal part to an integer in terms of tenths, hundredths, etc.
+    decimal_as_int = int(decimal_part * 100)  # 2 decimal places
 
-  # Check expiry index Stoploss
-  elif now.date() == index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -(index_obj.stoploss+20)):
-    return True
+    # Check the next multiples of 5
+    for i in range(decimal_as_int + 1, 100):  # Up to 1.00 (i.e., 100)
+        if i % 5 == 0:
+            return int_num + i / 100.0  # Return the result as a float
 
-  # Check Thrusday, Friday Finnifty index Target
-  elif index_obj.index in ['FINNIFTY'] and days_difference in [6, 5]:
-    if (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > 15):
-      return True
-    elif (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -index_obj.stoploss):
-      return True
-    else:
-      return False
-
-  # Check Thrusday, Friday Banknifty index Target
-  elif index_obj.index in ['BANKNIFTY'] and days_difference in [6, 5]:
-    if (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > 20):
-      return True
-    elif (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -index_obj.stoploss):
-      return True
-    else:
-      return False
-
-  # Check non expiry index Target
-  elif now.date() != index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) > index_obj.fixed_target/(days_difference+1)):
-    return True
-
-  # Check non expiry index Stoploss
-  elif now.date() != index_obj.expiry_date and (sum(Transaction.objects.filter(date__date=datetime.now(tz=ZoneInfo("Asia/Kolkata")).date(), indicate='EXIT', index=index_obj.index).values_list('profit', flat=True)) < -index_obj.stoploss):
-    return True
-
-  # default false
-  else:
-    return False
-
-
-@receiver(post_save, sender=Transaction)
-def check_exit_order_status(sender, instance, created, **kwargs):
-  if created:
-    sleep(1)
-    transaction.on_commit(lambda: ExitAction(sender, instance, created))
+    return int_num  # In case there's no valid multiple found

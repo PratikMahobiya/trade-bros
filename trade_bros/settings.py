@@ -7,22 +7,39 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.0/topics/settings/
 
 For the full list of settings and their values, see
-https://docs.djangoproject.com/en/5.0/ref/settings/
+https://docs.djangoproject.com/en/5.1/ref/settings/
+
+pip install --upgrade pip && pip install -r requirements.txt
+gunicorn --workers=1 --threads=3 trade_bros.wsgi:application
+
+Backup Db :
+    - python manage.py shell
+    - from stock.models import StockConfig
+    - from system_conf.models import Symbol
+    - open_entries_symbols = StockConfig.objects.filter(is_active=True).values_list('symbol__symbol', flat=True)
+    - Symbol.objects.filter(is_active=True).exclude(symbol__in=open_entries_symbols).delete()
+    - exit()
+
+    - python manage.py dumpdata auth.user system_conf.Configuration system_conf.Symbol stock.StockConfig stock.Transaction account.AccountKeys account.AccountConfiguration account.AccountStockConfig account.AccountTransaction > db.json
+Restore Db :
+    - Comment all post_save actions form action.py file (end of file)
+    - python manage.py loaddata db.json
+
 """
 
 import os
 import dj_database_url
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Build paths inside the project like this: BASE_DIR / "subdir".
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-kt0o0ru3ij04$4a*c4g%rvjo3%q5tzk&k#(60b@2c3yej96g-g"
+SECRET_KEY = "django-insecure-rn9i)qy0w(aokm0arqnmvaeco^i9e5g!h4736&chx(13qq-9al"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "1").lower() in ["true", "t", "1"]
@@ -31,7 +48,9 @@ ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "https://trade-bros.onrender.com,https://localhost:8000,https://127.0.0.1:8000").split(",")
 
-BED_URL_DOMAIN = os.getenv("CSRF_TRUSTED_ORIGINS", "https://trade-bros.onrender.com")
+RENDER_KEY = os.getenv("RENDER_KEY", "My Deploy")
+BED_URL_DOMAIN = os.getenv("BED_URL_DOMAIN", "https://tradebros.onrender.com")
+
 
 # Application definition
 
@@ -44,11 +63,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "admin_extra_buttons",
     "import_export",
-    
-    "logs",
-    "option",
+
     "system_conf",
-    "dashboard",
+    "stock",
+    "account",
 ]
 
 MIDDLEWARE = [
@@ -67,7 +85,7 @@ ROOT_URLCONF = "trade_bros.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": ['templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -84,25 +102,28 @@ WSGI_APPLICATION = "trade_bros.wsgi.application"
 
 
 # Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+# DATABASES = {
+#     'default': dj_database_url.parse("postgres://avnadmin:AVNS_rfihu563e20sAUBgk0_@moneyball-db-moneyball-db.i.aivencloud.com:14682/moneyball_db_1?sslmode=require", conn_max_age=0),
+# }
 
 DATABASES = {
-    "default": dj_database_url.parse("postgresql://trade_bros_db_user:OEq07sNOhGtD0LLKva5SAJhVsAOpG7Rg@dpg-crhtti3v2p9s73bg9ek0-a/trade_bros_db", conn_max_age=0),
-} if os.getenv("SERVER_DB", False) else {
-    "default": dj_database_url.parse("postgresql://trade_bros_db_user:OEq07sNOhGtD0LLKva5SAJhVsAOpG7Rg@dpg-crhtti3v2p9s73bg9ek0-a.virginia-postgres.render.com/trade_bros_db", conn_max_age=0),
+    'default': dj_database_url.parse("postgresql://moneyball_be45_user:KtHgpokVDc5VqFeizm3awVKrsX98h8Az@dpg-cuq5kelumphs73ed2gug-a/moneyball_be45", conn_max_age=0),
+} if os.getenv('SERVER_DB', False) else {
+    'default': dj_database_url.parse("postgresql://moneyball_be45_user:KtHgpokVDc5VqFeizm3awVKrsX98h8Az@dpg-cuq5kelumphs73ed2gug-a.singapore-postgres.render.com/moneyball_be45", conn_max_age=0),
 }
 
 # DATABASES = {
-#     "default": dj_database_url.parse("postgres://tradebros_ffv6_user:XLeQuTKte7aoyvQa5TOlWWf885tCGu4v@dpg-cpfnnartg9os73bhumqg-a.virginia-postgres.render.com/tradebros_ffv6", conn_max_age=600),
-# } if os.getenv("SERVER_DB", True) else {
 #     "default": {
 #         "ENGINE": "django.db.backends.sqlite3",
 #         "NAME": BASE_DIR / "db.sqlite3",
 #     }
 # }
 
+
 # Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -121,7 +142,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
+# https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
@@ -130,23 +151,44 @@ TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 
 USE_TZ = True
-USE_L10N = False
 
-DATETIME_FORMAT = "N j, Y, g:i:s a"
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Telegram Configuration
-TELEGRAM_APP_ID = '29604910'
-TELEGRAM_HASH_ID = 'a1645f10ee4abaf7ef0ebe4038fe5137'
-TELEGRAM_BOT = '7040073287:AAGO4tJeGsRCCALtMyXepttn_uLlI3nqJdk'
+
+# Broker Detail
+BROKER_PIN = int(os.getenv("BROKER_PIN", '0000'))
+BROKER_USER_ID = os.getenv("BROKER_USER_ID", 'User-Id Required')
+BROKER_API_KEY = os.getenv("BROKER_API_KEY", 'Api Key Required')
+BROKER_TOTP_KEY = os.getenv("BROKER_TOTP_KEY", 'TOTP Key required')
+
+SMTP_SENDER_NAME = 'TradeBros.AI'
+SMTP_SENDER_EMAIL = 'tradebros@gmail.com'
+SMTP_SENDER_LOGIN = '7da65c001@smtp-brevo.com'
+SMTP_SENDER_PASSWORD = 't6KCV3yS9sX0jWBM'
+
+
+import pyotp
+from SmartApi import SmartConnect
+connection = SmartConnect(api_key=BROKER_API_KEY)
+connection.generateSession(BROKER_USER_ID, BROKER_PIN, totp=pyotp.TOTP(BROKER_TOTP_KEY).now())
+
+broker_connection = connection
+account_connections = {}
+open_position = {}
+entry_holder = {}
+
+from SmartApi.smartWebSocketV2 import SmartWebSocketV2
+BROKER_AUTH_TOKEN = broker_connection.access_token
+BROKER_FEED_TOKEN = broker_connection.feed_token
+sws = SmartWebSocketV2(BROKER_AUTH_TOKEN, BROKER_API_KEY, BROKER_USER_ID, BROKER_FEED_TOKEN)

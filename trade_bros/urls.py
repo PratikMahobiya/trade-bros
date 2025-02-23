@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 
@@ -22,9 +23,8 @@ admin.site.index_title = 'Features Area'         # default: "Site administration
 admin.site.site_title = 'Trade Bros'             # default: "Django site admin"
 
 urlpatterns = [
-    path('', admin.site.urls),
-    path('api/trade/', include('option.urls')),
-    path('api/dashboard/', include('dashboard.urls')),
+    path("api/system_conf/", include("system_conf.urls")),
+    path("", admin.site.urls),
 ]
 
 import clock

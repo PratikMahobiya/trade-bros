@@ -534,7 +534,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                             # target = lower_value if lower_value else close - close * (configuration_obj.stoploss)/100
                             # stoploss = upper_value if upper_value else close + close * (configuration_obj.target)/100
 
-                    if nop < configuration_obj.open_position and symbol_obj.name not in exclude_symbols_names and mode not in [None]:
+                    if nop < configuration_obj.open_position and mode not in [None]: #  and symbol_obj.name not in exclude_symbols_names
                         print(f'TradeBros: {log_identifier}: {symbol_obj.name}: Prev close: {prev_close}: Close: {close}: Open: {open}')
                         data = {
                             'log_identifier': log_identifier,

@@ -673,7 +673,7 @@ def SquareOff():
             for stock_obj in entries_list:
                 try:
                     if stock_obj.symbol.expiry == now.date():
-                        # if stock_obj.symbol.name not in [ 'NIFTY', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY', 'NIFTYNXT50' ]:
+                        # if stock_obj.symbol.name not in [ 'NIFTY', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY', 'NIFTYNXT50', 'SENSEX', 'BANKEX' ]:
                             data = {
                                 'exit_type': 'SQ-OFF',
                                 'configuration_obj': future_configuration_obj if stock_obj.symbol.product == 'future' else equity_configuration_obj,
@@ -750,13 +750,15 @@ def PivotUpdate():
         print(f'TradeBros: PIVOT UPDATE: Started : Total : {symbol_list.count()}')
         for index, symbol_obj in enumerate(symbol_list):
             try:
-                if symbol_obj.symbol in ['Nifty 50', 'Nifty Bank', 'NIFTY MID SELECT', 'Nifty Fin Service', 'Nifty Next 50']:
+                if symbol_obj.symbol in ['Nifty 50', 'Nifty Bank', 'NIFTY MID SELECT', 'Nifty Fin Service', 'Nifty Next 50', 'SENSEX', 'BANKEX']:
                     yfsymb = {
                         'NIFTY': '^NSEI',
                         'BANKNIFTY': '^NSEBANK',
                         'MIDCPNIFTY' : 'NIFTY_MID_SELECT.NS',
                         'FINNIFTY': 'NIFTY_FIN_SERVICE.NS',
-                        'NIFTYNXT50': '^NSMIDCP'
+                        'NIFTYNXT50': '^NSMIDCP',
+                        'SENSEX': '^BSESN',
+                        'BANKEX': 'BSE-BANK.BO'
                     }
                     symbol = yfsymb[symbol_obj.name]
                 else:
@@ -1004,7 +1006,9 @@ def CheckFnOLtp():
                     'BANKNIFTY': '^NSEBANK',
                     'MIDCPNIFTY' : 'NIFTY_MID_SELECT.NS',
                     'FINNIFTY': 'NIFTY_FIN_SERVICE.NS',
-                    'NIFTYNXT50': '^NSMIDCP'
+                    'NIFTYNXT50': '^NSMIDCP',
+                    'SENSEX': '^BSESN',
+                    'BANKEX': 'BSE-BANK.BO',
                 }
                 symbol = yfsymb[sym.symbol.name]
             else:

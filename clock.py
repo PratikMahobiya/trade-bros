@@ -1,7 +1,7 @@
 import tzlocal
 from django.contrib.auth.models import User
 from apscheduler.schedulers.background import BackgroundScheduler
-from task import AccountConnection, BrokerConnection, CheckFnOSymbolDisable, CheckTodayEntry, MarketDataUpdate, PivotUpdate, SquareOff, stay_awake, SymbolSetup, Equity_BreakOut_1, FnO_BreakOut_1, NotifyUsers, StopSocketSetup, SocketSetup, CheckLtp, TriggerBuild
+from task import OI_SNATCHER, AccountConnection, BrokerConnection, CheckFnOLtp, CheckFnOSymbolDisable, CheckTodayEntry, MarketDataUpdate, OiChnageCleanup, PivotUpdate, SquareOff, stay_awake, SymbolSetup, Equity_BreakOut_1, FnO_BreakOut_1, NotifyUsers, StopSocketSetup, SocketSetup, CheckEQLtp, TriggerBuild, UpdateHoliday
 
 
 def start():
@@ -32,14 +32,16 @@ def start():
                 minute='*/2', timezone='Asia/Kolkata')
     sched.add_job(BrokerConnection, 'cron',
                 hour='9', minute='0', timezone='Asia/Kolkata')
+    sched.add_job(UpdateHoliday, 'cron',
+                hour='9', minute='5', timezone='Asia/Kolkata')
     sched.add_job(SymbolSetup, 'cron',
                 hour='9', minute='2', timezone='Asia/Kolkata')
     sched.add_job(AccountConnection, 'cron',
                 hour='9', minute='10', timezone='Asia/Kolkata')
     sched.add_job(PivotUpdate, 'cron',
-                hour='9', minute='16', timezone='Asia/Kolkata')
-    sched.add_job(NotifyUsers, 'cron',
-                hour='20', minute='0', timezone='Asia/Kolkata')
+                hour='9', minute='5', timezone='Asia/Kolkata')
+    # sched.add_job(NotifyUsers, 'cron',
+    #             hour='20', minute='0', timezone='Asia/Kolkata')
     sched.add_job(MarketDataUpdate, 'cron', day_of_week='mon-fri',
                 hour='8-15', minute='*/13', timezone='Asia/Kolkata')
     sched.add_job(CheckTodayEntry, 'cron', day_of_week='mon-fri',
@@ -48,18 +50,24 @@ def start():
                 hour='9-15', minute='*/3', timezone='Asia/Kolkata')
     sched.add_job(SquareOff, 'cron', day_of_week='mon-fri',
                 hour='15', minute='17', timezone='Asia/Kolkata')
-    sched.add_job(Equity_BreakOut_1, 'cron', day_of_week='mon-fri',
-                hour='9-15', minute='*/2', timezone='Asia/Kolkata')
+    # sched.add_job(Equity_BreakOut_1, 'cron', day_of_week='mon-fri',
+    #             hour='9-15', minute='*/2', timezone='Asia/Kolkata')
     sched.add_job(FnO_BreakOut_1, 'cron', day_of_week='mon-fri',
                 hour='9-15', minute='*/5', timezone='Asia/Kolkata')
     sched.add_job(TriggerBuild, 'cron',
-                hour='8,12,16,20,0,4', minute='55', timezone='Asia/Kolkata')
+                hour='8,16,20,4', minute='55', timezone='Asia/Kolkata')
     sched.add_job(SocketSetup, 'cron',
                 hour='9', minute='12', timezone='Asia/Kolkata')
-    sched.add_job(CheckLtp, 'cron', day_of_week='mon-fri', max_instances=2,
+    # sched.add_job(CheckEQLtp, 'cron', day_of_week='mon-fri', max_instances=2,
+    #             hour='9-15', second='*/30', timezone='Asia/Kolkata')
+    sched.add_job(CheckFnOLtp, 'cron', day_of_week='mon-fri', max_instances=2,
                 hour='9-15', second='*/30', timezone='Asia/Kolkata')
     # sched.add_job(StopSocketSetup, 'cron', day_of_week='mon-fri',
     #             hour='5', minute='5', timezone='Asia/Kolkata')
+    sched.add_job(OiChnageCleanup, 'cron', day_of_week='mon-fri',
+                hour='9', minute='14', timezone='Asia/Kolkata')
+    # sched.add_job(OI_SNATCHER, 'cron', day_of_week='mon-fri',
+    #             hour='9-15', minute='*/15', timezone='Asia/Kolkata')
     sched.start()
     SocketSetup(log_identifier='Restart')
     return True

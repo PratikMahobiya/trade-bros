@@ -1,21 +1,23 @@
 import pyotp
 import requests
 import threading
+import pandas as pd
 import yfinance as yf
 from time import sleep
 from zoneinfo import ZoneInfo
+from bs4 import BeautifulSoup
 from SmartApi import SmartConnect
 from helper.emails import email_send
 from account.action import UserTrade
-from helper.common import last_thursday
 from datetime import datetime, time, timedelta
-from helper.angel_function import historical_data
 from stock.models import StockConfig, Transaction
-from helper.indicator import BB, PIVOT, SUPER_TREND
-from system_conf.models import Configuration, Symbol
 from SmartApi.smartWebSocketV2 import SmartWebSocketV2
+from helper.indicator import ATR, BB, PIVOT, SUPER_TREND
+from helper.common import find_closest_values, last_thursday
 from helper.angel_socket import LTP_Action, connect_to_socket
-from helper.trade_action import Price_Action_Trade, Stock_Square_Off
+from system_conf.models import Configuration, Holiday, OIChange, Symbol
+from helper.angel_function import get_max_oi_strikeprice, historical_data
+from helper.trade_action import Price_Action_Trade, Stock_Square_Off, gap_entry_check
 from account.models import AccountConfiguration, AccountKeys, AccountStockConfig, AccountTransaction
 from trade_bros.settings import sws, open_position, BED_URL_DOMAIN, BROKER_API_KEY, BROKER_PIN, BROKER_TOTP_KEY, BROKER_USER_ID, broker_connection, account_connections, entry_holder, RENDER_KEY
 
@@ -49,7 +51,7 @@ def NotifyUsers():
             if invested_value > 0:
                 # Send Email Notification
                 template = 'portfolio_notification.html'
-                subject = f"{user.user_id}-{user.first_name}'s Portfolio on TradeBros.AI"
+                subject = f"{user.user_id}-{user.first_name}'s Portfolio on MoneyBall.AI"
                 recipients = [user.email]
                 email_context = {
                     "name": user.first_name,
@@ -75,7 +77,7 @@ def MarketDataUpdate(auto_trigger=True):
         print(f'TradeBros: Market data Update: Started : Runtime : {now.strftime("%d-%b-%Y %H:%M:%S")}')
         if now.time().minute in list(range(0, 60, 5)):
             sleep(10)
-        nse_tokens = list(Symbol.objects.filter(exchange='NSE', is_active=True).values_list('token', flat=True))
+        nse_tokens = list(Symbol.objects.filter(exchange='NSE', fno=True, is_active=True).values_list('token', flat=True))
         token_list = [nse_tokens[x:x+50] for x in range(0, len(nse_tokens), 50)]
         global broker_connection
         for list_ in token_list:
@@ -87,7 +89,7 @@ def MarketDataUpdate(auto_trigger=True):
                         if (now.time() > time(8, 00, 00) and now.time() < time(9, 14, 00)) or not auto_trigger:
                             Symbol.objects.filter(token=i['symbolToken'],
                                                     is_active=True).update(
-                                                        volume=i['tradeVolume'],
+                                                        volume=i['tradeVolume'] or 99999999999.0,
                                                         oi=i['opnInterest'],
                                                         percentchange=i['percentChange'],
                                                         valuechange=i['netChange'],
@@ -98,7 +100,7 @@ def MarketDataUpdate(auto_trigger=True):
                         else:
                             Symbol.objects.filter(token=i['symbolToken'],
                                                     is_active=True).update(
-                                                        volume=i['tradeVolume'],
+                                                        volume=i['tradeVolume'] or 99999999999.0,
                                                         oi=i['opnInterest'],
                                                         percentchange=i['percentChange'],
                                                         valuechange=i['netChange'],
@@ -162,13 +164,13 @@ def SymbolSetup():
         for i in data:
             product = None
             expity_date = datetime.strptime(i['expiry'], '%d%b%Y') if i['expiry'] else None
-            if i['exch_seg'] in ['NSE', 'NFO']:# and i['name'] not in exclude_symbol:
-                if i['instrumenttype'] in ['OPTSTK', 'OPTIDX'] and (expity_date.month == month_num) and (expity_date.date() > now.date()): # , 'OPTIDX', 'OPTFUT'
+            if i['exch_seg'] in ['NSE', 'NFO', 'BSE', 'BFO'] and i['name'] in ['NIFTY', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY', 'SENSEX', 'BANKEX']:
+                if i['instrumenttype'] in ['OPTSTK', 'OPTIDX'] and (expity_date.month == month_num) and (expity_date.date() >= now.date()): # , 'OPTIDX', 'OPTFUT'
                     product = 'future'
-                elif (i['symbol'] in ['Nifty 50', 'Nifty Bank', 'NIFTY MID SELECT', 'Nifty Fin Service', 'Nifty Next 50'] and expity_date == None) or i['symbol'].endswith('-EQ'):
+                elif (i['symbol'] in ['Nifty 50', 'Nifty Bank', 'NIFTY MID SELECT', 'Nifty Fin Service', 'SENSEX', 'BANKEX'] and expity_date == None) or i['symbol'].endswith('-EQ'):
                     product = 'equity'
                 if product is not None:
-                    if i['token'] not in exist_token_symbols and i['token'] not in processed_token:
+                    if i['token'] not in exist_token_symbols and i['token'] not in processed_token and i['symbol'] not in ['MRF-EQ']:
                         bulk_create_list.append(
                             Symbol(
                                 product=product,
@@ -201,6 +203,7 @@ def SymbolSetup():
 
         future_enables_symbols = set(Symbol.objects.filter(product='future', is_active=True).values_list('name', flat=True))
         Symbol.objects.filter(product='equity', name__in=future_enables_symbols, is_active=True).update(fno=True)
+        Symbol.objects.filter(fno=False).delete()
     except Exception as e:
         print(f'TradeBros: Symbol Setup: Main Error: {e}')
     print(f'TradeBros: Symbol Setup: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
@@ -226,30 +229,33 @@ def AccountConnection():
         user_accounts = AccountKeys.objects.filter(is_active=True)
 
         for user_account_obj in user_accounts:
-            connection = SmartConnect(api_key=user_account_obj.api_key)
-            connection.generateSession(user_account_obj.user_id, user_account_obj.user_pin, totp=pyotp.TOTP(user_account_obj.totp_key).now())
-            account_connections[user_account_obj.user_id] = connection
+            try:
+                connection = SmartConnect(api_key=user_account_obj.api_key)
+                connection.generateSession(user_account_obj.user_id, user_account_obj.user_pin, totp=pyotp.TOTP(user_account_obj.totp_key).now())
+                account_connections[user_account_obj.user_id] = connection
 
-            # Get Account Detail
-            account_detail = connection.getProfile(connection.refresh_token)
-            if account_detail['message'] == 'SUCCESS':
-                # Get Funds detail
-                if now.time() < time(9, 14, 00):
-                    fund_detail = connection.rmsLimit()
-                    if fund_detail['message'] == 'SUCCESS':
-                        account_config, _ = AccountConfiguration.objects.get_or_create(account=user_account_obj)
-                        account_config.account_balance = float(fund_detail['data']['availablecash'])
-                        if account_config.total_open_position > account_config.active_open_position:
-                            if account_config.account_balance <= 10:
-                                account_config.account_balance = 100000
-                                account_config.entry_amount = 10000
-                            else:
-                                account_config.entry_amount = float(fund_detail['data']['availablecash'])/(account_config.total_open_position-account_config.active_open_position)
-                            account_config.save()
+                # Get Account Detail
+                account_detail = connection.getProfile(connection.refresh_token)
+                if account_detail['message'] == 'SUCCESS':
+                    # Get Funds detail
+                    if now.time() < time(9, 14, 00):
+                        fund_detail = connection.rmsLimit()
+                        if fund_detail['message'] == 'SUCCESS':
+                            account_config, _ = AccountConfiguration.objects.get_or_create(account=user_account_obj)
+                            account_config.account_balance = float(fund_detail['data']['availablecash'])
+                            if account_config.total_open_position > account_config.active_open_position:
+                                if account_config.account_balance <= 10:
+                                    account_config.account_balance = 100000
+                                    account_config.entry_amount = 10000
+                                else:
+                                    account_config.entry_amount = float(fund_detail['data']['availablecash'])/(account_config.total_open_position-account_config.active_open_position)
+                                account_config.save()
 
-                print(f'TradeBros: Account Connection: Session generated for {account_detail["data"]["name"]} : {account_detail["data"]["clientcode"]}')
-            else:
-                print(f'TradeBros: Account Connection: failed to generated session for {user_account_obj.first_name} {user_account_obj.last_name} : {user_account_obj.user_id}')
+                    print(f'TradeBros: Account Connection: Session generated for {account_detail["data"]["name"]} : {account_detail["data"]["clientcode"]}')
+                else:
+                    print(f'TradeBros: Account Connection: failed to generated session for {user_account_obj.first_name} {user_account_obj.last_name} : {user_account_obj.user_id}')
+            except Exception as e:
+                print(f'TradeBros: Account Connection: Error while creating connection: {e}')
 
         print(f'TradeBros: Account Connection: Generate Session for accounts: Ended')
     except Exception as e:
@@ -285,6 +291,9 @@ def Equity_BreakOut_1(auto_trigger=True):
 
     try:
         global sws, open_position, broker_connection
+        check_holiday = Holiday.objects.filter(date=now.date(), is_active=True)
+        if check_holiday:
+            raise Exception(f"TradeBros: {log_identifier}: Today is Holiday : {check_holiday[0].holiday}")
         if auto_trigger:
             if now.time() < time(9, 18, 00):
                 raise Exception(f"TradeBros: {log_identifier}: Entry Not Started")
@@ -325,6 +334,7 @@ def Equity_BreakOut_1(auto_trigger=True):
         for index, symbol_name in enumerate(symbol_details):
             try:
                 mode = None
+                entry_type = 'BO'
 
                 # Starts
                 symbol_obj = symbol_obj_list[symbol_name]
@@ -354,7 +364,9 @@ def Equity_BreakOut_1(auto_trigger=True):
                             'fixed_target': configuration_obj.fixed_target,
                             'lot': symbol_obj.lot,
                             'sws': sws,
-                            'open_position': open_position
+                            'open_position': open_position,
+                            'entry_type': entry_type,
+                            'close': close,
                         }
                         new_entry = Price_Action_Trade(data, new_entry)
                 else:
@@ -395,19 +407,26 @@ def FnO_BreakOut_1(auto_trigger=True):
     from_day = now - timedelta(days=90)
 
     try:
-        if auto_trigger:
-            if now.time() < time(9, 22, 00):
-                raise Exception(f"TradeBros: {log_identifier}: Entry Not Started")
-            elif now.time() > time(15, 11, 00):
-                raise Exception(f"TradeBros: {log_identifier}: Entry Not Stopped")
+        # if auto_trigger:
+        #     if now.time() < time(9, 19, 00):
+        #         raise Exception(f"TradeBros: {log_identifier}: Entry Not Started")
+        #     elif now.time() > time(15, 27, 00):
+        #         raise Exception(f"TradeBros: {log_identifier}: Entry Not Stopped")
+        check_holiday = Holiday.objects.filter(date=now.date(), is_active=True)
+        if check_holiday:
+            raise Exception(f"TradeBros: {log_identifier}: Today is Holiday : {check_holiday[0].holiday}")
+        if now.time() < time(9, 19, 00):
+            sleep(10)
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
-
-        today_earning = Transaction.objects.filter(product=product, indicate='EXIT', created_at__date=now.date(), is_active=True).values_list('profit', flat=True)
         
-        exclude_symbols_names = Transaction.objects.filter(product=product, indicate='ENTRY', created_at__date=now.date(), is_active=True).values_list('name', flat=True)
+        exclude_symbols_names = Transaction.objects.filter(product=product, created_at__date=now.date(), is_active=True).values_list('name', flat=True)
 
         symbol_list = Symbol.objects.filter(product='equity', fno=True, is_active=True).order_by('-volume')
+        symbol_list_obj_dict = {
+            i.name: i for i in symbol_list
+        }
+        oi_sorted_symbols = OIChange.objects.filter(is_active=True).order_by('-oi').values_list('name', flat=True)
 
         global sws, open_position, broker_connection, entry_holder
         if not entry_holder.get(log_identifier):
@@ -422,7 +441,10 @@ def FnO_BreakOut_1(auto_trigger=True):
         index_list = [ 'NIFTY', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY', 'NIFTYNXT50' ]
         for index, symbol_obj in enumerate(symbol_list):
             try:
+                # symbol_obj = symbol_list_obj_dict[sym_name]
                 mode = None
+                entry_type = None
+                pivot_traditional = None
 
                 data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_DAY', product)
                 sleep(0.3)
@@ -434,42 +456,104 @@ def FnO_BreakOut_1(auto_trigger=True):
                 max_high = max(data_frame['High'].iloc[-30:-1]) if symbol_obj.name not in index_list else max(data_frame['High'].iloc[-5:-1])
                 min_low = min(data_frame['Low'].iloc[-30:-1]) if symbol_obj.name not in index_list else min(data_frame['Low'].iloc[-5:-1])
 
-                super_trend = SUPER_TREND(high=data_frame['High'], low=data_frame['Low'], close=data_frame['Close'], length=10, multiplier=3)
+                super_trend = SUPER_TREND(high=data_frame['High'], low=data_frame['Low'], close=data_frame['Close'], length=10, multiplier=5)
+
+                atr = ATR(high=data_frame['High'], low=data_frame['Low'], close=data_frame['Close'], timeperiod=14)
+
+                atr_trsl_multiplier = 1.45
+                if (prev_close > symbol_obj.month_r1 and prev_close < symbol_obj.month_r3) or (prev_close < symbol_obj.month_s1 and prev_close > symbol_obj.month_s3):
+                    atr_trsl_multiplier = 0.95
+                elif prev_close > symbol_obj.month_r3 or prev_close < symbol_obj.month_s3:
+                    atr_trsl_multiplier = 0.45
 
                 entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
-                if not entries_list:# and sum(today_earning) < configuration_obj.fixed_target * 2:
+                if not entries_list and now.time() > time(9, 19, 00) and now.time() < time(15, 27, 00):
+                    
+                    gap_ce = gap_entry_check(now, 'CE', symbol_obj, index_list, product)
+                    gap_pe = gap_entry_check(now, 'PE', symbol_obj, index_list, product)
 
-                    if (max_high < close) or (close > super_trend.iloc[-1] and prev_close < super_trend.iloc[-2]):
-                        mode = 'CE'
-                        stock_future_symbol = Symbol.objects.filter(
-                                                    product='future',
-                                                    name=symbol_obj.name,
-                                                    symbol__endswith='CE',
-                                                    strike__gt=close,
-                                                    fno=True,
-                                                    is_active=True).order_by('expiry', 'strike')
+                    if gap_ce or (((max_high < close and close > super_trend.iloc[-1]) or (close > super_trend.iloc[-1] and prev_close < super_trend.iloc[-2])) and len({super_trend.iloc[-1], super_trend.iloc[-2], super_trend.iloc[-3], super_trend.iloc[-4]}) != 1):
+                        target = (prev_close+open)/2 + atr.iloc[-1] * atr_trsl_multiplier
 
-                    elif (min_low > close) or (close < super_trend.iloc[-1] and prev_close > super_trend.iloc[-2]):
-                        mode = 'PE'
-                        stock_future_symbol = Symbol.objects.filter(
-                                                    product='future',
-                                                    name=symbol_obj.name,
-                                                    symbol__endswith='PE',
-                                                    strike__lt=close,
-                                                    fno=True,
-                                                    is_active=True).order_by('expiry', '-strike')
+                        from_day_1hr = now - timedelta(days=7)
+                        data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'ONE_HOUR', product)
+                        last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
+                        last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
+                        greater_values = [index+2 for index, value in enumerate(last_7_candle_high_value) if value < data_frame_1hr['Open'].iloc[-1]]
+                        stoploss = data_frame_1hr['Low'].iloc[-greater_values[0]] if greater_values else max(last_7_candle_low_value)
+                        if target > close and stoploss < close:
+                            if gap_ce:
+                                entry_type = 'GP'
+                            elif (max_high < close and close > super_trend.iloc[-1]):
+                                entry_type = 'BO'
+                            else:
+                                entry_type = 'ST'
+                            mode = 'CE'
+                            stock_future_symbol = Symbol.objects.filter(
+                                                        product='future',
+                                                        name=symbol_obj.name,
+                                                        symbol__endswith='CE',
+                                                        strike__gt=close,
+                                                        fno=True,
+                                                        is_active=True).order_by('expiry', 'strike')
+
+                            # target_pivot_values = [ symbol_obj.pivot, symbol_obj.r1, symbol_obj.r2, symbol_obj.r3, symbol_obj.s1, symbol_obj.s2, symbol_obj.s3, symbol_obj.week_pivot, symbol_obj.week_r1, symbol_obj.week_r2, symbol_obj.week_r3, symbol_obj.week_s1, symbol_obj.week_s2, symbol_obj.week_s3 ]
+                            # stoploss_pivot_values = [ symbol_obj.month_pivot, symbol_obj.month_r1, symbol_obj.month_r2, symbol_obj.month_r3, symbol_obj.month_s1, symbol_obj.month_s2, symbol_obj.month_s3 ]
+                            
+                            # upper_value, _ = find_closest_values(target_pivot_values, close)
+                            # _, lower_value = find_closest_values(stoploss_pivot_values, close)
+                            # target = upper_value if upper_value else close + close * (configuration_obj.target)/100
+                            # stoploss = lower_value if lower_value else close - close * (configuration_obj.stoploss)/100
+
+                    elif gap_pe or (((min_low > close and close < super_trend.iloc[-1]) or (close < super_trend.iloc[-1] and prev_close > super_trend.iloc[-2])) and len({super_trend.iloc[-1], super_trend.iloc[-2], super_trend.iloc[-3], super_trend.iloc[-4]}) != 1):
+                        target = (prev_close+open)/2 - atr.iloc[-1] * atr_trsl_multiplier
+
+                        from_day_1hr = now - timedelta(days=7)
+                        data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'ONE_HOUR', product)
+                        last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
+                        last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
+                        greater_values = [index+2 for index, value in enumerate(last_7_candle_low_value) if value > data_frame_1hr['Open'].iloc[-1]]
+                        stoploss = data_frame_1hr['High'].iloc[-greater_values[0]] if greater_values else min(last_7_candle_high_value)
+                        if target < close and stoploss > close:
+                            if gap_pe:
+                                entry_type = 'GP'
+                            elif (min_low > close and close < super_trend.iloc[-1]):
+                                entry_type = 'BO'
+                            else:
+                                entry_type = 'ST'
+                            mode = 'PE'
+                            stock_future_symbol = Symbol.objects.filter(
+                                                        product='future',
+                                                        name=symbol_obj.name,
+                                                        symbol__endswith='PE',
+                                                        strike__lt=close,
+                                                        fno=True,
+                                                        is_active=True).order_by('expiry', '-strike')
+
+                            # target_pivot_values = [ symbol_obj.pivot, symbol_obj.r1, symbol_obj.r2, symbol_obj.r3, symbol_obj.s1, symbol_obj.s2, symbol_obj.s3, symbol_obj.week_pivot, symbol_obj.week_r1, symbol_obj.week_r2, symbol_obj.week_r3, symbol_obj.week_s1, symbol_obj.week_s2, symbol_obj.week_s3 ]
+                            # stoploss_pivot_values = [ symbol_obj.month_pivot, symbol_obj.month_r1, symbol_obj.month_r2, symbol_obj.month_r3, symbol_obj.month_s1, symbol_obj.month_s2, symbol_obj.month_s3 ]
+                            
+                            # upper_value, _ = find_closest_values(stoploss_pivot_values, close)
+                            # _, lower_value = find_closest_values(target_pivot_values, close)
+                            # target = lower_value if lower_value else close - close * (configuration_obj.stoploss)/100
+                            # stoploss = upper_value if upper_value else close + close * (configuration_obj.target)/100
 
                     if nop < configuration_obj.open_position and symbol_obj.name not in exclude_symbols_names and mode not in [None]:
+                        print(f'TradeBros: {log_identifier}: {symbol_obj.name}: Prev close: {prev_close}: Close: {close}: Open: {open}')
                         data = {
                             'log_identifier': log_identifier,
                             'configuration_obj': configuration_obj,
                             'product': product,
                             'mode': mode,
-                            'target': configuration_obj.target,
-                            'stoploss': configuration_obj.stoploss,
-                            'fixed_target': configuration_obj.fixed_target,
+                            'target': target, # configuration_obj.target,
+                            'stoploss': stoploss, # configuration_obj.stoploss,
+                            'fixed_target': target, # configuration_obj.fixed_target,
                             'sws': sws,
-                            'open_position': open_position
+                            'open_position': open_position,
+                            'entry_type': entry_type,
+                            'close': close,
+                            'open': open,
+                            'prev_close': prev_close
                         }
 
                         for fut_sym_obj in stock_future_symbol:
@@ -490,18 +574,76 @@ def FnO_BreakOut_1(auto_trigger=True):
                                 new_entry = Price_Action_Trade(data, new_entry)
                                 nop += 1
                                 break
+                        # stock_future_symbol_list = stock_future_symbol[2:5] if len(stock_future_symbol) >= 5 and len(stock_future_symbol) >= 2 else stock_future_symbol
+                        # print(f'TradeBros: {log_identifier}: Total Strike Price : {len(stock_future_symbol)} : In use {len(stock_future_symbol_list)}')
+                        # print(f'TradeBros: {log_identifier}: Chain ATM {close} : OTM Strike Price : {[i.strike for i in stock_future_symbol_list]}')
+                        # fut_sym_obj = get_max_oi_strikeprice(stock_future_symbol_list)
+                        # if fut_sym_obj:
+                        #     ltp = broker_connection.ltpData(fut_sym_obj.exchange, fut_sym_obj.symbol, fut_sym_obj.token)['data']['ltp']
+                        #     lot = fut_sym_obj.lot
+                        #     chk_price = ltp * lot
+                        #     if chk_price < configuration_obj.amount:
+                        #         while True:
+                        #             chk_price = ltp * lot
+                        #             if chk_price >= configuration_obj.amount:
+                        #                 lot = lot - fut_sym_obj.lot
+                        #                 break
+                        #             lot += fut_sym_obj.lot
+
+                        #         data['ltp'] = ltp
+                        #         data['lot'] = lot
+                        #         data['symbol_obj'] = fut_sym_obj
+                        #         new_entry = Price_Action_Trade(data, new_entry)
+                        #         nop += 1
+                        #     else:
+                        #         print(f'TradeBros: {log_identifier}: Need more money to take entry on {fut_sym_obj.symbol} : Required {chk_price} : Current {configuration_obj.amount}')
+                        # else:
+                        #     print(f'TradeBros: {log_identifier}: Failed to fetch OI of strike prices')
                 else:
                     stock_obj = entries_list[0]
+                    if stock_obj.manual_updated == False and now.minute == 15:
+                        if stock_obj.mode == 'CE':
+                            from_day_1hr = now - timedelta(days=7)
+                            data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'ONE_HOUR', product)
+                            last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
+                            last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
+                            greater_values = [index+2 for index, value in enumerate(last_7_candle_high_value) if value < data_frame_1hr['Open'].iloc[-1]]
+
+                            target = (stock_obj.entry_prev_close_value+stock_obj.entry_open_value)/2 + atr.iloc[-1] * atr_trsl_multiplier
+                            stock_obj.target = target
+                            stock_obj.fixed_target = target
+                            stoploss = data_frame_1hr['Low'].iloc[-greater_values[0]] if greater_values else max(last_7_candle_low_value)
+                            if stock_obj.stoploss < stoploss:
+                                stock_obj.stoploss = stoploss
+                        else:
+                            from_day_1hr = now - timedelta(days=7)
+                            data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'ONE_HOUR', product)
+                            last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
+                            last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
+                            greater_values = [index+2 for index, value in enumerate(last_7_candle_low_value) if value > data_frame_1hr['Open'].iloc[-1]]
+                            target = (stock_obj.entry_prev_close_value+stock_obj.entry_open_value)/2 - atr.iloc[-1] * atr_trsl_multiplier
+                            stock_obj.target = target
+                            stock_obj.fixed_target = target
+                            stoploss = data_frame_1hr['High'].iloc[-greater_values[0]] if greater_values else min(last_7_candle_high_value)
+                            if stock_obj.stoploss > stoploss:
+                                stock_obj.stoploss = stoploss
+                        stock_obj.save()
+                    
                     # Perform action if required for Open Entries
-                    if symbol_obj.name not in index_list:
-                        if ((high > symbol_obj.r1 and low < symbol_obj.r1) or (high > symbol_obj.r2 and low < symbol_obj.r2) or (high > symbol_obj.pivot and low < symbol_obj.pivot) or (high > symbol_obj.s1 and low < symbol_obj.s1) or (high > symbol_obj.s2 and low < symbol_obj.s2)):
-                            data = {
-                                'exit_type': 'PIVOT',
-                                'configuration_obj': configuration_obj,
-                                'stock_obj': stock_obj
-                            }
-                            print(f'TradeBros: {log_identifier}: PIVOT Exit: FnO-Symbol: {symbol_obj.symbol} : {stock_obj.ltp}')
-                            Stock_Square_Off(data, stock_obj.ltp)
+                    # if symbol_obj.name not in index_list:
+                    #     data = {
+                    #         'exit_type': 'F-Exit',
+                    #         'configuration_obj': configuration_obj,
+                    #         'stock_obj': stock_obj
+                    #     }
+                    #     if (stock_obj.mode == 'CE' and close < super_trend.iloc[-1]) or (stock_obj.mode == 'PE' and close > super_trend.iloc[-1]):
+                    #         data['exit_type'] = 'ST-EXIT'
+                    #         print(f'TradeBros: {log_identifier}: {data["exit_type"]} Exit: FnO-Symbol: {symbol_obj.symbol} : {stock_obj.ltp}')
+                    #         Stock_Square_Off(data, stock_obj.ltp)
+                        # elif (stock_obj.mode == 'CE' and close < super_trend.iloc[-1]) or (stock_obj.mode == 'PE' and close > super_trend.iloc[-1]):
+                        #     data['exit_type'] = 'ST-EXIT'
+                        #     print(f'TradeBros: {log_identifier}: {data["exit_type"]} Exit: FnO-Symbol: {symbol_obj.symbol} : {stock_obj.ltp}')
+                        #     Stock_Square_Off(data, stock_obj.ltp)
 
             except Exception as e:
                 StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=False).delete()
@@ -519,6 +661,9 @@ def SquareOff():
     now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
     print(f'TradeBros: SQUARE OFF: Runtime : {now.strftime("%d-%b-%Y %H:%M:%S")}')
     try:
+        check_holiday = Holiday.objects.filter(date=now.date(), is_active=True)
+        if check_holiday:
+            raise Exception(f"TradeBros: SQUARE OFF: Today is Holiday : {check_holiday[0].holiday}")
         future_configuration_obj = Configuration.objects.filter(product='future')[0]
         equity_configuration_obj = Configuration.objects.filter(product='equity')[0]
 
@@ -531,13 +676,14 @@ def SquareOff():
         if entries_list:
             for stock_obj in entries_list:
                 try:
-                    if stock_obj.symbol.name not in [ 'NIFTY', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY', 'NIFTYNXT50' ]:
-                        data = {
-                            'exit_type': 'SQ-OFF',
-                            'configuration_obj': future_configuration_obj if stock_obj.symbol.product == 'future' else equity_configuration_obj,
-                            'stock_obj': stock_obj
-                        }
-                        Stock_Square_Off(data, stock_obj.ltp)
+                    if stock_obj.symbol.expiry == now.date():
+                        # if stock_obj.symbol.name not in [ 'NIFTY', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY', 'NIFTYNXT50' ]:
+                            data = {
+                                'exit_type': 'SQ-OFF',
+                                'configuration_obj': future_configuration_obj if stock_obj.symbol.product == 'future' else equity_configuration_obj,
+                                'stock_obj': stock_obj
+                            }
+                            Stock_Square_Off(data, stock_obj.ltp)
                 except Exception as e:
                     print(f'TradeBros: SQUARE OFF: Loop Error: {stock_obj.symbol.symbol} : {stock_obj.mode} : {e}')
         print(f'TradeBros: SQUARE OFF: Loop Ended')
@@ -598,8 +744,11 @@ def PivotUpdate():
     product = 'equity'
     print(f'TradeBros: PIVOT UPDATE: Runtime : {now.strftime("%d-%b-%Y %H:%M:%S")}')
     try:
+        check_holiday = Holiday.objects.filter(date=now.date(), is_active=True)
+        if check_holiday:
+            raise Exception(f"TradeBros: PIVOT UPDATE: Today is Holiday : {check_holiday[0].holiday}")
         # Set Pivot Points
-        symbol_list = Symbol.objects.filter(product=product, is_active=True).order_by('-fno')
+        symbol_list = Symbol.objects.filter(product=product, fno=True, is_active=True).order_by('-fno')
 
         from_day = now - timedelta(days=5)
         print(f'TradeBros: PIVOT UPDATE: Started : Total : {symbol_list.count()}')
@@ -616,11 +765,11 @@ def PivotUpdate():
                     symbol = yfsymb[symbol_obj.name]
                 else:
                     symbol = f"{symbol_obj.name}.NS"
+
+                # Get Daily Pivot
                 data_frame = yf.download(symbol, period="5d", group_by='ticker', rounding=True, progress=False)[symbol]
 
-                last_day = data_frame.iloc[-2]
-
-                pivot_traditional = PIVOT(last_day)
+                pivot_traditional = PIVOT(data_frame.iloc[-1])
                 symbol_obj.pivot = round(pivot_traditional['pivot'], 2)
                 symbol_obj.r1 = round(pivot_traditional['r1'], 2)
                 symbol_obj.s1 = round(pivot_traditional['s1'], 2)
@@ -628,6 +777,30 @@ def PivotUpdate():
                 symbol_obj.s2 = round(pivot_traditional['s2'], 2)
                 symbol_obj.r3 = round(pivot_traditional['r3'], 2)
                 symbol_obj.s3 = round(pivot_traditional['s3'], 2)
+
+                # Get Monthly Pivot
+                data_frame = yf.download(symbol, interval="1mo", group_by='ticker', rounding=True, progress=False)[symbol]
+
+                pivot_traditional = PIVOT(data_frame.iloc[-2])
+                symbol_obj.month_pivot = round(pivot_traditional['pivot'], 2)
+                symbol_obj.month_r1 = round(pivot_traditional['r1'], 2)
+                symbol_obj.month_s1 = round(pivot_traditional['s1'], 2)
+                symbol_obj.month_r2 = round(pivot_traditional['r2'], 2)
+                symbol_obj.month_s2 = round(pivot_traditional['s2'], 2)
+                symbol_obj.month_r3 = round(pivot_traditional['r3'], 2)
+                symbol_obj.month_s3 = round(pivot_traditional['s3'], 2)
+
+                # Get Weekly Pivot
+                data_frame = yf.download(symbol, interval="1wk", group_by='ticker', rounding=True, progress=False)[symbol]
+
+                pivot_traditional = PIVOT(data_frame.iloc[-2])
+                symbol_obj.week_pivot = round(pivot_traditional['pivot'], 2)
+                symbol_obj.week_r1 = round(pivot_traditional['r1'], 2)
+                symbol_obj.week_s1 = round(pivot_traditional['s1'], 2)
+                symbol_obj.week_r2 = round(pivot_traditional['r2'], 2)
+                symbol_obj.week_s2 = round(pivot_traditional['s2'], 2)
+                symbol_obj.week_r3 = round(pivot_traditional['r3'], 2)
+                symbol_obj.week_s3 = round(pivot_traditional['s3'], 2)
 
                 symbol_obj.save()
                 # print(f'TradeBros: PIVOT UPDATE: Updated: {index+1} : {symbol_obj.name}')
@@ -749,7 +922,7 @@ def SocketSetup(log_identifier='Cron'):
     sleep(2)
     sws = new_sws
 
-    correlation_id = "tradebros-socket"
+    correlation_id = "moneyball-socket"
     mode = 1
     nse = []
     nfo = []
@@ -795,12 +968,12 @@ def SocketSetup(log_identifier='Cron'):
     return True
 
 
-def CheckLtp():
+def CheckEQLtp():
     now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
-    print(f'TradeBros: Check LTP : Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
+    print(f'TradeBros: Check EQ LTP : Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
 
     global sws, open_position
-    correlation_id = "tradebros-socket"
+    correlation_id = "moneyball-socket"
     socket_mode = 1
     try:
         symbol_obj_list = StockConfig.objects.filter(symbol__product='equity')
@@ -808,13 +981,51 @@ def CheckLtp():
         tickers = yf.Tickers(list(symbol_list.keys())).tickers
         for ticker in tickers:
             try:
-                ltp = tickers[ticker].info.get('currentPrice')
-                LTP_Action(symbol_list[ticker], ltp, open_position, correlation_id, socket_mode, sws)
+                ltp = tickers[ticker].info.get('regularMarketPrice')
+                LTP_Action(symbol_list[ticker], ltp, open_position, correlation_id, socket_mode, sws, socket_data=True)
             except Exception as e:
-                print(f'TradeBros: Check LTP : Error Loop: {ticker} : {ltp} : {e}')
+                print(f'TradeBros: Check EQ LTP : Error Loop: {ticker} : {ltp} : {e}')
     except Exception as e:
-        print(f'TradeBros: Check LTP : Error Main : {e}')
-    print(f'TradeBros: Check LTP : Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+        print(f'TradeBros: Check EQ LTP : Error Main : {e}')
+    print(f'TradeBros: Check EQ LTP : Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    return True
+
+
+def CheckFnOLtp():
+    now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
+    print(f'TradeBros: Check FnO LTP : Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
+
+    global sws, open_position
+    correlation_id = "moneyball-socket"
+    socket_mode = 1
+    try:
+        symbol_obj_list = StockConfig.objects.filter(symbol__product='future')
+        symbol_list = {}
+        for sym in symbol_obj_list:
+            if sym.symbol.name in ['NIFTY', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY', 'NIFTYNXT50']:
+                yfsymb = {
+                    'NIFTY': '^NSEI',
+                    'BANKNIFTY': '^NSEBANK',
+                    'MIDCPNIFTY' : 'NIFTY_MID_SELECT.NS',
+                    'FINNIFTY': 'NIFTY_FIN_SERVICE.NS',
+                    'NIFTYNXT50': '^NSMIDCP'
+                }
+                symbol = yfsymb[sym.symbol.name]
+            else:
+                symbol = f"{sym.symbol.name}.NS"
+            symbol_list[symbol] = sym.symbol.token
+
+        # symbol_list = { f"{sym.symbol.name}.NS":sym.symbol.token for sym in symbol_obj_list }
+        tickers = yf.Tickers(list(symbol_list.keys())).tickers
+        for ticker in tickers:
+            try:
+                ltp = tickers[ticker].info.get('regularMarketPrice')
+                LTP_Action(symbol_list[ticker], ltp, open_position, correlation_id, socket_mode, sws, socket_data=False)
+            except Exception as e:
+                print(f'TradeBros: Check FnO LTP : Error Loop: {ticker} : {ltp} : {e}')
+    except Exception as e:
+        print(f'TradeBros: Check FnO LTP : Error Main : {e}')
+    print(f'TradeBros: Check FnO LTP : Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True
 
 
@@ -840,3 +1051,152 @@ def TriggerBuild():
         print(f'TradeBros: TriggerBuild : Response: ServiceName: {i["service"]["name"]} : ServiceID: {i["service"]["id"]} : {response.text}')
     print(f'TradeBros: TriggerBuild : Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
     return True
+
+
+def OiChnageCleanup():
+    now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
+    print(f'TradeBros: OI Change CleanUP : Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
+    
+    OIChange.objects.filter(is_active=True).delete()
+
+    print(f'TradeBros: OI Change CleanUP : Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    return True
+
+
+def UpdateHoliday():
+    try:
+        now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
+        print(f'TradeBros: Holiday List : Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
+        
+        # URL of the webpage containing the data table
+        url = f'https://www.angelone.in/nse-holidays-{now.year}'
+        dfholiday = None
+
+        # Send a GET request to the webpage
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            # Parse the HTML content of the webpage
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Find the data table by inspecting the webpage's HTML structure
+            # For example, if the data table is in a <table> element with class 'data-table'
+            data_table = soup.find('table', class_='inner-table')
+            r1 = []
+            # Extract data from the table (example: print the table content)
+            if data_table:
+                rows = data_table.find_all('tr')
+                
+                for row in rows:
+                    #print(row)
+                    columns = row.find_all('td')
+                    #########
+                    if not columns:
+                        columns = row.find_all('th')
+                        colnames1 = [column.get_text() for column in columns]
+                    else:
+                        row_data = [column.get_text() for column in columns]
+                        r1.append(row_data)
+                        #print(row_data)
+                dfholiday = pd.DataFrame(r1,columns = colnames1 ) 
+            else:
+                print("TradeBros: Holiday List : No data table found on the webpage.")
+        else:
+            print("TradeBros: Holiday List : Failed to retrieve webpage. Status code:", response.status_code)
+
+        if dfholiday is not None:
+            Holiday.objects.all().delete()
+            for idx, _ in enumerate(dfholiday.iterrows()):
+                holiday = dfholiday.iloc[idx]['Holidays']
+                day = dfholiday.iloc[idx]['Day']
+                date = datetime.strptime(dfholiday.iloc[idx]['Date'], "%B %d, %Y").replace(tzinfo=now.tzinfo)
+                Holiday.objects.create(holiday=holiday, day=day, date=date)
+
+    except Exception as e:
+        print(f'TradeBros: Holiday List : Error: {e}')
+    print(f'TradeBros: Holiday List : Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    return True
+
+
+def OI_SNATCHER(now=None):
+    try:
+        if now == None:
+            now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
+            print(f'TradeBros: OI SNATCHER : Runtime: {now.strftime("%d-%b-%Y %H:%M:%S")}')
+
+        # URL of the webpage containing the data table
+        url = 'https://www.nseindia.com/api/live-analysis-oi-spurts-underlyings'
+
+        headers = {
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()["data"]
+            print(f"TradeBros: OI SNATCHER : Total records: {len(data)}")
+            for i in data:
+                obj, _ = OIChange.objects.get_or_create(name=i['symbol'])
+                obj.oi = i['avgInOI']
+                if now.hour == 9 and now.minute == 15:
+                    obj.oi_915 = i['avgInOI']
+                elif now.hour == 9 and now.minute == 30:
+                    obj.oi_930 = i['avgInOI']
+                elif now.hour == 9 and now.minute == 45:
+                    obj.oi_945 = i['avgInOI']
+                elif now.hour == 10 and now.minute == 0:
+                    obj.oi_10 = i['avgInOI']
+                elif now.hour == 10 and now.minute == 15:
+                    obj.oi_1015 = i['avgInOI']
+                elif now.hour == 10 and now.minute == 30:
+                    obj.oi_1030 = i['avgInOI']
+                elif now.hour == 10 and now.minute == 45:
+                    obj.oi_1045 = i['avgInOI']
+                elif now.hour == 11 and now.minute == 0:
+                    obj.oi_11 = i['avgInOI']
+                elif now.hour == 11 and now.minute == 15:
+                    obj.oi_1115 = i['avgInOI']
+                elif now.hour == 11 and now.minute == 30:
+                    obj.oi_1130 = i['avgInOI']
+                elif now.hour == 11 and now.minute == 45:
+                    obj.oi_1145 = i['avgInOI']
+                elif now.hour == 12 and now.minute == 0:
+                    obj.oi_12 = i['avgInOI']
+                elif now.hour == 12 and now.minute == 15:
+                    obj.oi_1215 = i['avgInOI']
+                elif now.hour == 12 and now.minute == 30:
+                    obj.oi_1230 = i['avgInOI']
+                elif now.hour == 12 and now.minute == 45:
+                    obj.oi_1245 = i['avgInOI']
+                elif now.hour == 13 and now.minute == 0:
+                    obj.oi_13 = i['avgInOI']
+                elif now.hour == 13 and now.minute == 15:
+                    obj.oi_1315 = i['avgInOI']
+                elif now.hour == 13 and now.minute == 30:
+                    obj.oi_1330 = i['avgInOI']
+                elif now.hour == 13 and now.minute == 45:
+                    obj.oi_1345 = i['avgInOI']
+                elif now.hour == 14 and now.minute == 0:
+                    obj.oi_14 = i['avgInOI']
+                elif now.hour == 14 and now.minute == 15:
+                    obj.oi_1415 = i['avgInOI']
+                elif now.hour == 14 and now.minute == 30:
+                    obj.oi_1430 = i['avgInOI']
+                elif now.hour == 14 and now.minute == 45:
+                    obj.oi_1445 = i['avgInOI']
+                elif now.hour == 15 and now.minute == 0:
+                    obj.oi_15 = i['avgInOI']
+                elif now.hour == 15 and now.minute == 15:
+                    obj.oi_1515 = i['avgInOI']
+                elif now.hour == 15 and now.minute == 30:
+                    obj.oi_1530 = i['avgInOI']
+                obj.save()
+        else:
+            # print("TradeBros: OI SNATCHER : Failed to Data. Status code:", response.status_code, response.content)
+            OI_SNATCHER(now)
+
+    except Exception as e:
+        print(f'TradeBros: OI SNATCHER : Error: {e}')
+    print(f'TradeBros: OI SNATCHER : Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')
+    return True
+

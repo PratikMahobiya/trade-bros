@@ -41,3 +41,18 @@ def historical_data(token, exchange, now, from_day, interval, product):
 
         data_frame = data_frame.fillna(data_frame.mean())
         return data_frame
+
+
+def get_max_oi_strikeprice(strike_price_list):
+    global broker_connection
+    token_list = {i.token:i for i in strike_price_list}
+    data = broker_connection.getMarketData(mode="FULL", exchangeTokens={"NFO": list(token_list.keys())})
+    strike_price_obj = None
+    oi = 0
+    if data.get('data'):
+        fetched = data.get('data')['fetched']
+        for i in fetched:
+            if i['opnInterest'] > oi:
+                oi = i['opnInterest']
+                strike_price_obj = token_list[i['symbolToken']]
+    return strike_price_obj

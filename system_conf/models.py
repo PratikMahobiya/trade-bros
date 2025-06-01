@@ -49,13 +49,27 @@ class Symbol(models.Model):
     smallcpnifty50 = models.BooleanField(default=False, verbose_name='SmallCP50')
     smallcpnifty100 = models.BooleanField(default=False, verbose_name='SmallCP100')
     smallcpnifty250 = models.BooleanField(default=False, verbose_name='SmallCP250')
-    pivot = models.FloatField(verbose_name='Pivot', default=0)
-    r1 = models.FloatField(verbose_name='R1', default=0)
-    s1 = models.FloatField(verbose_name='S1', default=0)
-    r2 = models.FloatField(verbose_name='R2', default=0)
-    s2 = models.FloatField(verbose_name='S2', default=0)
-    r3 = models.FloatField(verbose_name='R3', default=0)
-    s3 = models.FloatField(verbose_name='S3', default=0)
+    pivot = models.FloatField(verbose_name='DAY-Pivot', default=0)
+    r1 = models.FloatField(verbose_name='DAY-R1', default=0)
+    s1 = models.FloatField(verbose_name='DAY-S1', default=0)
+    r2 = models.FloatField(verbose_name='DAY-R2', default=0)
+    s2 = models.FloatField(verbose_name='DAY-S2', default=0)
+    r3 = models.FloatField(verbose_name='DAY-R3', default=0)
+    s3 = models.FloatField(verbose_name='DAY-S3', default=0)
+    week_pivot = models.FloatField(verbose_name='Week-Pivot', default=0)
+    week_r1 = models.FloatField(verbose_name='Week-R1', default=0)
+    week_s1 = models.FloatField(verbose_name='Week-S1', default=0)
+    week_r2 = models.FloatField(verbose_name='Week-R2', default=0)
+    week_s2 = models.FloatField(verbose_name='Week-S2', default=0)
+    week_r3 = models.FloatField(verbose_name='Week-R3', default=0)
+    week_s3 = models.FloatField(verbose_name='Week-S3', default=0)
+    month_pivot = models.FloatField(verbose_name='Month-Pivot', default=0)
+    month_r1 = models.FloatField(verbose_name='Month-R1', default=0)
+    month_s1 = models.FloatField(verbose_name='Month-S1', default=0)
+    month_r2 = models.FloatField(verbose_name='Month-R2', default=0)
+    month_s2 = models.FloatField(verbose_name='Month-S2', default=0)
+    month_r3 = models.FloatField(verbose_name='Month-R3', default=0)
+    month_s3 = models.FloatField(verbose_name='Month-S3', default=0)
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -79,3 +93,55 @@ class Symbol(models.Model):
 
     def __str__(self):
         return f"{self.id}-{self.symbol}"
+    
+
+class Holiday(models.Model):
+    holiday = models.CharField(max_length=500, verbose_name="Holiday")
+    day = models.CharField(max_length=255, verbose_name="Day")
+    date = models.DateTimeField()
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    def __str__(self):
+        return f"{self.id}-{self.holiday}"
+
+
+class OIChange(models.Model):
+    name = models.CharField(max_length=500, verbose_name="Name")
+    oi = models.FloatField(verbose_name='OI%', default=0)
+    oi_915 = models.FloatField(verbose_name='9:15', default=0)
+    oi_930 = models.FloatField(verbose_name='9:30', default=0)
+    oi_945 = models.FloatField(verbose_name='9:45', default=0)
+    oi_10 = models.FloatField(verbose_name='10:00', default=0)
+    oi_1015 = models.FloatField(verbose_name='10:15', default=0)
+    oi_1030 = models.FloatField(verbose_name='10:30', default=0)
+    oi_1045 = models.FloatField(verbose_name='10:45', default=0)
+    oi_11 = models.FloatField(verbose_name='11:00', default=0)
+    oi_1115 = models.FloatField(verbose_name='11:15', default=0)
+    oi_1130 = models.FloatField(verbose_name='11:30', default=0)
+    oi_1145 = models.FloatField(verbose_name='11:45', default=0)
+    oi_12 = models.FloatField(verbose_name='12:00', default=0)
+    oi_1215 = models.FloatField(verbose_name='12:15', default=0)
+    oi_1230 = models.FloatField(verbose_name='12:30', default=0)
+    oi_1245 = models.FloatField(verbose_name='12:45', default=0)
+    oi_13 = models.FloatField(verbose_name='13:00', default=0)
+    oi_1315 = models.FloatField(verbose_name='13:15', default=0)
+    oi_1330 = models.FloatField(verbose_name='13:30', default=0)
+    oi_1345 = models.FloatField(verbose_name='13:45', default=0)
+    oi_14 = models.FloatField(verbose_name='14:00', default=0)
+    oi_1415 = models.FloatField(verbose_name='14:15', default=0)
+    oi_1430 = models.FloatField(verbose_name='14:30', default=0)
+    oi_1445 = models.FloatField(verbose_name='14:45', default=0)
+    oi_15 = models.FloatField(verbose_name='15:00', default=0)
+    oi_1515 = models.FloatField(verbose_name='15:15', default=0)
+    oi_1530 = models.FloatField(verbose_name='15:30', default=0)
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.id}-{self.name}"

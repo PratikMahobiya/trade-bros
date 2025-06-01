@@ -109,8 +109,11 @@ def AccountExitAction(instance):
                                                 order_id=order_id,
                                                 order_status=order_status,
                                                 lot=user_stock_config.lot)
-                        user_stock_config.delete()
+                        
+                        if instance.get('product') == 'future' and 'CS' not in instance.get('type'):
+                            user_stock_config.delete()
                         if instance.get('product') == 'equity':
+                            user_stock_config.delete()
                             if instance.get('mode') == 'CE':
                                 user_config = AccountConfiguration.objects.get(account=user_stock_config.account, is_active=True)
                                 user_config.active_open_position -= 1
@@ -151,7 +154,7 @@ def UserTrade(sender, instance, created, user_config):
     connection = account_connections[user_config.account.user_id]
 
     # Place Order
-    if user_config.total_open_position > user_config.active_open_position:
+    if (user_config.total_open_position > user_config.active_open_position) or instance.product == 'future':
         lot = instance.lot
         
         # Future CE and PE
@@ -209,7 +212,8 @@ def UserTrade(sender, instance, created, user_config):
                                     stoploss=instance.stoploss,
                                     order_id=order_id,
                                     order_status=order_status,
-                                    lot=lot)
+                                    lot=lot,
+                                    chart_price=instance.chart_price)
             if instance.product == 'equity':
                 if instance.mode == 'CE':
                     user_config.active_open_position += 1
@@ -303,7 +307,8 @@ def AccountTradeAction(sender, instance, created):
                 'max_l': instance.max_l,
                 'highest_price': instance.highest_price,
                 'fixed_target': instance.fixed_target,
-                'lot': instance.lot
+                'lot': instance.lot,
+                'chart_price': instance.chart_price
             }
             AccountExitAction(transaction_data)
         else:

@@ -54,3 +54,25 @@ def next_multiple_of_5_after_decimal(num):
             return int_num + i / 100.0  # Return the result as a float
 
     return int_num  # In case there's no valid multiple found
+
+
+def find_closest_values(lst, target):
+    # Sort the list to ensure correct comparison
+    lst.sort()
+
+    # Initialize variables to store the closest and lowest closest values
+    upper_value = None
+    lower_value = None
+
+    # Iterate through the list to find the closest and lowest closest values
+    for num in lst:
+        if num == target:
+            upper_value = num
+            break
+        elif num < target:
+            lower_value = num
+        else:
+            upper_value = num
+            break
+
+    return upper_value, lower_value

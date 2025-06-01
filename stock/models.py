@@ -21,6 +21,11 @@ class StockConfig(models.Model):
     trailing_sl = models.FloatField(verbose_name='Trailing SL', default=0)
     ltp = models.FloatField(verbose_name='Ltp', blank=True, null=True, default=0)
     fno_activation = models.BooleanField(default=False)
+    capital_save = models.BooleanField(verbose_name='Capital Saved', default=False)
+    chart_price = models.FloatField(verbose_name='CHART PRICE', default=0)
+    entry_open_value = models.FloatField(verbose_name='Entry Open Value', default=0)
+    entry_prev_close_value = models.FloatField(verbose_name='Entry Prev Close Value', default=0)
+    manual_updated = models.BooleanField(verbose_name='Manual Updated', default=False)
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -52,6 +57,7 @@ class Transaction(models.Model):
     max_l = models.FloatField(verbose_name='MAX-L (%)', default=0)
     highest_price = models.FloatField(verbose_name='HIGHEST PRICE', default=0)
     lot = models.FloatField(verbose_name='LOT')
+    chart_price = models.FloatField(verbose_name='Chart Price', default=0)
     
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

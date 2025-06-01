@@ -42,7 +42,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-rn9i)qy0w(aokm0arqnmvaeco^i9e5g!h4736&chx(13qq-9al"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "1").lower() in ["true", "t", "1"]
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -50,6 +50,7 @@ CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "https://trade-bros.onr
 
 RENDER_KEY = os.getenv("RENDER_KEY", "My Deploy")
 BED_URL_DOMAIN = os.getenv("BED_URL_DOMAIN", "https://tradebros.onrender.com")
+SOCKET_STREAM_URL_DOMAIN = os.getenv("SOCKET_STREAM_URL_DOMAIN", "https://tradebros-socket-service.onrender.com")
 
 
 # Application definition
@@ -109,9 +110,9 @@ WSGI_APPLICATION = "trade_bros.wsgi.application"
 # }
 
 DATABASES = {
-    'default': dj_database_url.parse("postgresql://tradebros_zpd0_user:M4lkwZ8WaEByHWDP2T5bDi6VDIziMZyr@dpg-cutcbebtq21c73bdt7mg-a/tradebros_zpd0", conn_max_age=0),
+    'default': dj_database_url.parse("postgresql://db_o8vb_user:4GzPnGm6ez5xhwsmkT6PsGmFfNaTEfdo@dpg-d0u9igc9c44c73aigim0-a/db_o8vb", conn_max_age=43200),
 } if os.getenv('SERVER_DB', False) else {
-    'default': dj_database_url.parse("postgresql://tradebros_zpd0_user:M4lkwZ8WaEByHWDP2T5bDi6VDIziMZyr@dpg-cutcbebtq21c73bdt7mg-a.singapore-postgres.render.com/tradebros_zpd0", conn_max_age=0),
+    'default': dj_database_url.parse("postgresql://db_o8vb_user:4GzPnGm6ez5xhwsmkT6PsGmFfNaTEfdo@dpg-d0u9igc9c44c73aigim0-a.singapore-postgres.render.com/db_o8vb", conn_max_age=43200),
 }
 
 # DATABASES = {

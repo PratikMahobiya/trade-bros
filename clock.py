@@ -29,7 +29,7 @@ def start():
 
     # Schedules job_function to be run on the Monday to Friday
     sched.add_job(stay_awake, 'cron',
-                minute='*/2', timezone='Asia/Kolkata')
+                minute='*/1', timezone='Asia/Kolkata')
     sched.add_job(BrokerConnection, 'cron',
                 hour='9', minute='0', timezone='Asia/Kolkata')
     sched.add_job(UpdateHoliday, 'cron',

@@ -597,7 +597,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                         #     print(f'TradeBros: {log_identifier}: Failed to fetch OI of strike prices')
                 else:
                     stock_obj = entries_list[0]
-                    if stock_obj.manual_updated == False and now.minute == 15:
+                    if stock_obj.manual_updated == False and now.minute % 5 == 0:
                         if stock_obj.mode == 'CE':
                             from_day_1hr = now - timedelta(days=7)
                             data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'THREE_MINUTE', product)
@@ -625,17 +625,17 @@ def FnO_BreakOut_1(auto_trigger=True):
                                 stock_obj.stoploss = stoploss
                         stock_obj.save()
                     
-                    # Perform action if required for Open Entries
-                    # if symbol_obj.name not in index_list:
-                    #     data = {
-                    #         'exit_type': 'F-Exit',
-                    #         'configuration_obj': configuration_obj,
-                    #         'stock_obj': stock_obj
-                    #     }
-                    #     if (stock_obj.mode == 'CE' and close < super_trend.iloc[-1]) or (stock_obj.mode == 'PE' and close > super_trend.iloc[-1]):
-                    #         data['exit_type'] = 'ST-EXIT'
-                    #         print(f'TradeBros: {log_identifier}: {data["exit_type"]} Exit: FnO-Symbol: {symbol_obj.symbol} : {stock_obj.ltp}')
-                    #         Stock_Square_Off(data, stock_obj.ltp)
+                        # Perform action if required for Open Entries
+                        # if symbol_obj.name not in index_list:
+                        data = {
+                             'exit_type': 'F-Exit',
+                             'configuration_obj': configuration_obj,
+                             'stock_obj': stock_obj
+                        }
+                        if (stock_obj.mode == 'CE' and close < super_trend.iloc[-1]) or (stock_obj.mode == 'PE' and close > super_trend.iloc[-1]):
+                            data['exit_type'] = 'ST-EXIT'
+                            print(f'TradeBros: {log_identifier}: {data["exit_type"]} Exit: FnO-Symbol: {symbol_obj.symbol} : {stock_obj.ltp}')
+                            Stock_Square_Off(data, stock_obj.ltp)
                         # elif (stock_obj.mode == 'CE' and close < super_trend.iloc[-1]) or (stock_obj.mode == 'PE' and close > super_trend.iloc[-1]):
                         #     data['exit_type'] = 'ST-EXIT'
                         #     print(f'TradeBros: {log_identifier}: {data["exit_type"]} Exit: FnO-Symbol: {symbol_obj.symbol} : {stock_obj.ltp}')

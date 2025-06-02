@@ -982,7 +982,7 @@ def CheckFnOLtp():
         for ticker in tickers:
             try:
                 # ltp = tickers[ticker].info.get('regularMarketPrice')
-                name_ = next((key for key, val in yfsymb.items() if val == value_to_find), None)
+                name_ = next((key for key, val in yfsymb.items() if val == ticker), None)
                 ltp = Symbol.objects.get(name=name_, product='equity', fno=True, is_active=True).ltp
                 LTP_Action(symbol_list[ticker], ltp, open_position, correlation_id, socket_mode, sws, socket_data=False)
             except Exception as e:

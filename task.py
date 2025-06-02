@@ -453,7 +453,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                 entry_type = None
                 pivot_traditional = None
 
-                data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'FIVE_MINUTE', product)
+                data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_MINUTE', product)
                 sleep(0.3)
                 open = data_frame['Open'].iloc[-1]
                 high = data_frame['High'].iloc[-1]
@@ -471,9 +471,9 @@ def FnO_BreakOut_1(auto_trigger=True):
                 atr = ATR(high=data_frame['High'], low=data_frame['Low'], close=data_frame['Close'], timeperiod=14)
 
                 atr_trsl_multiplier = 1.45
-                if (prev_close > symbol_obj.month_r1 and prev_close < symbol_obj.month_r3) or (prev_close < symbol_obj.month_s1 and prev_close > symbol_obj.month_s3):
+                if (prev_close > symbol_obj.r1 and prev_close < symbol_obj.r3) or (prev_close < symbol_obj.s1 and prev_close > symbol_obj.s3):
                     atr_trsl_multiplier = 0.95
-                elif prev_close > symbol_obj.month_r3 or prev_close < symbol_obj.month_s3:
+                elif prev_close > symbol_obj.r3 or prev_close < symbol_obj.s3:
                     atr_trsl_multiplier = 0.45
 
                 entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
@@ -483,7 +483,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                         target = (prev_close+open)/2 + atr.iloc[-1] * atr_trsl_multiplier
 
                         from_day_1hr = now - timedelta(days=7)
-                        data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'THREE_MINUTE', product)
+                        data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
                         last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                         last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
                         greater_values = [index+2 for index, value in enumerate(last_7_candle_high_value) if value < data_frame_1hr['Open'].iloc[-1]]
@@ -514,7 +514,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                         target = (prev_close+open)/2 - atr.iloc[-1] * atr_trsl_multiplier
 
                         from_day_1hr = now - timedelta(days=7)
-                        data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'THREE_MINUTE', product)
+                        data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
                         last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                         last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
                         greater_values = [index+2 for index, value in enumerate(last_7_candle_low_value) if value > data_frame_1hr['Open'].iloc[-1]]
@@ -607,7 +607,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                     if stock_obj.manual_updated == False and now.minute % 5 == 0:
                         if stock_obj.mode == 'CE':
                             from_day_1hr = now - timedelta(days=7)
-                            data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'THREE_MINUTE', product)
+                            data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
                             last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                             last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
                             greater_values = [index+2 for index, value in enumerate(last_7_candle_high_value) if value < data_frame_1hr['Open'].iloc[-1]]
@@ -620,7 +620,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                 stock_obj.stoploss = stoploss
                         else:
                             from_day_1hr = now - timedelta(days=7)
-                            data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'THREE_MINUTE', product)
+                            data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
                             last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                             last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
                             greater_values = [index+2 for index, value in enumerate(last_7_candle_low_value) if value > data_frame_1hr['Open'].iloc[-1]]

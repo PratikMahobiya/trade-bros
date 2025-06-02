@@ -78,37 +78,44 @@ def MarketDataUpdate(auto_trigger=True):
         if now.time().minute in list(range(0, 60, 5)):
             sleep(10)
         nse_tokens = list(Symbol.objects.filter(exchange='NSE', fno=True, is_active=True).values_list('token', flat=True))
-        token_list = [nse_tokens[x:x+50] for x in range(0, len(nse_tokens), 50)]
+        bse_tokens = list(Symbol.objects.filter(exchange='BSE', fno=True, is_active=True).values_list('token', flat=True))
+        nse_token_list = [nse_tokens[x:x+50] for x in range(0, len(nse_tokens), 50)]
+        bse_token_list = [bse_tokens[x:x+50] for x in range(0, len(bse_tokens), 50)]
+        temp_ = {
+            'NSE': nse_token_list,
+            'BSE': bse_token_list
+        }
         global broker_connection
-        for list_ in token_list:
-            try:
-                data = broker_connection.getMarketData(mode="FULL", exchangeTokens={"NSE": list_})
-                if data.get('data'):
-                    fetched = data.get('data')['fetched']
-                    for i in fetched:
-                        if (now.time() > time(8, 00, 00) and now.time() < time(9, 14, 00)) or not auto_trigger:
-                            Symbol.objects.filter(token=i['symbolToken'],
-                                                    is_active=True).update(
-                                                        volume=i['tradeVolume'] or 99999999999.0,
-                                                        oi=i['opnInterest'],
-                                                        percentchange=i['percentChange'],
-                                                        valuechange=i['netChange'],
-                                                        ltp=i['ltp'],
-                                                        weekhigh52=i['52WeekHigh'],
-                                                        weeklow52=i['52WeekLow']
-                                                    )
-                        else:
-                            Symbol.objects.filter(token=i['symbolToken'],
-                                                    is_active=True).update(
-                                                        volume=i['tradeVolume'] or 99999999999.0,
-                                                        oi=i['opnInterest'],
-                                                        percentchange=i['percentChange'],
-                                                        valuechange=i['netChange'],
-                                                        ltp=i['ltp']
-                                                    )
-                sleep(1)
-            except Exception as e:
-                print(f'TradeBros: Market data Update: Loop Error: {e}')
+        for exchanage_name in temp_:
+            for list_ in temp_[exchanage_name]:
+                try:
+                    data = broker_connection.getMarketData(mode="FULL", exchangeTokens={exchanage_name: list_})
+                    if data.get('data'):
+                        fetched = data.get('data')['fetched']
+                        for i in fetched:
+                            if (now.time() > time(8, 00, 00) and now.time() < time(9, 14, 00)) or not auto_trigger:
+                                Symbol.objects.filter(token=i['symbolToken'],
+                                                        is_active=True).update(
+                                                            volume=i['tradeVolume'] or 99999999999.0,
+                                                            oi=i['opnInterest'],
+                                                            percentchange=i['percentChange'],
+                                                            valuechange=i['netChange'],
+                                                            ltp=i['ltp'],
+                                                            weekhigh52=i['52WeekHigh'],
+                                                            weeklow52=i['52WeekLow']
+                                                        )
+                            else:
+                                Symbol.objects.filter(token=i['symbolToken'],
+                                                        is_active=True).update(
+                                                            volume=i['tradeVolume'] or 99999999999.0,
+                                                            oi=i['opnInterest'],
+                                                            percentchange=i['percentChange'],
+                                                            valuechange=i['netChange'],
+                                                            ltp=i['ltp']
+                                                        )
+                    sleep(1)
+                except Exception as e:
+                    print(f'TradeBros: Market data Update: Loop Error: {e}')
     except Exception as e:
         print(f'TradeBros: Market data Update: Main Error: {e}')
     print(f'TradeBros: Market data Update: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')

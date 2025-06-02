@@ -39,7 +39,7 @@ def start():
     sched.add_job(AccountConnection, 'cron',
                 hour='9', minute='10', timezone='Asia/Kolkata')
     sched.add_job(PivotUpdate, 'cron',
-                hour='9', minute='5', timezone='Asia/Kolkata')
+                hour='9', minute='12', timezone='Asia/Kolkata')
     # sched.add_job(NotifyUsers, 'cron',
     #             hour='20', minute='0', timezone='Asia/Kolkata')
     sched.add_job(MarketDataUpdate, 'cron', day_of_week='mon-fri',

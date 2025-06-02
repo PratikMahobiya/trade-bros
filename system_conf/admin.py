@@ -37,7 +37,7 @@ class SymbolAdmin(admin.ModelAdmin):
     search_fields = ['name', 'symbol', 'token']
 
     def get_ordering(self, request):
-        return ['-nifty200', '-nifty100', '-nifty50', '-midcpnifty150', '-midcpnifty100', '-midcpnifty50', '-smallcpnifty250', '-smallcpnifty100', '-smallcpnifty50', '-percentchange']
+        return ['product', '-nifty200', '-nifty100', '-nifty50', '-midcpnifty150', '-midcpnifty100', '-midcpnifty50', '-smallcpnifty250', '-smallcpnifty100', '-smallcpnifty50', '-percentchange']
     
     def percentchange_(self, obj):
         return colour(obj.percentchange)

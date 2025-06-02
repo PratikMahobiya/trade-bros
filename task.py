@@ -486,8 +486,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                         data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
                         last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                         last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
-                        greater_values = [index+2 for index, value in enumerate(last_7_candle_high_value) if value < data_frame_1hr['Open'].iloc[-1]]
-                        stoploss = data_frame_1hr['Low'].iloc[-greater_values[0]] if greater_values else max(last_7_candle_low_value)
+                        stoploss = max(last_7_candle_low_value)
                         if target > close and stoploss < close:
                             if (max_high < close and close > super_trend.iloc[-1]):
                                 entry_type = 'BO'
@@ -502,14 +501,6 @@ def FnO_BreakOut_1(auto_trigger=True):
                                                         fno=True,
                                                         is_active=True).order_by('expiry', 'strike')
 
-                            # target_pivot_values = [ symbol_obj.pivot, symbol_obj.r1, symbol_obj.r2, symbol_obj.r3, symbol_obj.s1, symbol_obj.s2, symbol_obj.s3, symbol_obj.week_pivot, symbol_obj.week_r1, symbol_obj.week_r2, symbol_obj.week_r3, symbol_obj.week_s1, symbol_obj.week_s2, symbol_obj.week_s3 ]
-                            # stoploss_pivot_values = [ symbol_obj.month_pivot, symbol_obj.month_r1, symbol_obj.month_r2, symbol_obj.month_r3, symbol_obj.month_s1, symbol_obj.month_s2, symbol_obj.month_s3 ]
-                            
-                            # upper_value, _ = find_closest_values(target_pivot_values, close)
-                            # _, lower_value = find_closest_values(stoploss_pivot_values, close)
-                            # target = upper_value if upper_value else close + close * (configuration_obj.target)/100
-                            # stoploss = lower_value if lower_value else close - close * (configuration_obj.stoploss)/100
-
                     elif (close < super_trend.iloc[-1] and len({super_trend.iloc[-1], super_trend.iloc[-2]}) != 1):
                         target = close - atr.iloc[-1] * atr_trsl_multiplier
 
@@ -517,8 +508,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                         data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
                         last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                         last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
-                        greater_values = [index+2 for index, value in enumerate(last_7_candle_low_value) if value > data_frame_1hr['Open'].iloc[-1]]
-                        stoploss = data_frame_1hr['High'].iloc[-greater_values[0]] if greater_values else min(last_7_candle_high_value)
+                        stoploss = min(last_7_candle_high_value)
                         if target < close and stoploss > close:
                             if (min_low > close and close < super_trend.iloc[-1]):
                                 entry_type = 'BO'
@@ -532,14 +522,6 @@ def FnO_BreakOut_1(auto_trigger=True):
                                                         strike__lt=close,
                                                         fno=True,
                                                         is_active=True).order_by('expiry', '-strike')
-
-                            # target_pivot_values = [ symbol_obj.pivot, symbol_obj.r1, symbol_obj.r2, symbol_obj.r3, symbol_obj.s1, symbol_obj.s2, symbol_obj.s3, symbol_obj.week_pivot, symbol_obj.week_r1, symbol_obj.week_r2, symbol_obj.week_r3, symbol_obj.week_s1, symbol_obj.week_s2, symbol_obj.week_s3 ]
-                            # stoploss_pivot_values = [ symbol_obj.month_pivot, symbol_obj.month_r1, symbol_obj.month_r2, symbol_obj.month_r3, symbol_obj.month_s1, symbol_obj.month_s2, symbol_obj.month_s3 ]
-                            
-                            # upper_value, _ = find_closest_values(stoploss_pivot_values, close)
-                            # _, lower_value = find_closest_values(target_pivot_values, close)
-                            # target = lower_value if lower_value else close - close * (configuration_obj.stoploss)/100
-                            # stoploss = upper_value if upper_value else close + close * (configuration_obj.target)/100
 
                     if nop < configuration_obj.open_position and mode not in [None]: #  and symbol_obj.name not in exclude_symbols_names
                         print(f'TradeBros: {log_identifier}: {symbol_obj.name}: Prev close: {prev_close}: Close: {close}: Open: {open}')
@@ -577,31 +559,6 @@ def FnO_BreakOut_1(auto_trigger=True):
                                 new_entry = Price_Action_Trade(data, new_entry)
                                 nop += 1
                                 break
-                        # stock_future_symbol_list = stock_future_symbol[2:5] if len(stock_future_symbol) >= 5 and len(stock_future_symbol) >= 2 else stock_future_symbol
-                        # print(f'TradeBros: {log_identifier}: Total Strike Price : {len(stock_future_symbol)} : In use {len(stock_future_symbol_list)}')
-                        # print(f'TradeBros: {log_identifier}: Chain ATM {close} : OTM Strike Price : {[i.strike for i in stock_future_symbol_list]}')
-                        # fut_sym_obj = get_max_oi_strikeprice(stock_future_symbol_list)
-                        # if fut_sym_obj:
-                        #     ltp = broker_connection.ltpData(fut_sym_obj.exchange, fut_sym_obj.symbol, fut_sym_obj.token)['data']['ltp']
-                        #     lot = fut_sym_obj.lot
-                        #     chk_price = ltp * lot
-                        #     if chk_price < configuration_obj.amount:
-                        #         while True:
-                        #             chk_price = ltp * lot
-                        #             if chk_price >= configuration_obj.amount:
-                        #                 lot = lot - fut_sym_obj.lot
-                        #                 break
-                        #             lot += fut_sym_obj.lot
-
-                        #         data['ltp'] = ltp
-                        #         data['lot'] = lot
-                        #         data['symbol_obj'] = fut_sym_obj
-                        #         new_entry = Price_Action_Trade(data, new_entry)
-                        #         nop += 1
-                        #     else:
-                        #         print(f'TradeBros: {log_identifier}: Need more money to take entry on {fut_sym_obj.symbol} : Required {chk_price} : Current {configuration_obj.amount}')
-                        # else:
-                        #     print(f'TradeBros: {log_identifier}: Failed to fetch OI of strike prices')
                 else:
                     stock_obj = entries_list[0]
                     if stock_obj.manual_updated == False and now.minute % 5 == 0:
@@ -610,12 +567,11 @@ def FnO_BreakOut_1(auto_trigger=True):
                             data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
                             last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                             last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
-                            greater_values = [index+2 for index, value in enumerate(last_7_candle_high_value) if value < data_frame_1hr['Open'].iloc[-1]]
 
                             target = close + atr.iloc[-1] * atr_trsl_multiplier
                             stock_obj.target = target
                             stock_obj.fixed_target = target
-                            stoploss = data_frame_1hr['Low'].iloc[-greater_values[0]] if greater_values else max(last_7_candle_low_value)
+                            stoploss = max(last_7_candle_low_value)
                             if stock_obj.stoploss < stoploss:
                                 stock_obj.stoploss = stoploss
                         else:
@@ -623,11 +579,10 @@ def FnO_BreakOut_1(auto_trigger=True):
                             data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
                             last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                             last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
-                            greater_values = [index+2 for index, value in enumerate(last_7_candle_low_value) if value > data_frame_1hr['Open'].iloc[-1]]
                             target = close - atr.iloc[-1] * atr_trsl_multiplier
                             stock_obj.target = target
                             stock_obj.fixed_target = target
-                            stoploss = data_frame_1hr['High'].iloc[-greater_values[0]] if greater_values else min(last_7_candle_high_value)
+                            stoploss = min(last_7_candle_high_value)
                             if stock_obj.stoploss > stoploss:
                                 stock_obj.stoploss = stoploss
                         stock_obj.save()
@@ -1027,7 +982,7 @@ def CheckFnOLtp():
         for ticker in tickers:
             try:
                 # ltp = tickers[ticker].info.get('regularMarketPrice')
-                ltp = sym.symbol.ltp
+                ltp = Symbol.objects.get(name=sym.symbol.name, product='equity', fno=True, is_active=True).ltp
                 LTP_Action(symbol_list[ticker], ltp, open_position, correlation_id, socket_mode, sws, socket_data=False)
             except Exception as e:
                 print(f'TradeBros: Check FnO LTP : Error Loop: {ticker} : {ltp} : {e}')

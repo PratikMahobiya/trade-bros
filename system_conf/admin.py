@@ -32,7 +32,7 @@ class HolidayAdmin(ExtraButtonsMixin, admin.ModelAdmin):
 
 @admin.register(Symbol)
 class SymbolAdmin(admin.ModelAdmin):
-    list_display = ('fno', 'name', 'percentchange_', 'pivot', 'r1', 'r2', 'r3', 's1', 's2', 's3', 'week_pivot', 'week_r1', 'week_r2', 'week_r3', 'week_s1', 'week_s2', 'week_s3', 'month_pivot', 'month_r1', 'month_r2', 'month_r3', 'month_s1', 'month_s2', 'month_s3', 'ltp', 'weekhigh52', 'weeklow52', 'nifty50', 'nifty100', 'nifty200', 'midcpnifty50', 'midcpnifty100', 'midcpnifty150', 'smallcpnifty50', 'smallcpnifty100', 'smallcpnifty250', 'exchange', 'product', 'expiry', 'strike', 'symbol', 'token', 'volume', 'valuechange', 'oi', 'lot', 'is_active')
+    list_display = ('name', 'exchange', 'product', 'percentchange_', 'pivot', 'r1', 'r2', 'r3', 's1', 's2', 's3', 'week_pivot', 'week_r1', 'week_r2', 'week_r3', 'week_s1', 'week_s2', 'week_s3', 'month_pivot', 'month_r1', 'month_r2', 'month_r3', 'month_s1', 'month_s2', 'month_s3', 'ltp', 'weekhigh52', 'weeklow52', 'nifty50', 'nifty100', 'nifty200', 'midcpnifty50', 'midcpnifty100', 'midcpnifty150', 'smallcpnifty50', 'smallcpnifty100', 'smallcpnifty250', 'expiry', 'strike', 'symbol', 'token', 'volume', 'valuechange', 'oi', 'lot', 'fno', 'is_active')
     list_filter = ('product', 'exchange', 'fno', 'nifty50', 'nifty100', 'nifty200', 'midcpnifty50', 'midcpnifty100', 'midcpnifty150', 'smallcpnifty50', 'smallcpnifty100', 'smallcpnifty250')
     search_fields = ['name', 'symbol', 'token']
 

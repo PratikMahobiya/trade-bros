@@ -171,7 +171,7 @@ def SymbolSetup():
         for i in data:
             product = None
             expity_date = datetime.strptime(i['expiry'], '%d%b%Y') if i['expiry'] else None
-            if i['exch_seg'] in ['NSE', 'NFO', 'BSE', 'BFO'] and i['name'] in ['NIFTY', 'BANKNIFTY', 'SENSEX']: # , 'BANKEX', 'MIDCPNIFTY', 'FINNIFTY'
+            if i['exch_seg'] in ['NSE', 'NFO', 'BSE', 'BFO'] and i['name'] in ['NIFTY', 'SENSEX']: # , 'BANKEX', 'MIDCPNIFTY', 'FINNIFTY', 'BANKNIFTY'
                 if i['instrumenttype'] in ['OPTSTK', 'OPTIDX'] and (expity_date.month == month_num) and (expity_date.date() >= now.date()): # , 'OPTIDX', 'OPTFUT'
                     product = 'future'
                 elif (i['symbol'] in ['Nifty 50', 'Nifty Bank', 'NIFTY MID SELECT', 'Nifty Fin Service', 'SENSEX', 'BANKEX'] and expity_date == None) or i['symbol'].endswith('-EQ'):

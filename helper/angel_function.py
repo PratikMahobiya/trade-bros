@@ -12,13 +12,13 @@ def historical_data(token, exchange, now, from_day, interval, product):
         "todate": now.strftime("%Y-%m-%d %H:%M")
     }
     global broker_connection, account_connections
-    connection = None
-    if product == 'future':
-        connection = account_connections.get('H188598')
-    elif product == 'equity':
-        connection = account_connections.get('P567723')
-    else:
-        connection = broker_connection
+    # connection = None
+    # if product == 'future':
+    #     connection = account_connections.get('H188598')
+    # elif product == 'equity':
+    #     connection = account_connections.get('P567723')
+    # else:
+    connection = broker_connection
     data = connection.getCandleData(historicParam)
     if data['status'] in [False, 'False', '']:
         raise Exception(f"Historical API error: {product} : {historicParam} : {data['errorcode']} : {data['message']}")

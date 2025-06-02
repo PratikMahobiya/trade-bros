@@ -477,7 +477,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                     atr_trsl_multiplier = 0.45
 
                 entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
-                if not entries_list and now.time() > time(9, 19, 00) and now.time() <= time(15, 16, 00):
+                if not entries_list and now.time() > time(9, 19, 00) and now.time() <= time(15, 5, 00):
 
                     if (close > super_trend.iloc[-1] and len({super_trend.iloc[-1], super_trend.iloc[-2]}) != 1):
                         target = close + atr.iloc[-1] * atr_trsl_multiplier

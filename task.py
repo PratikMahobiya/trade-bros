@@ -1026,7 +1026,8 @@ def CheckFnOLtp():
         tickers = yf.Tickers(list(symbol_list.keys())).tickers
         for ticker in tickers:
             try:
-                ltp = tickers[ticker].info.get('regularMarketPrice')
+                # ltp = tickers[ticker].info.get('regularMarketPrice')
+                ltp = sym.symbol.ltp
                 LTP_Action(symbol_list[ticker], ltp, open_position, correlation_id, socket_mode, sws, socket_data=False)
             except Exception as e:
                 print(f'TradeBros: Check FnO LTP : Error Loop: {ticker} : {ltp} : {e}')

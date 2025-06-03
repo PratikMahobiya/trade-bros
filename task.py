@@ -587,16 +587,16 @@ def FnO_BreakOut_1(auto_trigger=True):
                                 stock_obj.stoploss = stoploss
                         stock_obj.save()
                     
-                    # Perform action if required for Open Entries
-                    data = {
-                            'exit_type': 'F-Exit',
-                            'configuration_obj': configuration_obj,
-                            'stock_obj': stock_obj
-                    }
-                    if (stock_obj.mode == 'CE' and close < round(super_trend.iloc[-1], 2)) or (stock_obj.mode == 'PE' and close > round(super_trend.iloc[-1], 2)):
-                        data['exit_type'] = 'ST-EXIT'
-                        print(f'TradeBros: {log_identifier}: {data["exit_type"]} Exit: FnO-Symbol: {symbol_obj.symbol} : {stock_obj.ltp}')
-                        Stock_Square_Off(data, stock_obj.ltp)
+                    # # Perform action if required for Open Entries
+                    # data = {
+                    #         'exit_type': 'F-Exit',
+                    #         'configuration_obj': configuration_obj,
+                    #         'stock_obj': stock_obj
+                    # }
+                    # if (stock_obj.mode == 'CE' and close < round(super_trend.iloc[-1], 2)) or (stock_obj.mode == 'PE' and close > round(super_trend.iloc[-1], 2)):
+                    #     data['exit_type'] = 'ST-EXIT'
+                    #     print(f'TradeBros: {log_identifier}: {data["exit_type"]} Exit: FnO-Symbol: {symbol_obj.symbol} : {stock_obj.ltp}')
+                    #     Stock_Square_Off(data, stock_obj.ltp)
 
             except Exception as e:
                 StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=False).delete()

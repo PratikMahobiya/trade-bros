@@ -552,7 +552,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                 nop += 1
                                 break
                     else:
-                        print(f'TradeBros: {log_identifier}: {symbol_obj.name}: Toady Target {configuration_obj.stoploss} % : Achived : {today_return} %')
+                        print(f'TradeBros: {log_identifier}: {symbol_obj.name}: Daily Target {configuration_obj.stoploss} % : Achived : {today_return} %')
                 else:
                     stock_obj = entries_list[0]
                     if stock_obj.manual_updated == False and now.minute in [0, 15, 30, 45]:

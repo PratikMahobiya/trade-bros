@@ -515,7 +515,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                                         fno=True,
                                                         is_active=True).order_by('expiry', '-strike')
 
-                    if nop < configuration_obj.open_position and mode not in [None] and today_return < configuration_obj.fixed_target/2: #  and symbol_obj.name not in exclude_symbols_names
+                    if nop < configuration_obj.open_position and mode not in [None] and today_return < configuration_obj.stoploss: #  and symbol_obj.name not in exclude_symbols_names
                         print(f'TradeBros: {log_identifier}: {symbol_obj.name}: Prev close: {prev_close}: Close: {close}: Open: {open}')
                         data = {
                             'log_identifier': log_identifier,
@@ -552,7 +552,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                 nop += 1
                                 break
                     else:
-                        print(f'TradeBros: {log_identifier}: {symbol_obj.name}: Toady Target {configuration_obj.fixed_target/2} % : Achived : {today_return} %')
+                        print(f'TradeBros: {log_identifier}: {symbol_obj.name}: Toady Target {configuration_obj.stoploss} % : Achived : {today_return} %')
                 else:
                     stock_obj = entries_list[0]
                     if stock_obj.manual_updated == False and now.minute in [0, 15, 30, 45]:

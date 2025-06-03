@@ -426,7 +426,7 @@ def FnO_BreakOut_1(auto_trigger=True):
         check_holiday = Holiday.objects.filter(date=now.date(), is_active=True)
         if check_holiday:
             raise Exception(f"TradeBros: {log_identifier}: Today is Holiday : {check_holiday[0].holiday}")
-        if now.time() < time(9, 19, 00):
+        if now.time() < time(9, 16, 00):
             sleep(10)
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
@@ -481,7 +481,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                     atr_trsl_multiplier = 0.45
 
                 entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
-                if not entries_list and now.time() > time(9, 20, 00) and now.time() <= time(15, 7, 00):
+                if not entries_list and now.time() > time(9, 25, 00) and now.time() <= time(15, 7, 00):
 
                     if (close > round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1):
                         target = close + close * 0.0025

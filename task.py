@@ -431,13 +431,7 @@ def FnO_BreakOut_1(auto_trigger=True):
 
         configuration_obj = Configuration.objects.filter(product=product)[0]
         
-        exclude_symbols_names = Transaction.objects.filter(product=product, created_at__date=now.date(), is_active=True).values_list('name', flat=True)
-
         symbol_list = Symbol.objects.filter(product='equity', fno=True, is_active=True).order_by('-volume')
-        symbol_list_obj_dict = {
-            i.name: i for i in symbol_list
-        }
-        oi_sorted_symbols = OIChange.objects.filter(is_active=True).order_by('-oi').values_list('name', flat=True)
 
         global sws, open_position, broker_connection, entry_holder
         if not entry_holder.get(log_identifier):
@@ -457,6 +451,8 @@ def FnO_BreakOut_1(auto_trigger=True):
                 entry_type = None
                 pivot_traditional = None
 
+                today_return = sum(Transaction.objects.filter(product=product, name=symbol_obj.name, indicate='EXIT', created_at__date=now.date(), is_active=True).values_list('profit', flat=True))
+
                 data_frame = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day, 'ONE_MINUTE', product)
                 sleep(0.3)
                 open = data_frame['Open'].iloc[-1]
@@ -471,14 +467,6 @@ def FnO_BreakOut_1(auto_trigger=True):
                 min_low = min(data_frame['Low'].iloc[-30:-1]) if symbol_obj.name not in index_list else min(data_frame['Low'].iloc[-5:-1])
 
                 super_trend = SUPER_TREND(high=data_frame['High'], low=data_frame['Low'], close=data_frame['Close'], length=10, multiplier=5)
-
-                atr = ATR(high=data_frame['High'], low=data_frame['Low'], close=data_frame['Close'], timeperiod=14)
-
-                atr_trsl_multiplier = 1.45
-                if (prev_close > symbol_obj.r1 and prev_close < symbol_obj.r3) or (prev_close < symbol_obj.s1 and prev_close > symbol_obj.s3):
-                    atr_trsl_multiplier = 0.95
-                elif prev_close > symbol_obj.r3 or prev_close < symbol_obj.s3:
-                    atr_trsl_multiplier = 0.45
 
                 entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
                 if not entries_list and now.time() > time(9, 25, 00) and now.time() <= time(15, 7, 00):
@@ -527,7 +515,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                                         fno=True,
                                                         is_active=True).order_by('expiry', '-strike')
 
-                    if nop < configuration_obj.open_position and mode not in [None]: #  and symbol_obj.name not in exclude_symbols_names
+                    if nop < configuration_obj.open_position and mode not in [None] and today_return < configuration_obj.fixed_target/2: #  and symbol_obj.name not in exclude_symbols_names
                         print(f'TradeBros: {log_identifier}: {symbol_obj.name}: Prev close: {prev_close}: Close: {close}: Open: {open}')
                         data = {
                             'log_identifier': log_identifier,

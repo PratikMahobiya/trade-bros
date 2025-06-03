@@ -479,7 +479,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                 entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
                 if not entries_list and now.time() > time(9, 20, 00) and now.time() <= time(15, 7, 00):
 
-                    if (close > super_trend.iloc[-1] and len({super_trend.iloc[-1], super_trend.iloc[-2]}) != 1):
+                    if (close > round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1):
                         target = close + close * 0.0025
 
                         from_day_1hr = now - timedelta(days=7)
@@ -488,7 +488,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                         last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
                         stoploss = data_frame_1hr['Low'].iloc[-2] # max(last_7_candle_low_value)
                         if target > close and stoploss < close:
-                            if (max_high < close and close > super_trend.iloc[-1]):
+                            if (max_high < close and close > round(super_trend.iloc[-1], 2)):
                                 entry_type = 'BO'
                             else:
                                 entry_type = 'ST'
@@ -501,7 +501,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                                         fno=True,
                                                         is_active=True).order_by('expiry', 'strike')
 
-                    elif (close < super_trend.iloc[-1] and len({super_trend.iloc[-1], super_trend.iloc[-2]}) != 1):
+                    elif (close < round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1):
                         target = close - close * 0.0025
 
                         from_day_1hr = now - timedelta(days=7)
@@ -510,7 +510,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                         last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
                         stoploss = data_frame_1hr['High'].iloc[-2] # min(last_7_candle_high_value)
                         if target < close and stoploss > close:
-                            if (min_low > close and close < super_trend.iloc[-1]):
+                            if (min_low > close and close < round(super_trend.iloc[-1], 2)):
                                 entry_type = 'BO'
                             else:
                                 entry_type = 'ST'
@@ -593,7 +593,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                             'configuration_obj': configuration_obj,
                             'stock_obj': stock_obj
                     }
-                    if (stock_obj.mode == 'CE' and close < super_trend.iloc[-1]) or (stock_obj.mode == 'PE' and close > super_trend.iloc[-1]):
+                    if (stock_obj.mode == 'CE' and close < round(super_trend.iloc[-1], 2)) or (stock_obj.mode == 'PE' and close > round(super_trend.iloc[-1], 2)):
                         data['exit_type'] = 'ST-EXIT'
                         print(f'TradeBros: {log_identifier}: {data["exit_type"]} Exit: FnO-Symbol: {symbol_obj.symbol} : {stock_obj.ltp}')
                         Stock_Square_Off(data, stock_obj.ltp)

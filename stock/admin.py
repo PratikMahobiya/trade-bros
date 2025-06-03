@@ -108,7 +108,7 @@ class FnOStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             else:
                 if today_return > configuration_obj.stoploss:
                     self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Achived, profit of {today_return} %, on {len(today_trans_list)} trade.', level=messages.SUCCESS)
-                if today_return > 0 and today_return < configuration_obj.stoploss:
+                elif today_return > 0 and today_return < configuration_obj.stoploss:
                     self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, made profit of {today_return} %, on {len(today_trans_list)} trade.', level=messages.SUCCESS)
                 else:
                     self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, made loss of {today_return} %, on {len(today_trans_list)} trade.', level=messages.ERROR)

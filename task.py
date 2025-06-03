@@ -530,7 +530,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                             'configuration_obj': configuration_obj,
                             'product': product,
                             'mode': mode,
-                            'target': target, # configuration_obj.target,
+                            'target': configuration_obj.target,
                             'stoploss': stoploss, # configuration_obj.stoploss,
                             'fixed_target': target, # configuration_obj.fixed_target,
                             'sws': sws,
@@ -569,7 +569,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                             last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
 
                             target = close + close * 0.002
-                            stock_obj.target = target
+                            # stock_obj.target = target
                             stock_obj.fixed_target = target
                             stoploss = data_frame_1hr['Low'].iloc[-2] # max(last_7_candle_low_value)
                             if stock_obj.stoploss < stoploss:
@@ -580,7 +580,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                             last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                             last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
                             target = close - close * 0.002
-                            stock_obj.target = target
+                            # stock_obj.target = target
                             stock_obj.fixed_target = target
                             stoploss = data_frame_1hr['High'].iloc[-2] # min(last_7_candle_high_value)
                             if stock_obj.stoploss > stoploss:

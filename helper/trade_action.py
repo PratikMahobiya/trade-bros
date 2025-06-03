@@ -21,8 +21,8 @@ def Price_Action_Trade(data, new_entry):
         stock_config_obj.highest_price = price
         stock_config_obj.capital_save = True
         stock_config_obj.stoploss = next_multiple_of_5_after_decimal(round(price - price * (data['stoploss'])/100, len(str(price).split('.')[-1]))) if data['symbol_obj'].product != 'future' else data['stoploss']
-        stock_config_obj.target = next_multiple_of_5_after_decimal(round(price + price * (data['target'])/100, len(str(price).split('.')[-1]))) if data['symbol_obj'].product != 'future' else data['target']
-        stock_config_obj.fixed_target = next_multiple_of_5_after_decimal(round(price + price * (data['fixed_target'])/100, len(str(price).split('.')[-1]))) if data['symbol_obj'].product != 'future' else data['target']
+        stock_config_obj.target = next_multiple_of_5_after_decimal(round(price + price * (data['target'])/100, len(str(price).split('.')[-1])))
+        stock_config_obj.fixed_target = next_multiple_of_5_after_decimal(round(price + price * (data['fixed_target'])/100, len(str(price).split('.')[-1]))) if data['symbol_obj'].product != 'future' else data['fixed_target']
         stock_config_obj.is_active = True
         stock_config_obj.trailing_sl = 0
 

@@ -46,7 +46,7 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode, sws, sock
                 if stock_obj.symbol.product == 'future':
                     if (not socket_data and stock_obj.mode == 'CE' and ltp >= stock_obj.fixed_target) or (not socket_data and stock_obj.mode == 'PE' and ltp <= stock_obj.fixed_target) or (socket_data and not stock_obj.capital_save and percent > configuration_obj.fixed_target):
                         TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws)
-                    elif (not socket_data or data['percent'] < -configuration_obj.fixed_target/2):
+                    elif (not socket_data or data['percent'] < -configuration_obj.stoploss):
                         TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode, sws)
                 else:
                     if ltp >= stock_obj.fixed_target:

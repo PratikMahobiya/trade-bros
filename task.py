@@ -553,7 +553,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                 break
                     else:
                         print(f'TradeBros: {log_identifier}: {symbol_obj.name}: Daily Target {configuration_obj.stoploss} % : Achived : {today_return} %')
-                else:
+                elif entries_list and now.time() > time(9, 15, 00) and now.time() <= time(15, 29, 00):
                     stock_obj = entries_list[0]
                     if stock_obj.manual_updated == False and now.minute in [0, 15, 30, 45]:
                         if stock_obj.mode == 'CE':

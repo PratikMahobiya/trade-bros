@@ -29,8 +29,8 @@ def TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws):
         price = data['stock_obj'].ltp
         diff = (price - data['stock_obj'].price)
         profit = round((((diff/data['stock_obj'].price) * 100)), 2)
-        type = 'TARGET' if ((not data['socket_data'] and data['stock_obj'].mode == 'CE' and ltp >= data['stock_obj'].fixed_target) or (not data['socket_data'] and data['stock_obj'].mode == 'PE' and ltp <= data['stock_obj'].fixed_target)) else 'CS-TARGET'
-        lot = data['stock_obj'].lot if ((not data['socket_data'] and data['stock_obj'].mode == 'CE' and ltp >= data['stock_obj'].fixed_target) or (not data['socket_data'] and data['stock_obj'].mode == 'PE' and ltp <= data['stock_obj'].fixed_target)) else data['stock_obj'].lot/2
+        type = 'TARGET' if (data['stock_obj'].capital_save or (not data['socket_data'] and data['stock_obj'].mode == 'CE' and ltp >= data['stock_obj'].fixed_target) or (not data['socket_data'] and data['stock_obj'].mode == 'PE' and ltp <= data['stock_obj'].fixed_target)) else 'CS-TARGET'
+        lot = data['stock_obj'].lot if (data['stock_obj'].capital_save or (not data['socket_data'] and data['stock_obj'].mode == 'CE' and ltp >= data['stock_obj'].fixed_target) or (not data['socket_data'] and data['stock_obj'].mode == 'PE' and ltp <= data['stock_obj'].fixed_target)) else data['stock_obj'].lot/2
 
     transaction_obj, _ = Transaction.objects.get_or_create(
                             product=data['stock_obj'].symbol.product,
@@ -52,7 +52,7 @@ def TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws):
                             lot=lot,
                             chart_price=data['stock_obj'].chart_price)
     if data['stock_obj'].symbol.product == 'future':
-        if (not data['socket_data'] and data['stock_obj'].mode == 'CE' and ltp >= data['stock_obj'].fixed_target) or (not data['socket_data'] and data['stock_obj'].mode == 'PE' and ltp <= data['stock_obj'].fixed_target): 
+        if data['stock_obj'].capital_save or (not data['socket_data'] and data['stock_obj'].mode == 'CE' and ltp >= data['stock_obj'].fixed_target) or (not data['socket_data'] and data['stock_obj'].mode == 'PE' and ltp <= data['stock_obj'].fixed_target): 
             data['stock_obj'].delete()
             if data['stock_obj'].symbol.exchange == 'NSE':
                 exchangeType = 1

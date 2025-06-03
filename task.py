@@ -168,10 +168,11 @@ def SymbolSetup():
 
         bulk_create_list = []
         processed_token = []
+        active_index = ['NIFTY', 'SENSEX'] # , 'BANKEX', 'MIDCPNIFTY', 'FINNIFTY', 'BANKNIFTY'
         for i in data:
             product = None
             expity_date = datetime.strptime(i['expiry'], '%d%b%Y') if i['expiry'] else None
-            if i['exch_seg'] in ['NSE', 'NFO', 'BSE', 'BFO'] and i['name'] in ['NIFTY', 'SENSEX']: # , 'BANKEX', 'MIDCPNIFTY', 'FINNIFTY', 'BANKNIFTY'
+            if i['exch_seg'] in ['NSE', 'NFO', 'BSE', 'BFO'] and i['name'] in active_index:
                 if i['instrumenttype'] in ['OPTSTK', 'OPTIDX'] and (expity_date.month == month_num) and (expity_date.date() >= now.date()): # , 'OPTIDX', 'OPTFUT'
                     product = 'future'
                 elif (i['symbol'] in ['Nifty 50', 'Nifty Bank', 'NIFTY MID SELECT', 'Nifty Fin Service', 'SENSEX', 'BANKEX'] and expity_date == None) or i['symbol'].endswith('-EQ'):
@@ -211,6 +212,9 @@ def SymbolSetup():
         future_enables_symbols = set(Symbol.objects.filter(product='future', is_active=True).values_list('name', flat=True))
         Symbol.objects.filter(product='equity', name__in=future_enables_symbols, is_active=True).update(fno=True)
         Symbol.objects.filter(fno=False).delete()
+        for ind in active_index:
+            ind_expiry_date_list = Symbol.objects.filter(product='future', name=ind, is_active=True).order_by('expiry')
+            Symbol.objects.filter(product='equity', name=ind, is_active=True).update(expiry=ind_expiry_date_list[0].expiry)
     except Exception as e:
         print(f'TradeBros: Symbol Setup: Main Error: {e}')
     print(f'TradeBros: Symbol Setup: Execution Time(hh:mm:ss): {(datetime.now(tz=ZoneInfo("Asia/Kolkata")) - now)}')

@@ -480,7 +480,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                 if not entries_list and now.time() > time(9, 19, 00) and now.time() <= time(15, 5, 00):
 
                     if (close > super_trend.iloc[-1] and len({super_trend.iloc[-1], super_trend.iloc[-2]}) != 1):
-                        target = close + atr.iloc[-1] * atr_trsl_multiplier
+                        target = close + close * 0.0025
 
                         from_day_1hr = now - timedelta(days=7)
                         data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
@@ -502,7 +502,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                                         is_active=True).order_by('expiry', 'strike')
 
                     elif (close < super_trend.iloc[-1] and len({super_trend.iloc[-1], super_trend.iloc[-2]}) != 1):
-                        target = close - atr.iloc[-1] * atr_trsl_multiplier
+                        target = close - close * 0.0025
 
                         from_day_1hr = now - timedelta(days=7)
                         data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
@@ -561,14 +561,14 @@ def FnO_BreakOut_1(auto_trigger=True):
                                 break
                 else:
                     stock_obj = entries_list[0]
-                    if stock_obj.manual_updated == False and now.minute % 5 == 0:
+                    if stock_obj.manual_updated == False and now.minute in [0, 15, 30, 45]:
                         if stock_obj.mode == 'CE':
                             from_day_1hr = now - timedelta(days=7)
                             data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
                             last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                             last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
 
-                            target = close + atr.iloc[-1] * atr_trsl_multiplier
+                            target = close + close * 0.002
                             stock_obj.target = target
                             stock_obj.fixed_target = target
                             stoploss = max(last_7_candle_low_value)
@@ -579,7 +579,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                             data_frame_1hr = historical_data(symbol_obj.token, symbol_obj.exchange, now, from_day_1hr, 'FIFTEEN_MINUTE', product)
                             last_7_candle_high_value = [data_frame_1hr['High'].iloc[-2], data_frame_1hr['High'].iloc[-3], data_frame_1hr['High'].iloc[-4], data_frame_1hr['High'].iloc[-5], data_frame_1hr['High'].iloc[-6], data_frame_1hr['High'].iloc[-7], data_frame_1hr['High'].iloc[-8]]
                             last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
-                            target = close - atr.iloc[-1] * atr_trsl_multiplier
+                            target = close - close * 0.002
                             stock_obj.target = target
                             stock_obj.fixed_target = target
                             stoploss = min(last_7_candle_high_value)

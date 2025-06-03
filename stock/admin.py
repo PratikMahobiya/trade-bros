@@ -5,7 +5,7 @@ from datetime import timedelta, datetime, time
 from helper.trade_action import Stock_Square_Off
 from import_export.admin import ExportActionMixin
 from helper.common import colour, colour_indicator
-from system_conf.models import Configuration, Holiday
+from system_conf.models import Configuration, Holiday, Symbol
 from admin_extra_buttons.api import ExtraButtonsMixin, button
 from admin_extra_buttons.utils import HttpResponseRedirectToReferrer
 from stock.models import StockConfig, Transaction, FnO_Status, Equity_Status, FnO_Transaction, Equity_Transaction
@@ -83,6 +83,7 @@ class FnOStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
             html_attrs={'style': 'background-color:#15FBF1;color:black'})
     def STATUS(self, request):
         now = datetime.now(tz=ZoneInfo("Asia/Kolkata"))
+        configuration_obj = Configuration.objects.filter(product='future')[0]
         future_total_exit = Transaction.objects.filter(product='future', indicate='EXIT', type__in=['TARGET', 'STOPLOSS', 'TR-SL', 'PIVOT', 'SQ-OFF', 'F-Exit', 'ST-EXIT', 'M-Exit'], is_active=True).order_by('date').count()
         future_total_entry = Transaction.objects.filter(product='future', indicate='ENTRY', is_active=True).order_by('date').count()
         future_accuracy = round((len(Transaction.objects.filter(product='future', profit__gte=0, indicate='EXIT', is_active=True))/future_total_exit) * 100, 2) if future_total_exit != 0 else 0
@@ -95,6 +96,21 @@ class FnOStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         self.message_user(request, f'--- {future_accuracy} % Accuracy on {future_total_exit} Trades ---')
         self.message_user(request, f'Today: Entry: {future_today_entry}, Capital Save: {future_today_cs_exit}, Exit: {future_today_exit}.')
         self.message_user(request, f'--- Gained {future_today} % today, {future_till_now} % till now ---')
+        
+        for symbol_obj in Symbol.objects.filter(product='equity', fno=True, is_active=True):
+            today_return = sum(Transaction.objects.filter(product='future', name=symbol_obj.name, indicate='EXIT', created_at__date=now.date(), is_active=True).values_list('profit', flat=True))
+            if now.time() > time(9, 15, 00) and now.time() < time(15, 15, 00):
+                if today_return < configuration_obj.stoploss:
+                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, current return {today_return} %.', level=messages.WARNING)
+                else:
+                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Achived : {today_return} %.', level=messages.SUCCESS)
+            else:
+                if today_return > configuration_obj.stoploss:
+                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Achived, profit of {today_return} %.', level=messages.SUCCESS)
+                if today_return > 0 and today_return < configuration_obj.stoploss:
+                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, made profit of {today_return} %.', level=messages.SUCCESS)
+                else:
+                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, made loss of {today_return} %.', level=messages.ERROR)
         return HttpResponseRedirectToReferrer(request)
 
 

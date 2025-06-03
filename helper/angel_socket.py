@@ -25,7 +25,7 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode, sws, sock
                     'stock_obj': stock_obj,
                     'socket_data': socket_data
                 }
-                data['target'] = 1 / 100
+                data['target'] = 3 / 100
                 data['stoploss'] = configuration_obj.trail_stoploss_by / 100
 
                 # Record Max gain hit:
@@ -44,10 +44,12 @@ def LTP_Action(token, ltp, open_position, correlation_id, socket_mode, sws, sock
                     return True
 
                 if stock_obj.symbol.product == 'future':
-                    if (not socket_data and stock_obj.mode == 'CE' and ltp >= stock_obj.fixed_target) or (not socket_data and stock_obj.mode == 'PE' and ltp <= stock_obj.fixed_target) or (socket_data and not stock_obj.capital_save and percent > configuration_obj.fixed_target):
+                    if (not socket_data and stock_obj.mode == 'CE' and ltp >= stock_obj.fixed_target) or (not socket_data and stock_obj.mode == 'PE' and ltp <= stock_obj.fixed_target) or (socket_data and stock_obj.capital_save and percent > configuration_obj.fixed_target):
                         TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws)
-                    elif (not socket_data or data['percent'] < -configuration_obj.stoploss):
+                    elif not socket_data or data['percent'] < -configuration_obj.stoploss or (stock_obj.tr_hit and ltp <= stock_obj.trailing_sl):
                         TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode, sws)
+                    elif not socket_data or data['percent'] > configuration_obj.target:
+                        TrailingTargetUpdate(data, ltp)
                 else:
                     if ltp >= stock_obj.fixed_target:
                         TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws)

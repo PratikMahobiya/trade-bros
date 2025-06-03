@@ -98,19 +98,20 @@ class FnOStatusAdmin(ExtraButtonsMixin, admin.ModelAdmin):
         self.message_user(request, f'--- Gained {future_today} % today, {future_till_now} % till now ---')
         
         for symbol_obj in Symbol.objects.filter(product='equity', fno=True, is_active=True):
-            today_return = sum(Transaction.objects.filter(product='future', name=symbol_obj.name, indicate='EXIT', created_at__date=now.date(), is_active=True).values_list('profit', flat=True))
+            today_trans_list = Transaction.objects.filter(product='future', name=symbol_obj.name, indicate='EXIT', created_at__date=now.date(), is_active=True).values_list('profit', flat=True)
+            today_return = sum(today_trans_list)
             if now.time() > time(9, 15, 00) and now.time() < time(15, 15, 00):
                 if today_return < configuration_obj.stoploss:
-                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, current return {today_return} %.', level=messages.WARNING)
+                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, current return {today_return} %, on {len(today_trans_list)} trade.', level=messages.WARNING)
                 else:
-                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Achived : {today_return} %.', level=messages.SUCCESS)
+                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Achived : {today_return} %, on {len(today_trans_list)} trade.', level=messages.SUCCESS)
             else:
                 if today_return > configuration_obj.stoploss:
-                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Achived, profit of {today_return} %.', level=messages.SUCCESS)
+                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Achived, profit of {today_return} %, on {len(today_trans_list)} trade.', level=messages.SUCCESS)
                 if today_return > 0 and today_return < configuration_obj.stoploss:
-                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, made profit of {today_return} %.', level=messages.SUCCESS)
+                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, made profit of {today_return} %, on {len(today_trans_list)} trade.', level=messages.SUCCESS)
                 else:
-                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, made loss of {today_return} %.', level=messages.ERROR)
+                    self.message_user(request, f'-> {symbol_obj.name}: Daily Target of {configuration_obj.stoploss} % : Not achived, made loss of {today_return} %, on {len(today_trans_list)} trade.', level=messages.ERROR)
         return HttpResponseRedirectToReferrer(request)
 
 

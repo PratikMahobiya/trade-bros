@@ -79,7 +79,7 @@ def TargetExit(data, ltp, open_position, correlation_id, socket_mode, sws):
 def TrailingStopLossExit(data, ltp, open_position, correlation_id, socket_mode, sws):
     # StopLoss and Trailing StopLoss Exit
     price_value, exit_type = (data['stock_obj'].trailing_sl, 'TR-SL') if data['stock_obj'].tr_hit else (data['stock_obj'].stoploss, 'STOPLOSS')
-    if (data['stock_obj'].mode == 'CE' and ltp <= price_value) or (data['stock_obj'].mode == 'PE' and ltp >= price_value) or data['percent'] < -data['configuration_obj'].fixed_target/2:
+    if (data['stock_obj'].mode == 'CE' and ltp <= price_value) or (data['stock_obj'].mode == 'PE' and ltp >= price_value) or data['percent'] < -data['configuration_obj'].stoploss:
         # Exit Order.
 
         del open_position[data['stock_obj'].symbol.token]

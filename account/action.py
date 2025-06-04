@@ -212,8 +212,7 @@ def UserTrade(sender, instance, created, user_config):
                                     stoploss=instance.stoploss,
                                     order_id=order_id,
                                     order_status=order_status,
-                                    lot=lot,
-                                    chart_price=instance.chart_price)
+                                    lot=lot)
             if instance.product == 'equity':
                 if instance.mode == 'CE':
                     user_config.active_open_position += 1

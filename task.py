@@ -12,8 +12,8 @@ from account.action import UserTrade
 from datetime import datetime, time, timedelta
 from stock.models import StockConfig, Transaction
 from SmartApi.smartWebSocketV2 import SmartWebSocketV2
-from helper.indicator import ATR, BB, PIVOT, SUPER_TREND
 from helper.common import find_closest_values, last_thursday
+from helper.indicator import ATR, BB, EMA, PIVOT, SUPER_TREND
 from helper.angel_socket import LTP_Action, connect_to_socket
 from system_conf.models import Configuration, Holiday, OIChange, Symbol
 from helper.angel_function import get_max_oi_strikeprice, historical_data
@@ -467,11 +467,13 @@ def FnO_BreakOut_1(auto_trigger=True):
                 min_low = min(data_frame['Low'].iloc[-30:-1]) if symbol_obj.name not in index_list else min(data_frame['Low'].iloc[-5:-1])
 
                 super_trend = SUPER_TREND(high=data_frame['High'], low=data_frame['Low'], close=data_frame['Close'], length=10, multiplier=5)
+                ema_1 = EMA(data_frame['Close'], timeperiod=9)
+                ema_2 = EMA(data_frame['Close'], timeperiod=26)
 
                 entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
                 if not entries_list and now.time() > time(9, 25, 00) and now.time() <= time(15, 7, 00):
 
-                    if (close > round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1):
+                    if (close > round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1) or (open > ema_2.iloc[-1] and prev_open < ema_2.iloc[-2] and ema_1.iloc[-1] > ema_2.iloc[-1] and ema_1.iloc[-2] < ema_2.iloc[-2]):
                         target = close + close * 0.0025
 
                         from_day_1hr = now - timedelta(days=7)
@@ -493,7 +495,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                                         fno=True,
                                                         is_active=True).order_by('expiry', 'strike')
 
-                    elif (close < round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1):
+                    elif (close < round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1) or (open < ema_2.iloc[-1] and prev_open > ema_2.iloc[-2] and ema_1.iloc[-1] < ema_2.iloc[-1] and ema_1.iloc[-2] > ema_2.iloc[-2]):
                         target = close - close * 0.0025
 
                         from_day_1hr = now - timedelta(days=7)

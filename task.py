@@ -472,8 +472,13 @@ def FnO_BreakOut_1(auto_trigger=True):
 
                 entries_list = StockConfig.objects.filter(symbol__product=product, symbol__name=symbol_obj.name, is_active=True)
                 if not entries_list and now.time() > time(9, 25, 00) and now.time() <= time(15, 7, 00):
+                    
+                    ema_cross_ce = (open > ema_2.iloc[-1] and prev_open < ema_2.iloc[-2] and ema_1.iloc[-1] > ema_2.iloc[-1] and ema_1.iloc[-2] < ema_2.iloc[-2])
+                    # supertrend_ce = (close > round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1)
+                    ema_cross_pe = (open < ema_2.iloc[-1] and prev_open > ema_2.iloc[-2] and ema_1.iloc[-1] < ema_2.iloc[-1] and ema_1.iloc[-2] > ema_2.iloc[-2])
+                    # supertrend_pe = (close < round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1)
 
-                    if (close > round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1) or (open > ema_2.iloc[-1] and prev_open < ema_2.iloc[-2] and ema_1.iloc[-1] > ema_2.iloc[-1] and ema_1.iloc[-2] < ema_2.iloc[-2]):
+                    if ema_cross_ce: # supertrend_ce or 
                         target = close + close * 0.0025
 
                         from_day_1hr = now - timedelta(days=7)
@@ -482,8 +487,8 @@ def FnO_BreakOut_1(auto_trigger=True):
                         last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
                         stoploss = data_frame_1hr['Low'].iloc[-2] # max(last_7_candle_low_value)
                         if target > close and stoploss < close:
-                            if (max_high < close and close > round(super_trend.iloc[-1], 2)):
-                                entry_type = 'BO'
+                            if ema_cross_ce:
+                                entry_type = 'MA'
                             else:
                                 entry_type = 'ST'
                             mode = 'CE'
@@ -495,7 +500,7 @@ def FnO_BreakOut_1(auto_trigger=True):
                                                         fno=True,
                                                         is_active=True).order_by('expiry', 'strike')
 
-                    elif (close < round(super_trend.iloc[-1], 2) and len({round(super_trend.iloc[-1], 2), round(super_trend.iloc[-2], 2)}) != 1) or (open < ema_2.iloc[-1] and prev_open > ema_2.iloc[-2] and ema_1.iloc[-1] < ema_2.iloc[-1] and ema_1.iloc[-2] > ema_2.iloc[-2]):
+                    elif ema_cross_pe: # supertrend_pe or 
                         target = close - close * 0.0025
 
                         from_day_1hr = now - timedelta(days=7)
@@ -504,8 +509,8 @@ def FnO_BreakOut_1(auto_trigger=True):
                         last_7_candle_low_value = [data_frame_1hr['Low'].iloc[-2], data_frame_1hr['Low'].iloc[-3], data_frame_1hr['Low'].iloc[-4], data_frame_1hr['Low'].iloc[-5], data_frame_1hr['Low'].iloc[-6], data_frame_1hr['Low'].iloc[-7], data_frame_1hr['Low'].iloc[-8]]
                         stoploss = data_frame_1hr['High'].iloc[-2] # min(last_7_candle_high_value)
                         if target < close and stoploss > close:
-                            if (min_low > close and close < round(super_trend.iloc[-1], 2)):
-                                entry_type = 'BO'
+                            if ema_cross_pe:
+                                entry_type = 'MA'
                             else:
                                 entry_type = 'ST'
                             mode = 'PE'

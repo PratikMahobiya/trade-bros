@@ -110,9 +110,9 @@ WSGI_APPLICATION = "trade_bros.wsgi.application"
 # }
 
 DATABASES = {
-    'default': dj_database_url.parse("postgresql://db_o8vb_user:4GzPnGm6ez5xhwsmkT6PsGmFfNaTEfdo@dpg-d0u9igc9c44c73aigim0-a/db_o8vb", conn_max_age=43200),
+    'default': dj_database_url.parse("postgresql://db1_sjol_user:AxKUT8h13SyJosajAFSkkWKEzRvduhaD@dpg-d19tl03ipnbc739g2nag-a/db1_sjol", conn_max_age=43200),
 } if os.getenv('SERVER_DB', False) else {
-    'default': dj_database_url.parse("postgresql://db_o8vb_user:4GzPnGm6ez5xhwsmkT6PsGmFfNaTEfdo@dpg-d0u9igc9c44c73aigim0-a.singapore-postgres.render.com/db_o8vb", conn_max_age=43200),
+    'default': dj_database_url.parse("postgresql://db1_sjol_user:AxKUT8h13SyJosajAFSkkWKEzRvduhaD@dpg-d19tl03ipnbc739g2nag-a.singapore-postgres.render.com/db1_sjol", conn_max_age=43200),
 }
 
 # DATABASES = {
